@@ -81,19 +81,27 @@ module pipeline_cpu_tb;
         );
     end
 
-    // Function to get the instruction keyword (NOP, AND, ADD, etc.) based on opcode at bits 24:21
-    function [8*4:1] get_instruction_keyword;
-        input [31:0] instruction;
-        case (instruction[24:21]) // Opcode located in bits 24:21
-            4'b0000: get_instruction_keyword = "NOP";
-            4'b0001: get_instruction_keyword = "ANDS";
-            4'b0010: get_instruction_keyword = "ADD";
-            4'b0011: get_instruction_keyword = "LDRB";
-            4'b0100: get_instruction_keyword = "STR";
-            4'b0101: get_instruction_keyword = "BNE";
-            4'b0110: get_instruction_keyword = "BLLE";
-            default: get_instruction_keyword = "UNKNOWN";
-        endcase
-    endfunction
+// Function to get the instruction keyword (AND, EOR, SUB, etc.) based on opcode at bits 24:21
+function [8*4:1] get_instruction_keyword;
+    input [31:0] instruction;
+    case (instruction[24:21]) // Opcode located in bits 24:21
+        4'b0000: get_instruction_keyword = "AND";
+        4'b0001: get_instruction_keyword = "EOR";
+        4'b0010: get_instruction_keyword = "SUB";
+        4'b0011: get_instruction_keyword = "RSB";
+        4'b0100: get_instruction_keyword = "ADD";
+        4'b0101: get_instruction_keyword = "ADC";
+        4'b0110: get_instruction_keyword = "SBC";
+        4'b0111: get_instruction_keyword = "RSC";
+        4'b1000: get_instruction_keyword = "TST";
+        4'b1001: get_instruction_keyword = "TEQ";
+        4'b1010: get_instruction_keyword = "CMP";
+        4'b1011: get_instruction_keyword = "CMN";
+        4'b1100: get_instruction_keyword = "ORR";
+        4'b1101: get_instruction_keyword = "MOV";
+        4'b1110: get_instruction_keyword = "BIC";
+        4'b1111: get_instruction_keyword = "MVN";
+        default: get_instruction_keyword = "NOP";
+    endcase
+endfunction
 
-endmodule
