@@ -71,12 +71,7 @@ module pipeline_cpu_tb;
     end
 
     initial begin
-    // Print header once
-        $display("Clk | Reset | Time   | Operation | Opcode | PC      | IF/ID Instr      | ID/EX Instr      | EX/MEM Instr     | MEM/WB Instr");
 
-    // Monitor values continuously
-        $monitor("%b    |%b     |%0dns| %s|      %b|%d|%b|%b|%b|%b",
-                clk, reset, $time, opcode_name, IF_ID_instr[24:21], PC, IF_ID_instr, ID_EX_instr, EX_MEM_instr, MEM_WB_instr);
     end
 
 endmodule
