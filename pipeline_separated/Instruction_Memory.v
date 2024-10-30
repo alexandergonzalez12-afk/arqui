@@ -2,19 +2,13 @@
 `timescale 1ns / 1ns
 
 module Instruction_Memory (
-    input [7:0] address,
-    output reg [31:0] instruction
+    input [7:0] address,            // Accepts an 8-bit address
+    output reg [31:0] instruction   // Outputs a 32-bit instruction
 );
+    reg [7:0] memory [0:63];        // Memory to store 8-bit segments; adjusted size for four 8-bit values per 32-bit instruction
 
-    reg [31:0] Mem [0:255];
+    integer i;
+    reg [31:0] temp_instruction [0:16]; // Temporary storage for 32-bit instructions
 
-    // initial begin
-    //     $readmemh("instructions.hex", Mem);
-    // end
-        initial begin
-        $readmemb("codigo_validacion.txt", Mem);
-    end
-    always @(address) begin
-        instruction = Mem[address >> 2]; // divide by 4 for word addressing
     end
 endmodule
