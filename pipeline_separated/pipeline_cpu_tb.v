@@ -37,7 +37,7 @@ module pipeline_cpu_tb;
 
     // Monitor output
     initial begin
-        $monitor("Time=%0dns | PC=%h | IF/ID Instr=%h | ID/EX Instr=%h | EX/MEM Instr=%h | MEM/WB Instr=%h",
+        $monitor("Time=%0dns | PC=%b | IF/ID Instr=%b | ID/EX Instr=%b | EX/MEM Instr=%b | MEM/WB Instr=%b",
                  $time, PC, IF_ID_instr, ID_EX_instr, EX_MEM_instr, MEM_WB_instr);
     end
 endmodule
