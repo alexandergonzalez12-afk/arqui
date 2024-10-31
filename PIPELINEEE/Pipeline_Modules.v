@@ -77,6 +77,23 @@ module Multiplexer (
     end
   end
 endmodule
+module Instruction_Memory_ROM (output reg [31:0] I, input [7:0] A);
+  
+  // Variable I - Instruction(output) of 32-bit
+  // Variable A = Address(intput) of 8-bit
+  
+  // Variable Mem = memory holds 256 bytes as an array 
+  reg [7:0] Mem [0:255];
+
+    // Preload the memory with the content inside the file
+   
+
+    // Always reads the instruction from memory
+  always @(A) begin
+      I <= {Mem[A], Mem[A+1], Mem[A+2], Mem[A+3]};
+    end
+
+endmodule
 
 module PC (
   input clk,                // Clock signal
