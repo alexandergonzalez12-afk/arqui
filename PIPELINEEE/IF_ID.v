@@ -3,8 +3,6 @@ module IF_ID (
     input reset
     input clk
     input [31:0] instr_in
-
-    
     output [31:0] instr_out
 
 );
@@ -15,3 +13,5 @@ module IF_ID (
         end
         else 
         instr_out <= instr_in
+    end
+endmodule
