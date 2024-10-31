@@ -12,7 +12,9 @@ module pipeline_cpu_tb;
     // Instantiate the CPU (assuming top-level module is ARM_Pipeline)
     ARM_Pipeline cpu (
         .clk(clk),
-        .reset(reset)
+        .reset(reset),
+        .instr_address(instr_address),
+        .pc_out() // This will connect to `pc_out` inside the module, if you want to observe it
     );
 
     // Clock generation: toggle every 1 time unit (produces a 2-time unit clock period)
@@ -26,24 +28,20 @@ module pipeline_cpu_tb;
         enable = 1; // Enable the PC and IF/ID registers during this test
         i = 0;
 
-        // Open the file and load instructions
-        file = $fopen("codigo_validacion.txt", "r");
-        if (file == 0) begin
-            $display("Error: File could not be opened.");
-            $finish;
-        end
+    Instruction_Memory_ROM rom_inst (.I(Instruction), .A(Address));
 
-        // Load instructions from the file into the Instruction Memory
-        while (!$feof(file)) begin
-            r = $fscanf(file, "%b\n", line_data);
-            if (r == 1) begin
-                cpu.instr_mem.Mem[i] = line_data; // Store instruction in memory array
-                i = i + 1;
-            end else begin
-                $display("Error: Malformed line in file.");
-            end
-        end
-        $fclose(file);
+  initial begin
+    // Preload the memory with the content inside the file
+    fi = $fopen("file_precarga_fase_I.txt", "r");
+    if (fi) begin
+      Address = 8'b00000000;
+      while (!$feof(fi)) begin
+        code = $fscanf(fi, "%b", data);
+        rom_inst.Mem[Address] = data; // Preload the ROM memory
+        Address = Address + 1;
+      end
+      $fclose(fi);
+    end 
 
         // Initialize remaining memory locations to zero
         for (i = i; i < 256; i = i + 1) begin
@@ -81,27 +79,28 @@ module pipeline_cpu_tb;
         );
     end
 
-// Function to get the instruction keyword (AND, EOR, SUB, etc.) based on opcode at bits 24:21
-function [8*4:1] get_instruction_keyword;
-    input [31:0] instruction;
-    case (instruction[24:21]) // Opcode located in bits 24:21
-        4'b0000: get_instruction_keyword = "AND";
-        4'b0001: get_instruction_keyword = "EOR";
-        4'b0010: get_instruction_keyword = "SUB";
-        4'b0011: get_instruction_keyword = "RSB";
-        4'b0100: get_instruction_keyword = "ADD";
-        4'b0101: get_instruction_keyword = "ADC";
-        4'b0110: get_instruction_keyword = "SBC";
-        4'b0111: get_instruction_keyword = "RSC";
-        4'b1000: get_instruction_keyword = "TST";
-        4'b1001: get_instruction_keyword = "TEQ";
-        4'b1010: get_instruction_keyword = "CMP";
-        4'b1011: get_instruction_keyword = "CMN";
-        4'b1100: get_instruction_keyword = "ORR";
-        4'b1101: get_instruction_keyword = "MOV";
-        4'b1110: get_instruction_keyword = "BIC";
-        4'b1111: get_instruction_keyword = "MVN";
-        default: get_instruction_keyword = "NOP";
-    endcase
-endfunction
+    // Function to get the instruction keyword based on opcode at bits 24:21
+    function [8*4:1] get_instruction_keyword;
+        input [31:0] instruction;
+        case (instruction[24:21]) // Opcode located in bits 24:21
+            4'b0000: get_instruction_keyword = "AND";
+            4'b0001: get_instruction_keyword = "EOR";
+            4'b0010: get_instruction_keyword = "SUB";
+            4'b0011: get_instruction_keyword = "RSB";
+            4'b0100: get_instruction_keyword = "ADD";
+            4'b0101: get_instruction_keyword = "ADC";
+            4'b0110: get_instruction_keyword = "SBC";
+            4'b0111: get_instruction_keyword = "RSC";
+            4'b1000: get_instruction_keyword = "TST";
+            4'b1001: get_instruction_keyword = "TEQ";
+            4'b1010: get_instruction_keyword = "CMP";
+            4'b1011: get_instruction_keyword = "CMN";
+            4'b1100: get_instruction_keyword = "ORR";
+            4'b1101: get_instruction_keyword = "MOV";
+            4'b1110: get_instruction_keyword = "BIC";
+            4'b1111: get_instruction_keyword = "MVN";
+            default: get_instruction_keyword = "NOP";
+        endcase
+    endfunction
 
+endmodule

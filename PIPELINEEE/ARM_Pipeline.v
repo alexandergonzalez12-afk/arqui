@@ -1,7 +1,8 @@
 module ARM_Pipeline;
     reg clk, reset;
-    reg [7:0] pc;
+    reg [7:0] pc,;
     wire [31:0] instruction;
+    integer fi, code;
     
     // Control signals
     wire [3:0] ALU_op;
@@ -56,6 +57,16 @@ module ARM_Pipeline;
         reset = 1;
         pc = 0;
         #3 reset = 0;
+    // Preload the memory with the content inside the file
+    fi = $fopen("codigo_validacion", "r");
+    if (fi) begin
+      
+      while (!$feof(fi)) begin
+        code = $fscanf(fi, "%b", data);
+        imem.Mem[pc] = data; // Preload the ROM memory
+        pc = pc + 1;
+      end
+      $fclose(fi);
         
         // Run the simulation for 200 time units
         #200 $finish;
@@ -86,6 +97,11 @@ module ARM_Pipeline;
         WB_rf_e_reg <= MEM_rf_e_reg;
     end
 
+      
+
+
+
+    
     // Display output
     always @(posedge clk) begin
         $display("Time: %3d | PC: %2d | Instruction: %b | ALU_op: %4b | am: %2b | b: %1b | b1: %1b | S: %1b | load: %1b | rf_e: %1b | size: %1b | rw: %1b | e: %1b",
