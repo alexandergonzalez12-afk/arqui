@@ -26,12 +26,42 @@ module tb_pipeline;
   // Define the instruction memory array
   reg [31:0] instruction_memory [0:12];
 
-  // Instantiate the PC module
+  // Helper function to get the keyword based on opcode
+  function [7*8:1] get_keyword;
+    input [7:0] pc_value;
+    input [3:0] opcode;
+    begin
+      if (pc_value == 8'd0) 
+        get_keyword = "NOP";
+      else 
+        case (opcode)
+          4'b0000: get_keyword = "AND";
+          4'b0001: get_keyword = "EOR";
+          4'b0010: get_keyword = "SUB";
+          4'b0011: get_keyword = "RSB";
+          4'b0100: get_keyword = "ADD";
+          4'b0101: get_keyword = "ADC";
+          4'b0110: get_keyword = "SBC";
+          4'b0111: get_keyword = "RSC";
+          4'b1000: get_keyword = "TST";
+          4'b1001: get_keyword = "TEQ";
+          4'b1010: get_keyword = "CMP";
+          4'b1011: get_keyword = "CMN";
+          4'b1100: get_keyword = "ORR";
+          4'b1101: get_keyword = "MOV";
+          4'b1110: get_keyword = "BIC";
+          4'b1111: get_keyword = "MVN";
+          default: get_keyword = "UNKNOWN";
+        endcase
+    end
+  endfunction
+
+  // Instantiate the PC module with PC increment of 4
   PC uut_pc (
     .clk(clk),
     .reset(reset),
     .E(enable_pc),
-    .next_pc(pc + 8'd1), // Assume it increments for this example
+    .next_pc(pc + 8'd4), // Increment PC by 4
     .pc(pc)
   );
 
@@ -75,8 +105,11 @@ module tb_pipeline;
     .ID_AM(ID_AM)
   );
 
-  // Clock generation
-  always #1 clk = ~clk;
+  // Clock generation with 2 time units toggle
+  initial begin
+    clk = 0;
+    forever #2 clk = ~clk;
+  end
 
   // Initialize the instruction memory with given instructions
   initial begin
@@ -95,10 +128,9 @@ module tb_pipeline;
     instruction_memory[12] = 32'b00000000_00000000_00000000_00000000;
   end
 
-  // Test sequence
+  // Test sequence with enforced stop time at 40
   initial begin
     // Initialize signals
-    clk = 0;
     reset = 1;
     enable_pc = 1;
     enable_ifid = 1;
@@ -107,47 +139,21 @@ module tb_pipeline;
     // Start simulation
     #3 reset = 0;
     #32 S = 1;
-    #40 $finish;
+    #5 $finish; // Stop simulation at time 40
   end
 
   // Fetch instruction based on PC
-  assign instruction = instruction_memory[pc];
+  assign instruction = (pc == 8'd0) ? 32'b00000000_00000000_00000000_00000000 : instruction_memory[pc >> 2]; // NOP if PC is 0
 
-  // Display outputs for each clock cycle
+  // Display outputs for each clock cycle with divided stages
   always @(posedge clk) begin
-    $display("CLK | Keyword | PC | opcode | am | b | b1 | S | load | rf_e | size | rw | e | EX_opcode | EX_am | EX_s | EX_load | EX_rf_e | EX_size | EX_rw | EX_e | MEM_load | MEM_rf_e | MEM_size | MEM_rw | MEM_e | WB_rf_e");
-    $display("--------------------------------------------------------------------------------------------------------------------------");
-    $display("%d   | %s     | %d  | %b    | %b  | %b | %b  | %b | %b    | %b    | %b    | %b  | %b | %b       | %b     | %b    | %b       | %b       | %b       | %b     | %b    | %b        | %b         | %b        | %b      | %b    | %b",
-             $time,
-             instruction[27:24] == 4'b1110 ? "ANDS" :
-             instruction[27:24] == 4'b1111 ? "ADD" :
-             instruction[27:24] == 4'b0001 ? "LDRB" :
-             instruction[27:24] == 4'b0000 ? "STR" :
-             instruction[27:24] == 4'b1011 ? "BNE" : "NOP",
-             pc,
-             instruction[27:24], // opcode
-             instruction[23:22], // am
-             instruction[21],    // b
-             instruction[20],    // b1
-             S,
-             mux_id_load,
-             mux_rf_e,
-             mux_id_mem_size,
-             mux_id_mem_write,
-             enable_ifid,
-             mux_alu_op,
-             mux_id_am,
-             mux_store_cc,
-             mux_id_load,
-             mux_rf_e,
-             mux_id_mem_size,
-             mux_id_mem_write,
-             enable_pc,
-             mux_id_load,
-             mux_rf_e,
-             mux_id_mem_size,
-             mux_id_mem_write,
-             mux_rf_e
-             );
+    $display("PC: %0d | Opcode: %s", pc, get_keyword(pc, instruction[24:21]));
+    $display("-----------------------------------------------------------");
+    $display("Fetch Stage:    Instruction: %b", instruction);
+    $display("Decode Stage:   ALU_OP: %b | AM: %b | Load: %b | RF_E: %b", ALU_OP, ID_AM, ID_LOAD, RF_E);
+    $display("Execute Stage:  ALU_OP: %b | AM: %b | S: %b | Load: %b", mux_alu_op, mux_id_am, S, mux_id_load);
+    $display("Memory Stage:   Load: %b | RF_E: %b | Mem Size: %b | RW: %b", mux_id_load, mux_rf_e, mux_id_mem_size, mux_id_mem_write);
+    $display("Write Back:     RF_E: %b", mux_rf_e);
+    $display("-----------------------------------------------------------\n");
   end
 endmodule
