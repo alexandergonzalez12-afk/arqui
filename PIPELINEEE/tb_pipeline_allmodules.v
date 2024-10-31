@@ -31,7 +31,7 @@ module tb_pipeline;
     input [7:0] pc_value;
     input [3:0] opcode;
     begin
-      if (pc_value == 8'd0) 
+      if (instruction == 32'b00000000_00000000_00000000_00000000) 
         get_keyword = "NOP";
       else 
         case (opcode)
@@ -139,7 +139,7 @@ module tb_pipeline;
     // Start simulation
     #3 reset = 0;
     #32 S = 1;
-    #5 $finish; // Stop simulation at time 40
+    #20 $finish; // Stop simulation at time 40
   end
 
   // Fetch instruction based on PC
