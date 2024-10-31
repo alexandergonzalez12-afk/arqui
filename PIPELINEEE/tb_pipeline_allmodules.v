@@ -27,6 +27,35 @@ module tb_pipeline;
     reg [31:0] data;       // For loading instruction data
     reg [7:0] address;     // Temporary address variable
 
+    // Helper function to get the keyword based on opcode
+    function [7*8:1] get_keyword;
+      input [3:0] opcode;
+      begin
+        if(instruction == 32'b0)
+          get_keyword = "NOP";
+        else
+          case (opcode)
+            4'b0000: get_keyword = "AND";
+            4'b0001: get_keyword = "EOR";
+            4'b0010: get_keyword = "SUB";
+            4'b0011: get_keyword = "RSB";
+            4'b0100: get_keyword = "ADD";
+            4'b0101: get_keyword = "ADC";
+            4'b0110: get_keyword = "SBC";
+            4'b0111: get_keyword = "RSC";
+            4'b1000: get_keyword = "TST";
+            4'b1001: get_keyword = "TEQ";
+            4'b1010: get_keyword = "CMP";
+            4'b1011: get_keyword = "CMN";
+            4'b1100: get_keyword = "ORR";
+            4'b1101: get_keyword = "MOV";
+            4'b1110: get_keyword = "BIC";
+            4'b1111: get_keyword = "MVN";
+            default: get_keyword = "NOP"; // Default to NOP if opcode is unknown
+          endcase
+      end
+    endfunction
+
     // Instantiate the PC module with PC increment of 4
     PC uut_pc (
         .clk(clk),
@@ -99,12 +128,11 @@ module tb_pipeline;
         // Start loading instructions from the file
         address = 8'd0;
         while (!$feof(fi)) begin
-           code = $fscanf(fi, "%b", data);
+            code = $fscanf(fi, "%b", data);
             rom_inst.Mem[address] = data; // Preload the ROM memory
             address = address + 1;
         end
         $fclose(fi);
-
     end
 
     // Test sequence with enforced stop time at 40
@@ -123,7 +151,7 @@ module tb_pipeline;
 
     // Display outputs for each clock cycle
     always @(posedge clk) begin
-        $display("PC: %0d | Instruction: %b", pc, instruction);
+        $display("PC: %0d | Opcode: %s", pc, get_keyword(instruction[24:21]));
         $display("-----------------------------------------------------------");
         $display("Fetch Stage:    Instruction: %b", instruction);
         $display("Decode Stage:   ALU_OP: %b | AM: %b | Load: %b | RF_E: %b", ALU_OP, ID_AM, ID_LOAD, RF_E);
