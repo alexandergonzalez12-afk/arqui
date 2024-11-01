@@ -13,6 +13,17 @@ module tb_pipeline;
     wire [7:0] pc;
     wire [31:0] instruction;
 
+    // Pipeline registers for each stage
+    reg [31:0] if_instruction;
+    reg [3:0] id_ALU_OP;
+    reg [1:0] id_AM;
+    reg id_LOAD, id_RF_E;
+    reg [3:0] ex_ALU_OP;
+    reg [1:0] ex_AM;
+    reg ex_S, ex_LOAD;
+    reg mem_LOAD, mem_RF_E, mem_SIZE, mem_RW;
+    reg wb_RF_E;
+
     // Control signals from ControlUnit
     wire [3:0] ALU_OP;
     wire ID_LOAD, ID_MEM_WRITE, STORE_CC, ID_B, ID_BL, ID_MEM_SIZE, ID_MEM_E, RF_E;
@@ -149,15 +160,42 @@ module tb_pipeline;
         #20 $finish; // Stop simulation at time 40
     end
 
+    // Pipeline stages update
+    always @(posedge clk) begin
+        // IF stage
+        if_instruction <= instruction;
+
+        // ID stage
+        id_ALU_OP <= ALU_OP;
+        id_AM <= ID_AM;
+        id_LOAD <= ID_LOAD;
+        id_RF_E <= RF_E;
+
+        // EX stage
+        ex_ALU_OP <= mux_alu_op;
+        ex_AM <= mux_id_am;
+        ex_S <= S;
+        ex_LOAD <= mux_id_load;
+
+        // MEM stage
+        mem_LOAD <= mux_id_load;
+        mem_RF_E <= mux_rf_e;
+        mem_SIZE <= mux_id_mem_size;
+        mem_RW <= mux_id_mem_write;
+
+        // WB stage
+        wb_RF_E <= mux_rf_e;
+    end
+
     // Display outputs for each clock cycle
     always @(posedge clk) begin
         $display("PC: %0d | Opcode: %s", pc, get_keyword(instruction[24:21]));
         $display("-----------------------------------------------------------");
-        $display("Fetch Stage:    Instruction: %b", instruction);
-        $display("Decode Stage:   ALU_OP: %b | AM: %b | Load: %b | RF_E: %b", ALU_OP, ID_AM, ID_LOAD, RF_E);
-        $display("Execute Stage:  ALU_OP: %b | AM: %b | S: %b | Load: %b", mux_alu_op, mux_id_am, S, mux_id_load);
-        $display("Memory Stage:   Load: %b | RF_E: %b | Mem Size: %b | RW: %b", mux_id_load, mux_rf_e, mux_id_mem_size, mux_id_mem_write);
-        $display("Write Back:     RF_E: %b", mux_rf_e);
+        $display("Fetch Stage:    Instruction: %b", if_instruction);
+        $display("Decode Stage:   ALU_OP: %b | AM: %b | Load: %b | RF_E: %b", id_ALU_OP, id_AM, id_LOAD, id_RF_E);
+        $display("Execute Stage:  ALU_OP: %b | AM: %b | S: %b | Load: %b", ex_ALU_OP, ex_AM, ex_S, ex_LOAD);
+        $display("Memory Stage:   Load: %b | RF_E: %b | Mem Size: %b | RW: %b", mem_LOAD, mem_RF_E, mem_SIZE, mem_RW);
+        $display("Write Back:     RF_E: %b", wb_RF_E);
         $display("-----------------------------------------------------------\n");
     end
 endmodule
