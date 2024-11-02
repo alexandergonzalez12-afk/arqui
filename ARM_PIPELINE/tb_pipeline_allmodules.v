@@ -6,14 +6,14 @@ module testbench();
     reg select;
     wire [31:0] pc_out;
     wire [31:0] instruction;
-    wire ID_RF_enable, EX_RF_enable, MEM_RF_enable, WB_RF_enable, RFenable;
+    wire ID_RF_E, EX_RF_E, MEM_RF_E, WB_RF_E, RFenable;
     wire [1:0] AM; 
     wire [31:0] NextPC;
-    wire [1:0] ID_shift_AM,EX_shift_AM;
-    wire [3:0] ID_alu_op,EX_alu_op,opcode;   
+    wire [1:0] ID_AM,EX_AM;
+    wire [3:0] ALU_OP,EX_alu_op,opcode;   
 
     wire [7:0] ID_mnemonic0, ID_mnemonic1, ID_mnemonic2;
-    wire ID_S_bit, ID_load_instr, ID_B_instr, ID_load_store_instr, ID_size, ID_BL_instr;
+    wire STORE_CC, ID_MEM_E, ID_B, ID_MEM_WRITE, ID_MEM_SIZE, ID_BL;
     wire [31:0] ID_instruction; 
 
     reg [7:0] Address;
@@ -25,7 +25,7 @@ module testbench();
         if (fi) begin
             for (Address = 0; Address < 48; Address = Address + 1) begin
                 if ($fscanf(fi, "%b", data) != -1) begin
-                    rom.mem[Address] = data;  
+                    rom.Mem[Address] = data;  
                 end
             end
             $fclose(fi);  
@@ -46,12 +46,12 @@ module testbench();
     );
 
     
-    rom256x8 rom (
-        .Address(pc_out[7:0]),  
-        .Instruction(instruction)
+    Instruction_Memory_ROM rom (
+        .A(pc_out[7:0]),  
+        .I(instruction)
     );
 
-    IF_ID_PipelineReg if_id (
+    IF_ID if_id (
         .Clk(clk),
         .Reset(reset),
         .IF_ID_enable(1'b1),
@@ -59,16 +59,16 @@ module testbench();
         .ID_instruction(ID_instruction)
     );
 
-    control_unit control (
-        .ID_S_bit(ID_S_bit),
-        .ID_load_instr(ID_load_instr),
-        .ID_RF_enable(ID_RF_enable),
-        .ID_B_instr(ID_B_instr),
-        .ID_load_store_instr(ID_load_store_instr),
-        .ID_size(ID_size),
-        .ID_BL_instr(ID_BL_instr),
-        .ID_shift_AM(ID_shift_AM),
-        .ID_alu_op(ID_alu_op),
+    ControlUnit control (
+        .STORE_CC(STORE_CC),
+        .ID_MEM_E(ID_MEM_E),
+        .ID_RF_E(ID_RF_E),
+        .ID_B(ID_B),
+        .ID_MEM_WRITE(ID_MEM_WRITE),
+        .ID_MEM_SIZE(ID_MEM_SIZE),
+        .ID_BL(ID_BL),
+        .ID_AM(ID_AM),
+        .ALU_OP(ALU_OP),
         .ID_mnemonic0(ID_mnemonic0),
         .ID_mnemonic1(ID_mnemonic1),
         .ID_mnemonic2(ID_mnemonic2),
@@ -85,59 +85,59 @@ module testbench();
         .BL(BL),
         .size(size),
         .ReadWrite(ReadWrite),
-        .ID_shift_AM(ID_shift_AM),
-        .ID_alu_op(ID_alu_op),
-        .ID_S_Bit(ID_S_bit),
-        .ID_load_instr(ID_load_instr),
-        .ID_RF_enable(ID_RF_enable),
-        .ID_B_intr(ID_B_instr),
-        .ID_load_store_instr(ID_load_store_instr),
-        .ID_size(ID_size),
-        .ID_BL_instr(ID_BL_instr),
+        .ID_AM(ID_AM),
+        .ALU_OP(ALU_OP),
+        .STORE_CC(STORE_CC),
+        .ID_MEM_E(ID_MEM_E),
+        .ID_RF_E(ID_RF_E),
+        .ID_B(ID_B),
+        .ID_MEM_WRITE(ID_MEM_WRITE),
+        .ID_MEM_SIZE(ID_MEM_SIZE),
+        .ID_BL(ID_BL),
         .select(select)
     );
 
-    ID_EX_PipelineReg id_ex (
+    ID_EX id_ex (
         .Clk(clk),
         .Reset(reset),
-        .ID_S_instr(S),
-        .ID_alu_op(ID_alu_op),
-        .ID_load_instr(load),
-        .ID_RF_enable(RFenable),
-        .ID_load_store_instr(ReadWrite),
-        .ID_size(size),
-        .ID_BL_instr(BL),
-        .ID_shift_AM(AM),
-        .ID_B_instr(ID_B_instr),
-        .EX_S_instr(EX_S_instr),
+        .STORE_CC(S),
+        .ALU_OP(ALU_OP),
+        .ID_MEM_E(load),
+        .ID_RF_E(RFenable),
+        .ID_MEM_WRITE(ReadWrite),
+        .ID_MEM_SIZE(size),
+        .ID_BL(BL),
+        .ID_AM(AM),
+        .ID_B(ID_B),
+        .EX_STORE_CC(EX_STORE_CC),
         .EX_alu_op(EX_alu_op),
-        .EX_load_instr(EX_load_instr),
-        .EX_RF_enable(EX_RF_enable),
-        .EX_load_store_instr(EX_load_store_instr),
-        .EX_size(EX_size),
-        .EX_BL_instr(EX_BL_instr),
-        .EX_B_instr(EX_B_instr),
-        .EX_shift_AM(EX_shift_AM)
+        .EX_MEM_E(EX_MEM_E),
+        .EX_RF_E(EX_RF_E),
+        .EX_MEM_WRITE(EX_MEM_WRITE),
+        .EX_MEM_SIZE(EX_MEM_SIZE),
+        .EX_BL(EX_BL),
+        .EX_B(EX_B),
+        .EX_AM(EX_AM)
     );
 
-    EX_MEM_PipelineReg ex_mem (
+    EX_MEM ex_mem (
         .Clk(clk),
         .Reset(reset),
-        .EX_load_store_instr(EX_load_store_instr),
-        .EX_size(EX_size),
-        .EX_RF_enable(EX_RF_enable),
-        .EX_load_instr(EX_load_instr),
-        .MEM_load_instr(MEM_load_instr),
-        .MEM_load_store_instr(MEM_load_store_instr),
+        .EX_MEM_WRITE(EX_MEM_WRITE),
+        .EX_MEM_SIZE(EX_MEM_SIZE),
+        .EX_RF_E(EX_RF_E),
+        .EX_MEM_E(EX_MEM_E),
+        .MEM_E(MEM_E),
+        .MEM_WRITE(MEM_WRITE),
         .MEM_size(MEM_size),
-        .MEM_RF_enable(MEM_RF_enable)
+        .MEM_RF_E(MEM_RF_E)
     );
 
-    MEM_WB_PipelineReg mem_wb (
+    MEM_WB mem_wb (
         .Clk(clk),
         .Reset(reset),
-        .MEM_RF_enable(MEM_RF_enable),
-        .WB_RF_enable(WB_RF_enable)
+        .MEM_RF_E(MEM_RF_E),
+        .WB_RF_E(WB_RF_E)
     );
 
     initial begin
@@ -155,10 +155,10 @@ module testbench();
    initial begin
     $monitor("PC=%0d | Instruction=%b | Mnemonic=%c%c%c\n    ID Signals: S = %b AM = %b op = %b E = %b RF_Enable = %b B = %b BL = %b ReadWrite = %b size = %b\n    EX Signals: S_bit = %b AM = %b ALU_op = %b E = %b RF_Enable = %b B = %b BL = %b ReadWrite = %b size = %b\n    MEM Signals: E = %b ReadWrite = %b RF_Enable = %b size = %b\n    WB Signal: RF_Enable = %b",
              pc_out, instruction, ID_mnemonic0, ID_mnemonic1, ID_mnemonic2,
-             ID_S_bit,ID_shift_AM,ID_alu_op, ID_load_store_instr, ID_RF_enable, ID_B_instr,ID_BL_instr, ID_load_instr, ID_size,
-             EX_S_instr,EX_shift_AM, EX_alu_op, EX_load_store_instr, EX_RF_enable,EX_B_instr,EX_BL_instr, EX_load_instr, EX_size,
-             MEM_load_store_instr, MEM_load_instr, MEM_RF_enable, MEM_size,
-             WB_RF_enable);
+             STORE_CC,ID_AM,ALU_OP, ID_MEM_WRITE, ID_RF_E, ID_B,ID_BL, ID_MEM_E, ID_MEM_SIZE,
+             EX_STORE_CC,EX_AM, EX_alu_op, EX_MEM_WRITE, EX_RF_E,EX_B,EX_BL, EX_MEM_E, EX_MEM_SIZE,
+             MEM_WRITE, MEM_E, MEM_RF_E, MEM_size,
+             WB_RF_E);
              
     #52 $finish;
 end
