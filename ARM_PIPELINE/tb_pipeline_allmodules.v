@@ -1,6 +1,6 @@
 `timescale 1ns / 1ns
 
-module testbench();
+module tb_pipeline();
     reg clk;
     reg reset;
     reg select;
@@ -88,7 +88,7 @@ module testbench();
         .select(select)
     );
 
-    IF_IDReg if_idreg (
+    IF_ID if_idreg (
         .Clk(clk),
         .Reset(reset),
         .IF_ID_enable(1'b1),
@@ -96,7 +96,7 @@ module testbench();
         .ID_instruction(ID_instruction)
     );
 
-    ID_EXReg id_exreg (
+    ID_EX id_exreg (
         .Clk(clk),
         .Reset(reset),
         .ID_S_instr(S),
@@ -119,7 +119,7 @@ module testbench();
         .EX_shift_AM(EX_shift_AM)
     );
 
-    EX_MEMReg ex_memreg (
+    EX_MEM ex_memreg (
         .Clk(clk),
         .Reset(reset),
         .EX_load_store_instr(EX_load_store_instr),
@@ -132,7 +132,7 @@ module testbench();
         .MEM_RF_enable(MEM_RF_enable)
     );
 
-    MEM_WBReg mem_wbreg (
+    MEM_WB mem_wbreg (
         .Clk(clk),
         .Reset(reset),
         .MEM_RF_enable(MEM_RF_enable),
@@ -152,7 +152,7 @@ module testbench();
     end
 
    initial begin
-    $monitor("PC=%0d | Instruction=%b | Mnemonic=%c%c%c\n    ID Signals: S = %b AM = %b opcode = %b E = %b RF_E = %b B = %b BL = %b RW = %b size = %b\n    EX Signals: S = %b AM = %b ALU_op = %b E = %b RF_E = %b B = %b BL = %b RW = %b size = %b\n    MEM Signals: E = %b RW = %b RF_E = %b size = %b\n    WB Signal: RF_E = %b",
+    $monitor("Program Counter=%0d | Instruction=%b | INSTR CODE CALLED: %c%c%c\n    ID Signals: S = %b Adressing Mode = %b Opcode = %b E = %b RF_E = %b B = %b BL = %b RW = %b size = %b\n    EX Signals: S = %b AM = %b ALU_op = %b E = %b RF_E = %b B = %b BL = %b RW = %b size = %b\n    MEM Signals: E = %b RW = %b RF_E = %b size = %b\n    WB Signal: RF_E = %b",
              pc_out, instruction, ID_mnemonic0, ID_mnemonic1, ID_mnemonic2,
              ID_S_bit,ID_shift_AM,ID_alu_op, ID_load_store_instr, ID_RF_enable, ID_B_instr,ID_BL_instr, ID_load_instr, ID_size,
              EX_S_instr,EX_shift_AM, EX_alu_op, EX_load_store_instr, EX_RF_enable,EX_B_instr,EX_BL_instr, EX_load_instr, EX_size,

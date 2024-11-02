@@ -1,66 +1,3 @@
-module Adder(output reg [31:0] NextPC, input [31:0] PC);
-always @(*) begin
-    NextPC = PC + 4; 
-end
-endmodule
-
-module Instruction_Memory_ROM (
-    input [7:0] Address,           
-    output reg [31:0] Instruction  
-);
-
-    reg [7:0] mem [0:255];
-
-    always @(*) begin
-        Instruction = {mem[Address], mem[Address + 1], mem[Address + 2], mem[Address + 3]};
-    end
-
-endmodule
-
-module PC (
-    output reg [31:0] Qs, input [31:0] Ds, input enable, clk, reset
-);
-    always @(posedge clk) begin
-        if(reset) begin
-            Qs = 32'h00000000;
-        end else if(enable) begin
-            Qs = Ds;
-        end
-    end
-endmodule
-
-module Multiplexer (
-    output reg [1:0] AM,
-    output reg [3:0] opcode,
-    output reg S, load, RFenable, B, BL, size, ReadWrite,
-    input [1:0] ID_shift_AM,
-    input [3:0] ID_alu_op,
-    input ID_S_Bit, ID_load_instr, ID_RF_enable, ID_B_intr, ID_load_store_instr, ID_size, ID_BL_instr, select
-);
-    always @(*) begin
-        if (select) begin
-            AM = 2'b00;
-            opcode = 4'b0000;
-            S = 1'b0;
-            load = 1'b0;
-            RFenable = 1'b0;
-            B = 1'b0;
-            BL = 1'b0;
-            size = 1'b0;
-            ReadWrite = 1'b0;
-        end else begin
-            AM = ID_shift_AM;
-            opcode = ID_alu_op;
-            S = ID_S_Bit;
-            load = ID_load_instr;
-            ReadWrite = ID_load_store_instr;
-            RFenable = ID_RF_enable;
-            B = ID_B_intr;
-            BL = ID_BL_instr;
-            size = ID_size;
-        end
-    end
-endmodule
 
 module ControlUnit (
     output reg ID_S_bit, ID_load_instr, ID_RF_enable, ID_B_instr,
@@ -200,7 +137,71 @@ always @(instruction) begin
 end        
 endmodule
 
-module IF_IDReg (
+module Adder(output reg [31:0] NextPC, input [31:0] PC);
+always @(*) begin
+    NextPC = PC + 4; 
+end
+endmodule
+
+module Instruction_Memory_ROM (
+    input [7:0] Address,           
+    output reg [31:0] Instruction  
+);
+
+    reg [7:0] mem [0:255];
+
+    always @(*) begin
+        Instruction = {mem[Address], mem[Address + 1], mem[Address + 2], mem[Address + 3]};
+    end
+
+endmodule
+
+module PC (
+    output reg [31:0] Qs, input [31:0] Ds, input enable, clk, reset
+);
+    always @(posedge clk) begin
+        if(reset) begin
+            Qs = 32'h00000000;
+        end else if(enable) begin
+            Qs = Ds;
+        end
+    end
+endmodule
+
+module Multiplexer (
+    output reg [1:0] AM,
+    output reg [3:0] opcode,
+    output reg S, load, RFenable, B, BL, size, ReadWrite,
+    input [1:0] ID_shift_AM,
+    input [3:0] ID_alu_op,
+    input ID_S_Bit, ID_load_instr, ID_RF_enable, ID_B_intr, ID_load_store_instr, ID_size, ID_BL_instr, select
+);
+    always @(*) begin
+        if (select) begin
+            AM = 2'b00;
+            opcode = 4'b0000;
+            S = 1'b0;
+            load = 1'b0;
+            RFenable = 1'b0;
+            B = 1'b0;
+            BL = 1'b0;
+            size = 1'b0;
+            ReadWrite = 1'b0;
+        end else begin
+            AM = ID_shift_AM;
+            opcode = ID_alu_op;
+            S = ID_S_Bit;
+            load = ID_load_instr;
+            ReadWrite = ID_load_store_instr;
+            RFenable = ID_RF_enable;
+            B = ID_B_intr;
+            BL = ID_BL_instr;
+            size = ID_size;
+        end
+    end
+endmodule
+
+module IF_ID (
     input Clk, 
     input Reset,
     input IF_ID_enable,
@@ -217,7 +218,7 @@ always @(posedge Clk) begin
 end
 endmodule
 
-module ID_EXReg (
+module ID_EX (
     input Clk,
     input Reset,
     input ID_S_instr,
@@ -266,7 +267,7 @@ end
 endmodule
 
 
-module EX_MEMReg (
+module EX_MEM (
     input Clk,
     input Reset,
     input EX_load_store_instr,
@@ -292,7 +293,7 @@ always @(posedge Clk) begin
 end
 endmodule
 
-module MEM_WBReg (
+module MEM_WB (
     input Clk,
     input Reset,
     input MEM_RF_enable,
