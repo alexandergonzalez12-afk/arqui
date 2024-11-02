@@ -15,20 +15,20 @@ end
 endmodule
 
 
-module ROM256x8 (
-    input [7:0] address,           
-    output reg [31:0] instruction  
-);
+// module Instruction_memory (
+//     input [7:0] address,           
+//     output reg [31:0] instruction  
+// );
 
-    reg [7:0] mem [0:255]; 
+//     reg [7:0] mem [0:255]; 
 
-    always @(*) begin
-        instruction = {mem[address], mem[address + 1], mem[address + 2], mem[address + 3]}; 
-    end
-endmodule
+//     always @(*) begin
+//         instruction = {mem[address], mem[address + 1], mem[address + 2], mem[address + 3]}; 
+//     end
+// endmodule
 
 
-module control_unit (
+module ControlUnit (
     output reg ID_S_bit, ID_load_instr, ID_RF_enable, ID_B_instr,
     ID_load_store_instr, ID_size, ID_BL_instr,
     output reg [1:0] ID_shift_AM,
@@ -211,7 +211,7 @@ module ProgramCounter (
     end
 endmodule
 
-module IF_ID_PipelineReg (
+module IF_ID (
     input Clk, 
     input Reset,
     input IF_ID_enable,
@@ -228,7 +228,7 @@ always @(posedge Clk) begin
 end
 endmodule
 
-module ID_EX_PipelineReg (
+module ID_EX (
     input Clk,
     input Reset,
     input ID_S_instr,
@@ -277,7 +277,7 @@ end
 endmodule
 
 
-module EX_MEM_PipelineReg (
+module EX_MEM (
     input Clk,
     input Reset,
     input EX_load_store_instr,
@@ -303,7 +303,7 @@ always @(posedge Clk) begin
 end
 endmodule
 
-module MEM_WB_PipelineReg (
+module MEM_WB (
     input Clk,
     input Reset,
     input MEM_RF_enable,
@@ -319,7 +319,7 @@ always @(posedge Clk) begin
 end
 endmodule
 
-module rom256x8 (
+module Instruction_Memory_ROM (
     input [7:0] Address,           
     output reg [31:0] Instruction  
 );

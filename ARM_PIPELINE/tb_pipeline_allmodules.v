@@ -46,12 +46,12 @@ module testbench();
     );
 
     
-    rom256x8 rom (
+    Instruction_Memory_ROM rom (
         .Address(pc_out[7:0]),  
         .Instruction(instruction)
     );
 
-    IF_ID_PipelineReg if_id (
+    IF_ID if_id (
         .Clk(clk),
         .Reset(reset),
         .IF_ID_enable(1'b1),
@@ -59,7 +59,7 @@ module testbench();
         .ID_instruction(ID_instruction)
     );
 
-    control_unit control (
+    ControlUnit control (
         .ID_S_bit(ID_S_bit),
         .ID_load_instr(ID_load_instr),
         .ID_RF_enable(ID_RF_enable),
@@ -97,7 +97,7 @@ module testbench();
         .select(select)
     );
 
-    ID_EX_PipelineReg id_ex (
+    ID_EX id_ex (
         .Clk(clk),
         .Reset(reset),
         .ID_S_instr(S),
@@ -120,7 +120,7 @@ module testbench();
         .EX_shift_AM(EX_shift_AM)
     );
 
-    EX_MEM_PipelineReg ex_mem (
+    EX_MEM ex_mem (
         .Clk(clk),
         .Reset(reset),
         .EX_load_store_instr(EX_load_store_instr),
@@ -133,7 +133,7 @@ module testbench();
         .MEM_RF_enable(MEM_RF_enable)
     );
 
-    MEM_WB_PipelineReg mem_wb (
+    MEM_WB mem_wb (
         .Clk(clk),
         .Reset(reset),
         .MEM_RF_enable(MEM_RF_enable),
