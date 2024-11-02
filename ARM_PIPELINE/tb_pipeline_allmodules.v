@@ -32,7 +32,7 @@ module testbench();
         end
     end
 
-    ProgramCounter pc (
+    PC pc (
         .Qs(pc_out),
         .Ds(reset ? 32'b0 : NextPC),
         .enable(1'b1),
@@ -40,26 +40,17 @@ module testbench();
         .reset(reset)
     );
 
-    adder pc_adder (
+    Adder adder (
         .NextPC(NextPC),
         .PC(pc_out)
     );
-
     
     Instruction_Memory_ROM rom (
         .Address(pc_out[7:0]),  
         .Instruction(instruction)
     );
 
-    IF_ID if_id (
-        .Clk(clk),
-        .Reset(reset),
-        .IF_ID_enable(1'b1),
-        .IF_instruction(instruction),
-        .ID_instruction(ID_instruction)
-    );
-
-    ControlUnit control (
+    ControlUnit controlunit (
         .ID_S_bit(ID_S_bit),
         .ID_load_instr(ID_load_instr),
         .ID_RF_enable(ID_RF_enable),
@@ -75,7 +66,7 @@ module testbench();
         .instruction(ID_instruction)
     );
 
-    MUX mux (
+    Multiplexer mux (
         .AM(AM),
         .opcode(opcode),
         .S(S),
@@ -97,7 +88,15 @@ module testbench();
         .select(select)
     );
 
-    ID_EX id_ex (
+    IF_IDReg if_idreg (
+        .Clk(clk),
+        .Reset(reset),
+        .IF_ID_enable(1'b1),
+        .IF_instruction(instruction),
+        .ID_instruction(ID_instruction)
+    );
+
+    ID_EXReg id_exreg (
         .Clk(clk),
         .Reset(reset),
         .ID_S_instr(S),
@@ -120,7 +119,7 @@ module testbench();
         .EX_shift_AM(EX_shift_AM)
     );
 
-    EX_MEM ex_mem (
+    EX_MEMReg ex_memreg (
         .Clk(clk),
         .Reset(reset),
         .EX_load_store_instr(EX_load_store_instr),
@@ -133,7 +132,7 @@ module testbench();
         .MEM_RF_enable(MEM_RF_enable)
     );
 
-    MEM_WB mem_wb (
+    MEM_WBReg mem_wbreg (
         .Clk(clk),
         .Reset(reset),
         .MEM_RF_enable(MEM_RF_enable),
