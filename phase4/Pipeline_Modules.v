@@ -1,4 +1,3 @@
-
 module ControlUnit (
     output reg ID_S_bit, ID_load_instr, ID_RF_enable, ID_B_instr,
     ID_load_store_instr, ID_size, ID_BL_instr,
@@ -68,50 +67,19 @@ always @(instruction) begin
                     4'b1111: begin ID_alu_op = 4'b1011; ID_mnemonic0 = "M"; ID_mnemonic1 = "V"; ID_mnemonic2 = "N"; end
                 endcase
             end
-            3'b010: begin 
-                ID_S_bit = 0;
-                ID_load_instr = instruction[20]; 
-                ID_B_instr = 0;
+            3'b011: begin
                 ID_load_store_instr = 1;
-                if (instruction[22]) begin
-                    ID_size = 0;
+                ID_size = instruction[22]; // 1 if word; 0 if byte
+                if (instruction[20] == 1) begin
+                    ID_RF_enable = 1;
+                    ID_load_instr = 1;
                 end else begin
-                    ID_size = 1;
+                    ID_RF_enable = 0;
+                    ID_load_instr = 0;
                 end
-                ID_BL_instr = 0;
-                ID_shift_AM = 2'b10;
-                if (instruction[20] == 0) begin 
-                    ID_load_instr = 1; 
-                    ID_mnemonic0 = "S"; 
-                    ID_mnemonic1 = "T"; 
-                    ID_mnemonic2 = "R"; 
-                    ID_RF_enable = 0; 
-                end else begin 
-                    ID_load_instr = 0; 
-                    ID_mnemonic0 = "L"; 
-                    ID_mnemonic1 = "D"; 
-                    ID_mnemonic2 = "R"; 
-                    ID_RF_enable = 1; 
-                end
-                ID_alu_op = (instruction[23] == 1) ? 4'b0000 : 4'b0010;
-            end
-            3'b101: begin 
-                ID_S_bit = 0;
-                ID_load_instr = 0;
-                ID_RF_enable = 0; 
-                ID_B_instr = 1;
-                ID_load_store_instr = 0;
-                ID_size = 0;
-                ID_BL_instr = instruction[24];
-                if (instruction[24] == 0) begin 
-                    ID_mnemonic0 = "B"; 
-                    ID_mnemonic1 = " "; 
-                    ID_mnemonic2 = " "; 
-                end else begin 
-                    ID_mnemonic0 = "B"; 
-                    ID_mnemonic1 = "L"; 
-                    ID_mnemonic2 = " "; 
-                end
+                ID_mnemonic0 = instruction[20] ? "L" : "S";
+                ID_mnemonic1 = instruction[20] ? "D" : "T";
+                ID_mnemonic2 = "R";
             end
             default: begin
                 ID_S_bit = 0;
@@ -355,22 +323,65 @@ module ConditionHandler (
     end
 endmodule
 
+module ARM_Shifter (
+    input [31:0] Rm,            // Input register Rm
+    input [11:0] I,             // Immediate value
+    input [1:0] AM,             // Addressing Mode
+    output reg [31:0] N         // Output
+);
+
+always @(*) begin
+    case (AM)
+        2'b00: N = ({24'b0, I[7:0]} >> (2 * I[11:8])) | ({24'b0, I[7:0]} << (32 - 2 * I[11:8]));  // Rotate right
+        2'b01: N = Rm;  // Pass Rm value
+        2'b10: N = {20'b0, I};  // Zero extend I[11:0]
+        2'b11: begin  // Addressing Mode 11: Shift Rm based on I[11:7]
+            case (I[6:5])
+                2'b00: N = Rm << I[11:7];  // Logical Shift Left (LSL)
+                2'b01: N = Rm >> I[11:7];  // Logical Shift Right (LSR)
+                2'b10: N = $signed(Rm) >>> I[11:7];  // Arithmetic Shift Right (ASR)
+                2'b11: N = {Rm, Rm} >> I[11:7];  // Rotate Right (ROR)
+                default: N = 32'b0; // Default case for safety
+            endcase
+        end
+        default: N = 32'b0; // Default output
+    endcase
+end
+
+endmodule
+
+
+
 module EX_Stage (
     input clk,
     input reset,
-    input [31:0] A, B,
-    input [3:0] alu_op,
-    input update_flags,
-    input [31:0] instruction,
-    output [31:0] result,
-    output N, Z, C, V,
-    output Branch, BranchLink
+    input [31:0] A, B,          // Inputs to the ALU
+    input [3:0] alu_op,         // ALU operation
+    input update_flags,         // Signal to update flags
+    input [31:0] instruction,   // Current instruction
+    input [31:0] Rm,            // Register Rm input for Shifter
+    input [11:0] I,             // Immediate input for Shifter
+    input [1:0] AM,             // Addressing Mode for Shifter
+    output [31:0] result,       // ALU result
+    output [31:0] shifted_value, // Shifter output
+    output N, Z, C, V,          // Flags
+    output Branch, BranchLink   // ConditionHandler outputs
 );
+
     wire N_in, Z_in, C_in, V_in;
 
+    // Shifter instance
+    ARM_Shifter shifter (
+        .Rm(Rm),
+        .I(I),
+        .AM(AM),
+        .N(shifted_value)
+    );
+
+    // ALU instance
     ALU alu (
         .A(A),
-        .B(B),
+        .B(shifted_value),  // Shifter output as input to ALU
         .alu_op(alu_op),
         .result(result),
         .N(N_in),
@@ -379,6 +390,7 @@ module EX_Stage (
         .V(V_in)
     );
 
+    // FlagRegister instance
     FlagRegister flag_register (
         .clk(clk),
         .reset(reset),
@@ -393,6 +405,7 @@ module EX_Stage (
         .V(V)
     );
 
+    // ConditionHandler instance
     ConditionHandler condition_handler (
         .ConditionCode(instruction[31:28]),
         .N(N),

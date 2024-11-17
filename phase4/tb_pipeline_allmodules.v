@@ -18,6 +18,7 @@ module tb_pipeline();
 
     // EX Signals
     wire [31:0] ALU_result;
+    wire [31:0] shifted_value; // Shifter output
     wire [3:0] EX_alu_op;
     wire [1:0] EX_shift_AM;
     wire EX_S_instr, EX_load_instr, EX_RF_enable, EX_load_store_instr, EX_size, EX_BL_instr, EX_B_instr;
@@ -32,6 +33,11 @@ module tb_pipeline();
     wire [1:0] AM;
     wire [3:0] opcode;
     wire S, load, RFenable, B, BL, size, ReadWrite;
+
+    // Inputs for Shifter
+    reg [31:0] Rm;  
+    reg [11:0] I;   
+    reg [1:0] AM_input;   
 
     // Temporary variables for reading memory
     reg [7:0] Address;
@@ -154,7 +160,11 @@ module tb_pipeline();
         .alu_op(EX_alu_op),
         .update_flags(1'b1),
         .instruction(ID_instruction),
+        .Rm(Rm),                  // Register Rm input for Shifter
+        .I(I),                    // Immediate input for Shifter
+        .AM(AM_input),            // Addressing Mode for Shifter
         .result(ALU_result),
+        .shifted_value(shifted_value), // Shifter output
         .N(N),
         .Z(Z),
         .C(C),
@@ -201,8 +211,8 @@ module tb_pipeline();
 
     // Monitoring the Simulation
     initial begin
-        $monitor("PC=%0d | Instr=%b | Branch=%b | BranchLink=%b | Flags: N=%b Z=%b C=%b V=%b\n    ID Signals: S=%b AM=%b Opcode=%b RF_E=%b B=%b BL=%b RW=%b size=%b",
-                 pc_out, instruction, Branch, BranchLink, N, Z, C, V,
+        $monitor("PC=%0d | Instr=%b | Shifted Value=%b | Branch=%b | BranchLink=%b | Flags: N=%b Z=%b C=%b V=%b\n    ID Signals: S=%b AM=%b Opcode=%b RF_E=%b B=%b BL=%b RW=%b size=%b",
+                 pc_out, instruction, shifted_value, Branch, BranchLink, N, Z, C, V,
                  ID_S_bit, ID_shift_AM, ID_alu_op, ID_RF_enable, ID_B_instr, ID_BL_instr, ID_load_store_instr, ID_size);
         #52 $finish;
     end
