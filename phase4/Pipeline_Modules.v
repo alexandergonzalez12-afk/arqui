@@ -1,3 +1,244 @@
+//------------------------------------------ID---------------------------------------------
+//------------------------------------------Register_File----------------------------------
+module Binary_Decoder ( 
+  input [3:0] I,        //input of 4 bits
+  input LE,             //Load Enable of 1 bit
+  output reg [15:0] O   //output of 16 bits
+  );
+
+  always @(*) begin
+    if (LE == 1'b1) begin // When Load Enables is 1, it enables the corresponding one
+          case (I)
+              4'b0000: O = 16'b0000000000000001; 
+              4'b0001: O = 16'b0000000000000010; 
+              4'b0010: O = 16'b0000000000000100; 
+              4'b0011: O = 16'b0000000000001000; 
+              4'b0100: O = 16'b0000000000010000; 
+              4'b0101: O = 16'b0000000000100000; 
+              4'b0110: O = 16'b0000000001000000; 
+              4'b0111: O = 16'b0000000010000000; 
+              4'b1000: O = 16'b0000000100000000; 
+              4'b1001: O = 16'b0000001000000000; 
+              4'b1010: O = 16'b0000010000000000; 
+              4'b1011: O = 16'b0000100000000000; 
+              4'b1100: O = 16'b0001000000000000; 
+              4'b1101: O = 16'b0010000000000000; 
+              4'b1110: O = 16'b0100000000000000; 
+              4'b1111: O = 16'b1000000000000000; 
+          
+      endcase
+      end else 
+          O = 16'b0000000000000000;  // If Load Enable is 0, disable all registers
+  end    
+endmodule
+
+module Register (
+  output reg [31:0] O, 
+  input [31:0] PW,       // data to be written
+  input LE, Clk         //Load enable and Clock
+);
+    
+  always @ (posedge Clk)
+    if (LE) 
+      O = PW;           // Load data if LE is 1
+  
+endmodule
+
+// Selects one of 16 32-bit inputs based on the 4-bit select signal
+module Mux_RF (
+  output reg [31:0] Z,
+  input [3:0] S,
+  input [31:0] r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15
+);
+  
+  always @ (*)
+    begin
+    case(S)         // Selects the registers form RO to R15(Program Counter)
+    4'b0000: Z = r0;
+    4'b0001: Z = r1;
+    4'b0010: Z = r2;
+    4'b0011: Z = r3;
+    4'b0100: Z = r4;
+    4'b0101: Z = r5;
+    4'b0110: Z = r6;
+    4'b0111: Z = r7;
+    4'b1000: Z = r8;
+    4'b1001: Z = r9;
+    4'b1010: Z = r10;
+    4'b1011: Z = r11;
+    4'b1100: Z = r12;
+    4'b1101: Z = r13;
+    4'b1110: Z = r14;
+    4'b1111: Z = r15; 
+ 	
+    endcase
+    end
+endmodule
+
+module Three_port_register_file (
+  input [3:0] RA, RB, RD, RW,   // registers of 4 bits
+  input [31:0] PW,              // Data to be written
+  input [31:0] PC,              // value stored in R15
+  input Clk, LE,                // Clock and Load Enable
+  output [31:0] PA, PB, PD     // Register output values
+);
+ 4'b0100: Z = r4;
+    4'b0101: Z = r5;
+    4'b0110: Z = r6;
+    4'b0111: Z = r7;
+    4'b1000: Z = r8;
+    4'b1001: Z = r9;
+    4'b1010: Z = r10;
+    4'b1011: Z = r11;
+    4'b1100: Z = r12;
+    4'b1101: Z = r13;
+    4'b1110: Z = r14;
+    4'b1111: Z = r15; 
+  wire [31:0] R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15;
+  wire [15:0] O;
+
+  // Instantiate the Binary Decoder
+  Binary_Decoder BD (RW, LE, O);
+
+  // Instantiate Registers
+  Register Regis0 (R0, PW, O[0], Clk);
+  Register Regis1 (R1, PW, O[1], Clk);
+  Register Regis2 (R2, PW, O[2], Clk) 4'b0100: Z = r4;
+    4'b0101: Z = r5;
+    4'b0110: Z = r6;
+    4'b0111: Z = r7;
+    4'b1000: Z = r8;
+    4'b1001: Z = r9;
+    4'b1010: Z = r10;
+    4'b1011: Z = r11;
+    4'b1100: Z = r12;
+    4'b1101: Z = r13;
+    4'b1110: Z = r14;
+    4'b1111: Z = r15; ;
+  Register Regis3 (R3, PW, O[3], Clk);
+  Register Regis4 (R4, PW, O[4], Clk);
+  Register Regis5 (R5, PW, O[5], Clk);
+  Register Regis6 (R6, PW, O[6], Clk);
+  Register Regis7 (R7, PW, O[7], Clk);
+  Register Regis8 (R8, PW, O[8], Clk);
+  Register Regis9 (R9, PW, O[9], Clk);
+  Register Regis10 (R10, PW, O[10], Clk);
+  Register Regis11 (R11, PW, O[11], Clk);
+  Register Regis12 (R12, PW, O[12], Clk);
+  Register Regis13 (R13, PW, O[13], Clk);
+  Register Regis14 (R14, PW, O[14], Clk);
+  Register Regis15 (R15, PC, 1'b1, Clk);
+
+  // Instantiate Multiplexers for outputs
+  Mux_RF MUX1 (PA, RA, R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15);
+  Mux_RF MUX2 (PB, RB, R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15);
+  Mux_RF MUX3 (PD, RD, R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15);
+
+endmodule
+
+module MUX_PA (
+    input [31:0] pa, jump_EX_pa, jump_MEM_pa, jump_WB_pa,
+    input [1:0] S_PA,
+    output [31:0] rf_pa
+);
+
+always @ (*)
+    begin
+    case(S_PA)         // Selects the Signal from PA to pick the output
+    4'b00: rf_pa = pa;
+    4'b01: rf_pa = jump_EX_pa;
+    4'b10: rf_pa = jump_MEM_pa;
+    4'b11: rf_pa = jump_WB_pa;
+
+    endcase
+    end
+endmodule
+
+module MUX_PB (
+    input [31:0] pb, jump_EX_pb, jump_MEM_pb, jump_WB_pb,
+    input [1:0] S_PB,
+    output [31:0] rf_pb
+);
+always @ (*)
+    begin
+    case(S_PB)         // Selects the Signal from PB to pick the output
+    4'b00: rf_pb = pb;
+    4'b01: rf_pb = jump_EX_pb;
+    4'b10: rf_pb = jump_MEM_pb;
+    4'b11: rf_pb = jump_WB_pb;
+ 	
+    endcase
+    end
+endmodule
+
+module MUX_PD (
+    input [31:0] pd, jump_EX_pd, jump_MEM_pd, jump_WB_pd,
+    input [1:0] S_PD,
+    output [31:0] rf_pd
+);
+always @ (*)
+    begin
+    case(S_PD)         // Selects the Signal from PD to pick the output
+    4'b00: rf_pd = pd;
+    4'b01: rf_pd = jump_EX_pd;
+    4'b10: rf_pd = jump_MEM_pd;
+    4'b11: rf_pd = jump_WB_pd;
+ 	
+    endcase
+    end
+endmodule
+
+module MUX_I15_I12 (
+    input [3:0] inst_I15_I12, val14,
+    input BL_out,
+    output [3:0] result
+);
+    begin
+    case(BL_out)         // Selects the Signal from PD to pick the output
+    4'b0: result = val14;
+    4'b1: result = inst_I15_I12;
+
+    endcase
+    end
+endmodule
+
+module X4_SE(
+    input [23:0] instr_I23_I0,  // Input 24-bit signal
+    output reg [7:0] instr_SE   // Output 8-bit sign-extended signal
+);
+
+    wire [7:0] selected_bits;  // Extracted bits for multiplication
+    wire [9:0] multiplied_bits; // Result after multiplication by 4
+
+    // Extract specific bits (for example, the 8 LSBs)
+    assign selected_bits = instr_I23_I0[7:0];
+
+    // Multiply by 4
+    assign multiplied_bits = selected_bits * 4;
+
+    always @(*) begin
+        // Perform sign extension
+        if (multiplied_bits[9] == 1) begin
+            // If the result is negative (assuming signed operation)
+            instr_SE = {1'b1, multiplied_bits[7:0]}; // Extend with MSB = 1
+        end else begin
+            // If the result is positive
+            instr_SE = multiplied_bits[7:0]; // Use lower 8 bits directly
+        end
+    end
+endmodule
+
+module SUM_RF (
+    input [7:0] instr_SE,
+    input [7:0] nextpc, 
+    output [7:0] TA
+);
+always @(*) begin
+    TA = instr_SE + nextpc;
+end
+endmodule
+//------------------------------------------Register_File----------------------------------
+//------------------------------------------ID---------------------------------------------
 module ControlUnit (
     output reg ID_S_bit, ID_load_instr, ID_RF_enable, ID_B_instr,
     ID_load_store_instr, ID_size, ID_BL_instr,
