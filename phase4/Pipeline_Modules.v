@@ -142,7 +142,7 @@ module MUX_PA (
     output [31:0] rf_pa
 );
 
-always @ (*)
+always @(*)
     begin
     case(S_PA)         // Selects the Signal from PA to pick the output
     4'b00: rf_pa = pa;
@@ -151,7 +151,7 @@ always @ (*)
     4'b11: rf_pa = jump_WB_pa;
 
     endcase
-    end
+end
 endmodule
 
 module MUX_PB (
@@ -159,7 +159,7 @@ module MUX_PB (
     input [1:0] S_PB,
     output [31:0] rf_pb
 );
-always @ (*)
+always @(*)
     begin
     case(S_PB)         // Selects the Signal from PB to pick the output
     4'b00: rf_pb = pb;
@@ -168,7 +168,7 @@ always @ (*)
     4'b11: rf_pb = jump_WB_pb;
  	
     endcase
-    end
+end
 endmodule
 
 module MUX_PD (
@@ -176,7 +176,7 @@ module MUX_PD (
     input [1:0] S_PD,
     output [31:0] rf_pd
 );
-always @ (*)
+always @(*)
     begin
     case(S_PD)         // Selects the Signal from PD to pick the output
     4'b00: rf_pd = pd;
@@ -185,7 +185,7 @@ always @ (*)
     4'b11: rf_pd = jump_WB_pd;
  	
     endcase
-    end
+end
 endmodule
 
 module MUX_I15_I12 (
@@ -193,13 +193,14 @@ module MUX_I15_I12 (
     input BL_out,
     output [3:0] result
 );
+always @(*)
     begin
-    case(BL_out)         // Selects the Signal from PD to pick the output
+    case(BL_out)         
     4'b0: result = val14;
     4'b1: result = inst_I15_I12;
 
     endcase
-    end
+end
 endmodule
 
 module X4_SE(
@@ -240,7 +241,7 @@ endmodule
 //------------------------------------------Register_File----------------------------------
 //------------------------------------------ID---------------------------------------------
 module ControlUnit (
-    output reg ID_S_bit, ID_load_instr, ID_RF_enable, ID_B_instr,
+    output reg ID_S_bit, ID_load_instr, ID_RF_enable, ID_B_instr,       // hacer el MUX para el RF_Enable
     ID_load_store_instr, ID_size, ID_BL_instr,
     output reg [1:0] ID_shift_AM,
     output reg [3:0] ID_alu_op,
@@ -339,6 +340,22 @@ always @(instruction) begin
         endcase
     end
 end        
+endmodule
+
+module MUX_RFenable(
+    input val1, 
+    input id_rf_e,
+    input s_rfenable,
+    output out_rf_enable
+);
+always @(*)
+    begin
+    case(s_rfenable)         
+    4'b0: out_rf_enable = id_rf_e;
+    4'b1: out_rf_enable = val1;
+
+    endcase
+end
 endmodule
 
 module Adder(output reg [31:0] NextPC, input [31:0] PC);
