@@ -161,6 +161,39 @@ module Multiplexer (
     end
 endmodule
 
+module MUX_DataMemory(
+    input [7:0] Addr,        
+    input [31:0] DataOut,    
+    input Sel,               
+    output reg [31:0] MuxOut 
+);
+
+    always @(*) begin
+        if (Sel)
+            MuxOut = DataOut;  // Select DataOut when Sel = 1
+        else
+            MuxOut = {24'b0, Addr};  // Zero-extend Addr to 32 bits when Sel = 0
+    end
+
+endmodule
+
+module MUX_Fetch (
+    input [7:0] In1,        
+    input [7:0] In2,         
+    input Sel,               
+    output reg [7:0] MuxOut  
+);
+
+    always @(*) begin
+        if (Sel)
+            MuxOut = In2;    // Select In2 when Sel = 1
+        else
+            MuxOut = In1;    
+    end
+
+endmodule
+
+
 module IF_ID (
     input Clk, 
     input Reset,
