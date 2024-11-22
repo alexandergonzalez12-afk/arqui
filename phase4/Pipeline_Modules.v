@@ -232,30 +232,33 @@ module ID_EX (
     output reg EX_B_instr,
     output reg [1:0] EX_shift_AM
 );
-    always @(posedge Clk) begin
-        if (Reset) begin
-            EX_S_instr <= 1'b0;
-            EX_alu_op <= 4'b0000;
-            EX_load_instr <= 1'b0;
-            EX_RF_enable <= 1'b0;
-            EX_load_store_instr <= 1'b0;
-            EX_size <= 1'b0;
-            EX_BL_instr <= 1'b0;
-            EX_shift_AM <= 2'b00;
-            EX_B_instr <= 0;
-        end else begin
-            EX_S_instr <= ID_S_instr;
-            EX_alu_op <= ID_alu_op;
-            EX_load_instr <= ID_load_instr;
-            EX_RF_enable <= ID_RF_enable;
-            EX_load_store_instr <= ID_load_store_instr;
-            EX_size <= ID_size;
-            EX_BL_instr <= ID_BL_instr;
-            EX_shift_AM <= ID_shift_AM;
-            EX_B_instr <= ID_B_instr;
-        end
+
+always @(posedge Clk or posedge Reset) begin
+    if (Reset) begin
+        EX_S_instr <= 1'b0;
+        EX_alu_op <= 4'b0000;
+        EX_load_instr <= 1'b0;
+        EX_RF_enable <= 1'b0;
+        EX_load_store_instr <= 1'b0;
+        EX_size <= 1'b0;
+        EX_BL_instr <= 1'b0;
+        EX_shift_AM <= 2'b00;
+        EX_B_instr <= 1'b0;
+    end else begin
+        EX_S_instr <= ID_S_instr;
+        EX_alu_op <= ID_alu_op;
+        EX_load_instr <= ID_load_instr;
+        EX_RF_enable <= ID_RF_enable;
+        EX_load_store_instr <= ID_load_store_instr;
+        EX_size <= ID_size;
+        EX_BL_instr <= ID_BL_instr;
+        EX_shift_AM <= ID_shift_AM;
+        EX_B_instr <= ID_B_instr;
     end
+end
+
 endmodule
+
 
 module EX_MEM (
     input Clk,
@@ -449,4 +452,36 @@ module EX_Stage (
         .Branch(Branch),
         .BranchLink(BranchLink)
     );
+endmodule
+
+module HazardUnit (
+    input [4:0] ID_Rn,             // Source register in ID stage
+    input [4:0] ID_Rm,             // Source register in ID stage
+    input [4:0] EX_Rd,             // Destination register in EX stage
+    input [4:0] MEM_Rd,            // Destination register in MEM stage
+    input EX_MemRead,              // EX stage memory read signal
+    input MEM_MemRead,             // MEM stage memory read signal
+    input Branch,                  // Branch signal from ConditionHandler
+    output reg stall,              // Signal to stall the pipeline
+    output reg flush               // Signal to flush the pipeline
+);
+
+always @(*) begin
+    // Default values
+    stall = 0;
+    flush = 0;
+
+    // checking for data hazards
+    if (EX_MemRead && (EX_Rd != 0) && ((EX_Rd == ID_Rn) || (EX_Rd == ID_Rm))) begin
+        stall = 1; // Stall pipeline if there's a data hazard
+    end else if (MEM_MemRead && (MEM_Rd != 0) && ((MEM_Rd == ID_Rn) || (MEM_Rd == ID_Rm))) begin
+        stall = 1; // if theres a hazard then a delay is created 
+    end
+
+    // control hazard
+    if (Branch) begin
+        flush = 1; // Flush pipeline on branch
+    end
+end
+
 endmodule
