@@ -82,18 +82,7 @@ module Three_port_register_file (
   input Clk, LE,                // Clock and Load Enable
   output [31:0] PA, PB, PD     // Register output values
 );
- 4'b0100: Z = r4;
-    4'b0101: Z = r5;
-    4'b0110: Z = r6;
-    4'b0111: Z = r7;
-    4'b1000: Z = r8;
-    4'b1001: Z = r9;
-    4'b1010: Z = r10;
-    4'b1011: Z = r11;
-    4'b1100: Z = r12;
-    4'b1101: Z = r13;
-    4'b1110: Z = r14;
-    4'b1111: Z = r15; 
+
   wire [31:0] R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15;
   wire [15:0] O;
 
@@ -103,18 +92,7 @@ module Three_port_register_file (
   // Instantiate Registers
   Register Regis0 (R0, PW, O[0], Clk);
   Register Regis1 (R1, PW, O[1], Clk);
-  Register Regis2 (R2, PW, O[2], Clk) 4'b0100: Z = r4;
-    4'b0101: Z = r5;
-    4'b0110: Z = r6;
-    4'b0111: Z = r7;
-    4'b1000: Z = r8;
-    4'b1001: Z = r9;
-    4'b1010: Z = r10;
-    4'b1011: Z = r11;
-    4'b1100: Z = r12;
-    4'b1101: Z = r13;
-    4'b1110: Z = r14;
-    4'b1111: Z = r15; ;
+  Register Regis2 (R2, PW, O[2], Clk);
   Register Regis3 (R3, PW, O[3], Clk);
   Register Regis4 (R4, PW, O[4], Clk);
   Register Regis5 (R5, PW, O[5], Clk);
@@ -139,68 +117,90 @@ endmodule
 module MUX_PA (
     input [31:0] pa, jump_EX_pa, jump_MEM_pa, jump_WB_pa,
     input [1:0] S_PA,
-    output [31:0] rf_pa
+    output reg [31:0] rf_pa  // Changed to reg for assignment in procedural block
 );
 
-always @(*)
-    begin
-    case(S_PA)         // Selects the Signal from PA to pick the output
-    4'b00: rf_pa = pa;
-    4'b01: rf_pa = jump_EX_pa;
-    4'b10: rf_pa = jump_MEM_pa;
-    4'b11: rf_pa = jump_WB_pa;
-
+always @(*) begin
+    case (S_PA)
+        2'b00: rf_pa = pa;
+        2'b01: rf_pa = jump_EX_pa;
+        2'b10: rf_pa = jump_MEM_pa;
+        2'b11: rf_pa = jump_WB_pa;
     endcase
 end
+
 endmodule
 
 module MUX_PB (
     input [31:0] pb, jump_EX_pb, jump_MEM_pb, jump_WB_pb,
     input [1:0] S_PB,
-    output [31:0] rf_pb
+    output reg [31:0] rf_pb  // Changed to reg
 );
-always @(*)
-    begin
-    case(S_PB)         // Selects the Signal from PB to pick the output
-    4'b00: rf_pb = pb;
-    4'b01: rf_pb = jump_EX_pb;
-    4'b10: rf_pb = jump_MEM_pb;
-    4'b11: rf_pb = jump_WB_pb;
- 	
+always @(*) begin
+    case (S_PB)
+        2'b00: rf_pb = pb;
+        2'b01: rf_pb = jump_EX_pb;
+        2'b10: rf_pb = jump_MEM_pb;
+        2'b11: rf_pb = jump_WB_pb;
     endcase
 end
+
 endmodule
 
 module MUX_PD (
     input [31:0] pd, jump_EX_pd, jump_MEM_pd, jump_WB_pd,
     input [1:0] S_PD,
-    output [31:0] rf_pd
+    output reg [31:0] rf_pd  // Changed to reg
 );
-always @(*)
-    begin
-    case(S_PD)         // Selects the Signal from PD to pick the output
-    4'b00: rf_pd = pd;
-    4'b01: rf_pd = jump_EX_pd;
-    4'b10: rf_pd = jump_MEM_pd;
-    4'b11: rf_pd = jump_WB_pd;
- 	
+always @(*) begin
+    case (S_PD)
+        2'b00: rf_pd = pd;
+        2'b01: rf_pd = jump_EX_pd;
+        2'b10: rf_pd = jump_MEM_pd;
+        2'b11: rf_pd = jump_WB_pd;
     endcase
 end
+
 endmodule
 
 module MUX_I15_I12 (
     input [3:0] inst_I15_I12, val14,
     input BL_out,
-    output [3:0] result
+    output reg [3:0] result  // Changed to reg
 );
-always @(*)
-    begin
-    case(BL_out)         
-    4'b0: result = val14;
-    4'b1: result = inst_I15_I12;
-
+always @(*) begin
+    case (BL_out)
+        1'b0: result = val14;
+        1'b1: result = inst_I15_I12;
     endcase
 end
+
+endmodule
+
+module SUM_RF (
+    input [7:0] instr_SE,
+    input [7:0] nextpc,
+    output reg [7:0] TA  // Changed to reg
+);
+always @(*) begin
+    TA = instr_SE + nextpc;
+end
+
+endmodule
+
+module MUX_RFenable (
+    input val1,
+    input id_rf_e,
+    input s_rfenable,
+    output reg out_rf_enable  // Changed to reg
+);
+always @(*) begin
+    case (s_rfenable)
+        1'b0: out_rf_enable = id_rf_e;
+        1'b1: out_rf_enable = val1;
+    endcase
+end
+
 endmodule
 
 module X4_SE(
@@ -229,15 +229,6 @@ module X4_SE(
     end
 endmodule
 
-module SUM_RF (
-    input [7:0] instr_SE,
-    input [7:0] nextpc, 
-    output [7:0] TA
-);
-always @(*) begin
-    TA = instr_SE + nextpc;
-end
-endmodule
 //------------------------------------------Register_File----------------------------------
 //------------------------------------------ID---------------------------------------------
 module ControlUnit (
@@ -342,21 +333,6 @@ always @(instruction) begin
 end        
 endmodule
 
-module MUX_RFenable(
-    input val1, 
-    input id_rf_e,
-    input s_rfenable,
-    output out_rf_enable
-);
-always @(*)
-    begin
-    case(s_rfenable)         
-    4'b0: out_rf_enable = id_rf_e;
-    4'b1: out_rf_enable = val1;
-
-    endcase
-end
-endmodule
 
 module Adder(output reg [31:0] NextPC, input [31:0] PC);
 always @(*) begin
@@ -365,8 +341,8 @@ end
 endmodule
 
 module Instruction_Memory_ROM (
-    input [7:0] Address,           
-    output reg [31:0] Instruction  
+    input [7:0] Address,
+    output reg [31:0] Instruction  // Changed to reg
 );
     reg [7:0] mem [0:255];
     always @(*) begin
@@ -741,68 +717,5 @@ always @(*) begin
         flush = 1; // Flush pipeline on branch
     end
 end
-
-endmodule
-// CONECTION
-module PipelineCPU (
-    input clk, reset,
-    output [31:0] pc,
-    output [31:0] instruction,
-    output [31:0] alu_result,
-    output branch_taken
-);
-    wire [31:0] next_pc, id_instruction, ex_alu_result;
-    wire [1:0] id_shift_AM, ex_shift_AM;
-    wire [3:0] id_alu_op, ex_alu_op;
-    wire id_s_bit, id_rf_enable, id_load_instr;
-    wire ex_rf_enable, ex_load_instr;
-
-    // PC and NextPC
-    PC pc_reg (.Qs(pc), .Ds(next_pc), .enable(~branch_taken), .clk(clk), .reset(reset));
-    Adder pc_adder (.NextPC(next_pc), .PC(pc));
-
-    // Instruction Memory
-    Instruction_Memory_ROM instruction_memory (.Address(pc[7:0]), .Instruction(instruction));
-
-    // IF/ID Pipeline Register
-    IF_ID if_id (.Clk(clk), .Reset(reset), .IF_ID_enable(~branch_taken), .IF_instruction(instruction), .ID_instruction(id_instruction));
-
-    // Control Unit
-    ControlUnit control (
-        .instruction(id_instruction),
-        .ID_shift_AM(id_shift_AM),
-        .ID_alu_op(id_alu_op),
-        .ID_S_bit(id_s_bit),
-        .ID_RF_enable(id_rf_enable),
-        .ID_load_instr(id_load_instr)
-    );
-
-    // ID/EX Pipeline Register
-    ID_EX id_ex (
-        .Clk(clk), .Reset(reset),
-        .ID_S_instr(id_s_bit), .ID_alu_op(id_alu_op),
-        .ID_RF_enable(id_rf_enable), .ID_load_instr(id_load_instr),
-        .EX_S_instr(ex_s_bit), .EX_alu_op(ex_alu_op),
-        .EX_RF_enable(ex_rf_enable), .EX_load_instr(ex_load_instr)
-    );
-
-    // EX Stage
-    EX_Stage ex_stage (
-        .clk(clk), .reset(reset),
-        .A(32'b0), .B(32'b0),  // Connect actual data from ID/EX registers
-        .alu_op(ex_alu_op),
-        .result(alu_result)
-    );
-
-    // Hazard Detection Unit
-    HazardUnit hazard_detection (
-        .ID_Rn(id_instruction[19:16]),
-        .ID_Rm(id_instruction[3:0]),
-        .EX_Rd(id_instruction[15:12]),
-        .EX_MemRead(1'b0),  // Simplified for now
-        .stall(stall_signal)
-    );
-
-    assign branch_taken = 0;  // Placeholder; connect actual branch signal
 
 endmodule

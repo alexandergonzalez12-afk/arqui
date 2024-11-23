@@ -82,18 +82,7 @@ module Three_port_register_file (
   input Clk, LE,                // Clock and Load Enable
   output [31:0] PA, PB, PD     // Register output values
 );
- 4'b0100: Z = r4;
-    4'b0101: Z = r5;
-    4'b0110: Z = r6;
-    4'b0111: Z = r7;
-    4'b1000: Z = r8;
-    4'b1001: Z = r9;
-    4'b1010: Z = r10;
-    4'b1011: Z = r11;
-    4'b1100: Z = r12;
-    4'b1101: Z = r13;
-    4'b1110: Z = r14;
-    4'b1111: Z = r15; 
+
   wire [31:0] R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15;
   wire [15:0] O;
 
@@ -103,18 +92,7 @@ module Three_port_register_file (
   // Instantiate Registers
   Register Regis0 (R0, PW, O[0], Clk);
   Register Regis1 (R1, PW, O[1], Clk);
-  Register Regis2 (R2, PW, O[2], Clk) 4'b0100: Z = r4;
-    4'b0101: Z = r5;
-    4'b0110: Z = r6;
-    4'b0111: Z = r7;
-    4'b1000: Z = r8;
-    4'b1001: Z = r9;
-    4'b1010: Z = r10;
-    4'b1011: Z = r11;
-    4'b1100: Z = r12;
-    4'b1101: Z = r13;
-    4'b1110: Z = r14;
-    4'b1111: Z = r15; ;
+  Register Regis2 (R2, PW, O[2], Clk);
   Register Regis3 (R3, PW, O[3], Clk);
   Register Regis4 (R4, PW, O[4], Clk);
   Register Regis5 (R5, PW, O[5], Clk);
@@ -130,9 +108,9 @@ module Three_port_register_file (
   Register Regis15 (R15, PC, 1'b1, Clk);
 
   // Instantiate Multiplexers for outputs
-  Mux_RF MUX1 (PA, RA, R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15);
-  Mux_RF MUX2 (PB, RB, R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15);
-  Mux_RF MUX3 (PD, RD, R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15);
+  Multiplexer MUX1 (PA, RA, R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15);
+  Multiplexer MUX2 (PB, RB, R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15);
+  Multiplexer MUX3 (PD, RD, R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15);
 
 endmodule
 

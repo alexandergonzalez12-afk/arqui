@@ -49,20 +49,9 @@ module tb_pipeline();
     wire [1:0] S_PA, S_PB, S_PD;
 
     // Instruction decoding signals
-    wire [3:0] RA, RB, RD, RW;
+    wire [4:0] RA, RB, RD, RW; // Updated to 5 bits
     wire [31:0] PW;
     wire LE;
-
-    // MUX_I15_I12 Signals
-    wire [3:0] inst_I15_I12;
-    wire [3:0] val14;
-    wire BL_out;
-    wire [3:0] mux_i15_i12_result;
-
-    // X4_SE and SUM_RF Signals
-    wire [23:0] instr_I23_I0;
-    wire [7:0] instr_SE;
-    wire [7:0] TA;
 
     // Temporary variables for reading memory
     reg [7:0] Address;
@@ -165,10 +154,10 @@ module tb_pipeline();
 
     // Instantiate HazardUnit
     HazardUnit hazard_unit (
-        .ID_Rn(RA),
-        .ID_Rm(RB),
-        .EX_Rd(RD),
-        .MEM_Rd(RW),
+        .ID_Rn(RA[4:0]),   // Use only the lower 5 bits of RA
+        .ID_Rm(RB[4:0]),   // Use only the lower 5 bits of RB
+        .EX_Rd(RD[4:0]),   // Use only the lower 5 bits of RD
+        .MEM_Rd(RW[4:0]),  // Use only the lower 5 bits of RW
         .EX_MemRead(EX_MemRead),
         .MEM_MemRead(MEM_MemRead),
         .Branch(Branch),
