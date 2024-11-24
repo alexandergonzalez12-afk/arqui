@@ -89,7 +89,7 @@ module tb_pipeline();
     initial begin
         $monitor("Time=%0t | PC=%0d | Instr=%b | ALU Result=%b | Flags: N=%b Z=%b C=%b V=%b | Branch=%b | Stall=%b | Flush=%b",
                  $time, pc_out, instruction, ALU_result, N, Z, C, V, Branch, stall, flush);
-        #100 $finish;
+        #60 $finish;
     end
 
     // Instantiate PC
