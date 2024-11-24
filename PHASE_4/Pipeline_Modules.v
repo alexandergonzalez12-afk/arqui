@@ -350,6 +350,34 @@ module Instruction_Memory_ROM (
     end
 endmodule
 
+module Data_Memory_RAM (output reg [31:0] data_out, input [7:0] address, input [31:0] data_in, input [1:0] size, input rw, input enable);
+
+  // Memory array "Mem" to hold 256 bytes, each element is 8 bits
+  reg [7:0] Mem [0:255];
+
+  // Always block to handle both read and write operations
+  always @(*) begin
+    // Check the condition for read or write operation
+    if (rw == 0) begin  // Read operation if rw  =0 then check for size
+      if (size == 0) begin  // If size =0 returns a  the 32-bit value
+        data_out <= {24'b0, Mem[address]};  // Return a 32-bit value with only the least significant byte little endian
+      end else if (size == 1) begin  // Read a word (4 bytes)
+        data_out <= {Mem[address], Mem[address+1], Mem[address+2], Mem[address+3]};  // Return 4 consecutive bytes
+      end
+    end else if (rw == 1 && enable == 1) begin  // Write operation
+      if (size == 0) begin  // Write a single byte
+        Mem[address] <= data_in[7:0];  // Write only the least significant byte of data_in
+      end else if (size == 1) begin  // Write a word (4 bytes)
+        Mem[address] <= data_in[31:24];      // Write the most significant byte
+        Mem[address+1] <= data_in[23:16];    // Write the next byte
+        Mem[address+2] <= data_in[15:8];     // Write the next byte
+        Mem[address+3] <= data_in[7:0];      // Write the least significant byte
+      end
+    end
+  end
+
+endmodule
+
 module PC (
     output reg [31:0] Qs, input [31:0] Ds, input enable, clk, reset
 );

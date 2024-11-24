@@ -70,12 +70,26 @@ module tb_pipeline();
             $fclose(fi);  
         end
     end
+      
 
-    // Clock Generation
-    initial begin
-        clk = 0;
-        forever #2 clk = ~clk;  // Toggle clk every 2 time units
-    end
+    // initial begin
+    //     // Preload the memory with the content inside the file
+    //     fi = $fopen("file_precarga_fase_I.txt", "r");  // Open the file in read mode
+    //     if (fi) begin
+    //     Address = 8'b00000000;                       // Start at address 0
+    //     while (!$feof(fi)) begin                     // Loop until end of file
+    //         code = $fscanf(fi, "%b", DataIn);          // Read 8-bit data from the file
+    //         ram_inst.Mem[Address] = DataIn;            // Store the data in the RAM memory
+    //         Address = Address + 1;                     // Increment address for next data
+    //     end
+    //     $fclose(fi);                                 // Close the input file
+    //     end 
+
+        // Clock Generation
+        initial begin
+            clk = 0;
+            forever #2 clk = ~clk;  // Toggle clk every 2 time units
+        end
 
     // Simulation Control
     initial begin
@@ -112,6 +126,16 @@ module tb_pipeline();
         .Address(pc_out[7:0]),
         .Instruction(instruction)
     );
+
+    // Instantiate Instruction Memory
+    // Data_Memory_RAM ram_inst (
+    //     .data_out(DataOut), 
+    //     .address(Address), 
+    //     .data_in(DataIn), 
+    //     .size(Size), 
+    //     .rw(RW), 
+    //     .enable(E)
+    //     );
 
     // Instantiate Control Unit
     ControlUnit controlunit (
