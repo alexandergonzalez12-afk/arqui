@@ -108,77 +108,99 @@ module Three_port_register_file (
   Register Regis15 (R15, PC, 1'b1, Clk);
 
   // Instantiate Multiplexers for outputs
-  Multiplexer MUX1 (PA, RA, R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15);
-  Multiplexer MUX2 (PB, RB, R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15);
-  Multiplexer MUX3 (PD, RD, R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15);
+  Mux_RF MUX1 (PA, RA, R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15);
+  Mux_RF MUX2 (PB, RB, R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15);
+  Mux_RF MUX3 (PD, RD, R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15);
 
 endmodule
 
 module MUX_PA (
     input [31:0] pa, jump_EX_pa, jump_MEM_pa, jump_WB_pa,
     input [1:0] S_PA,
-    output [31:0] rf_pa
+    output reg [31:0] rf_pa  // Changed to reg for assignment in procedural block
 );
 
-always @(*)
-    begin
-    case(S_PA)         // Selects the Signal from PA to pick the output
-    4'b00: rf_pa = pa;
-    4'b01: rf_pa = jump_EX_pa;
-    4'b10: rf_pa = jump_MEM_pa;
-    4'b11: rf_pa = jump_WB_pa;
-
+always @(*) begin
+    case (S_PA)
+        2'b00: rf_pa = pa;
+        2'b01: rf_pa = jump_EX_pa;
+        2'b10: rf_pa = jump_MEM_pa;
+        2'b11: rf_pa = jump_WB_pa;
     endcase
 end
+
 endmodule
 
 module MUX_PB (
     input [31:0] pb, jump_EX_pb, jump_MEM_pb, jump_WB_pb,
     input [1:0] S_PB,
-    output [31:0] rf_pb
+    output reg [31:0] rf_pb  // Changed to reg
 );
-always @(*)
-    begin
-    case(S_PB)         // Selects the Signal from PB to pick the output
-    4'b00: rf_pb = pb;
-    4'b01: rf_pb = jump_EX_pb;
-    4'b10: rf_pb = jump_MEM_pb;
-    4'b11: rf_pb = jump_WB_pb;
- 	
+always @(*) begin
+    case (S_PB)
+        2'b00: rf_pb = pb;
+        2'b01: rf_pb = jump_EX_pb;
+        2'b10: rf_pb = jump_MEM_pb;
+        2'b11: rf_pb = jump_WB_pb;
     endcase
 end
+
 endmodule
 
 module MUX_PD (
     input [31:0] pd, jump_EX_pd, jump_MEM_pd, jump_WB_pd,
     input [1:0] S_PD,
-    output [31:0] rf_pd
+    output reg [31:0] rf_pd  // Changed to reg
 );
-always @(*)
-    begin
-    case(S_PD)         // Selects the Signal from PD to pick the output
-    4'b00: rf_pd = pd;
-    4'b01: rf_pd = jump_EX_pd;
-    4'b10: rf_pd = jump_MEM_pd;
-    4'b11: rf_pd = jump_WB_pd;
- 	
+always @(*) begin
+    case (S_PD)
+        2'b00: rf_pd = pd;
+        2'b01: rf_pd = jump_EX_pd;
+        2'b10: rf_pd = jump_MEM_pd;
+        2'b11: rf_pd = jump_WB_pd;
     endcase
 end
+
 endmodule
 
 module MUX_I15_I12 (
     input [3:0] inst_I15_I12, val14,
     input BL_out,
-    output [3:0] result
+    output reg [3:0] result  // Changed to reg
 );
-always @(*)
-    begin
-    case(BL_out)         
-    4'b0: result = val14;
-    4'b1: result = inst_I15_I12;
-
+always @(*) begin
+    case (BL_out)
+        1'b0: result = val14;
+        1'b1: result = inst_I15_I12;
     endcase
 end
+
+endmodule
+
+module SUM_RF (
+    input [7:0] instr_SE,
+    input [7:0] nextpc,
+    output reg [7:0] TA  // Changed to reg
+);
+always @(*) begin
+    TA = instr_SE + nextpc;
+end
+
+endmodule
+
+module MUX_RFenable (
+    input val1,
+    input id_rf_e,
+    input s_rfenable,
+    output reg out_rf_enable  // Changed to reg
+);
+always @(*) begin
+    case (s_rfenable)
+        1'b0: out_rf_enable = id_rf_e;
+        1'b1: out_rf_enable = val1;
+    endcase
+end
+
 endmodule
 
 module X4_SE(
@@ -207,15 +229,6 @@ module X4_SE(
     end
 endmodule
 
-module SUM_RF (
-    input [7:0] instr_SE,
-    input [7:0] nextpc, 
-    output [7:0] TA
-);
-always @(*) begin
-    TA = instr_SE + nextpc;
-end
-endmodule
 //------------------------------------------Register_File----------------------------------
 //------------------------------------------ID---------------------------------------------
 module ControlUnit (
@@ -320,21 +333,6 @@ always @(instruction) begin
 end        
 endmodule
 
-module MUX_RFenable(
-    input val1, 
-    input id_rf_e,
-    input s_rfenable,
-    output out_rf_enable
-);
-always @(*)
-    begin
-    case(s_rfenable)         
-    4'b0: out_rf_enable = id_rf_e;
-    4'b1: out_rf_enable = val1;
-
-    endcase
-end
-endmodule
 
 module Adder(output reg [31:0] NextPC, input [31:0] PC);
 always @(*) begin
@@ -343,8 +341,8 @@ end
 endmodule
 
 module Instruction_Memory_ROM (
-    input [7:0] Address,           
-    output reg [31:0] Instruction  
+    input [7:0] Address,
+    output reg [31:0] Instruction  // Changed to reg
 );
     reg [7:0] mem [0:255];
     always @(*) begin
@@ -633,7 +631,7 @@ module EX_Stage (
     input [31:0] instruction,   // Current instruction
     input [31:0] Rm,            // Register Rm input for Shifter
     input [11:0] I,             // Immediate input for Shifter
-    input [1:0] AM,             // Addressing Mode for Shifter
+    input [1:0] AM,             // Addressing Mode fxxor Shifter
     output [31:0] result,       // ALU result
     output [31:0] shifted_value, // Shifter output
     output N, Z, C, V,          // Flags
