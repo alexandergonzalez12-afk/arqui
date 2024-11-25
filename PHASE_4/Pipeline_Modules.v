@@ -350,7 +350,12 @@ module Instruction_Memory_ROM (
     end
 endmodule
 
-module Data_Memory_RAM (output reg [31:0] data_out, input [7:0] address, input [31:0] data_in, input [1:0] size, input rw, input enable);
+module Data_Memory_RAM (output reg [31:0] data_out,
+ input [7:0] address,
+  input [31:0] data_in,
+   input [1:0] size,
+    input rw,
+     input enable);
 
   // Memory array "Mem" to hold 256 bytes, each element is 8 bits
   reg [7:0] Mem [0:255];
