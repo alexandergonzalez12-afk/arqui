@@ -148,22 +148,6 @@ end
 
 endmodule
 
-module MUX_PD (
-    input [31:0] pd, jump_EX_pd, jump_MEM_pd, jump_WB_pd,
-    input [1:0] S_PD,
-    output reg [31:0] rf_pd  // Changed to reg
-);
-always @(*) begin
-    case (S_PD)
-        2'b00: rf_pd = pd;
-        2'b01: rf_pd = jump_EX_pd;
-        2'b10: rf_pd = jump_MEM_pd;
-        2'b11: rf_pd = jump_WB_pd;
-    endcase
-end
-
-endmodule
-
 module MUX_I15_I12 (
     input [3:0] inst_I15_I12, val14,
     input BL_out,
@@ -307,6 +291,21 @@ module ALU (
         N = result[31];
         Z = (result == 32'b0);
         V = ((A[31] == B[31]) && (result[31] != A[31]));
+    end
+endmodule
+
+module MUX_ALU (
+    input [31:0] alu_result,
+    input [7:0] Next_PC,
+    input BL_OUT,
+
+    output reg [7:0] DM_address
+);
+    always @(*) begin
+        if (BL_OUT)
+            DM_address = Next_PC;    
+        else
+            DM_address = alu_result;    //check if can caught an issue due to having different bit sizes 
     end
 endmodule
 
@@ -535,7 +534,18 @@ module IF_ID (
     input reset,
     input clk,
     input [31:0] instr_in,
-    output reg [31:0] instr_out
+    input signal_Hazard,                //added input signals
+    input [7:0] next_pc,
+
+    output reg [31:0] instr_out,
+    output reg [23:0] instr_i23_i0,    // added output signals
+    output reg [7:0] Next_PC,
+    output reg [3:0] instr_i3_i0,
+    output reg [3:0] instr_i19_i16,
+    output reg [3:0] instr_i31_i28,
+    output reg [11:0] instr_i11_i0,
+    output reg [3:0] instr_i15_i12
+
 );
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -559,6 +569,13 @@ module ID_EX (
     input ID_BL,
     input ID_B,
     input RF_ENABLE,
+    input BL_OUT,                   //added conections
+    input [7:0] NEXT_PC,
+    input [31:0] MUX_PA,
+    input [31:0] MUX_PB,
+    input [31:0] PD,
+    input [3:0] MUX_INSTR_I15_I12,
+    input [11:0] INSTR_I11_I0       // finished added conection
 
     output reg [3:0] id_alu_op,
     output reg id_load,
@@ -569,7 +586,15 @@ module ID_EX (
     output reg store_cc,
     output reg id_bl,
     output reg id_b,
-    output reg rf_enable
+    output reg rf_enable,
+    output reg bl_out,              //added conections
+    output reg [7:0] next_pc,
+    output reg [31:0] mux_pa,
+    output reg [31:0] mux_pb,
+    output reg [31:0] mux_pc,
+    output reg [31:0] pd,
+    output reg [3:0] mux_instr_i15_i12,
+    output reg [11:0] instr_i11_i0  // finished added conection
 );
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -606,12 +631,18 @@ module EX_MEM(
     input ID_MEM_SIZE,
     input ID_MEM_ENABLE,
     input RF_ENABLE,
+    input [31:0] PD,
+    input [7:0] DM_ADDRESS,
+    input [3:0] MUX_INSTR_I15_I12,
 
     output reg id_load,
     output reg id_mem_size,
     output reg id_mem_write,
     output reg id_mem_enable,
-    output reg rf_enable
+    output reg rf_enable,
+    output reg [31:0] pd,
+    output reg [7:0] dm_address,
+    output reg [3:0] mux_instr_i15_i12
 );
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -634,7 +665,11 @@ module MEM_WB (
     input clk,
     input reset,
     input RF_ENABLE,
-    output reg rf_enable
+    input [31:0] MUX_DATAMEMORY,
+    input [3:0] MUX_INSTR_I15_I12,
+    output reg rf_enable,
+    output reg [3:0] mux_instr_i15_i12,
+    output reg [31:0] mux_datamemory
 );
     always @(posedge clk or posedge reset) begin
         if (reset) begin
