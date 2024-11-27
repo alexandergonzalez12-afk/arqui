@@ -149,13 +149,13 @@ end
 endmodule
 
 module MUX_I15_I12 (
-    input [3:0] inst_I15_I12, val14,
+    input [3:0] inst_I15_I12, 
     input BL_out,
     output reg [3:0] result  // Changed to reg
 );
 always @(*) begin
     case (BL_out)
-        1'b0: result = val14;
+        1'b0: result = 1'b1110;
         1'b1: result = inst_I15_I12;
     endcase
 end
@@ -174,7 +174,6 @@ end
 endmodule
 
 module MUX_RFenable (
-    input val1,
     input id_rf_e,
     input s_rfenable,
     output reg out_rf_enable  // Changed to reg
@@ -182,7 +181,7 @@ module MUX_RFenable (
 always @(*) begin
     case (s_rfenable)
         1'b0: out_rf_enable = id_rf_e;
-        1'b1: out_rf_enable = val1;
+        1'b1: out_rf_enable = 1'b1;
     endcase
 end
 
@@ -214,7 +213,14 @@ module X4_SE(
     end
 endmodule
 
-module Data_Memory_RAM (output reg [31:0] data_out, input [7:0] address, input [31:0] data_in, input [1:0] size, input rw, input enable);
+module Data_Memory_RAM (
+    output reg [31:0] data_out, 
+    input [7:0] address, 
+    input [31:0] data_in, 
+    input [1:0] size, 
+    input rw, 
+    input enable
+    );
 
   // Memory array "Mem" to hold 256 bytes, each element is 8 bits
   reg [7:0] Mem [0:255];
@@ -259,17 +265,17 @@ module MUX_DataMemory(
 endmodule
 
 module MUX_Fetch (
-    input [7:0] In1,        
-    input [7:0] In2,         
+    input [7:0] SUMOUT,        
+    input [7:0] TA,         
     input Sel,               
     output reg [7:0] MuxOut  
 );
 
     always @(*) begin
         if (Sel)
-            MuxOut = In2;    // Select In2 when Sel = 1
+            MuxOut = TA;    // Select In2 when Sel = 1
         else
-            MuxOut = In1;    
+            MuxOut = SUMOUT;    
     end
 
 endmodule
@@ -277,6 +283,7 @@ endmodule
 module ALU (
     input [31:0] A, B,
     input [3:0] alu_op,
+    input C_IN,
     output reg [31:0] result,
     output reg N, Z, C, V
 );
@@ -313,6 +320,7 @@ module FlagRegister (
     input clk,
     input reset,
     input update,
+    input STORE_CC,             //added signal store cc
     input N_in, Z_in, C_in, V_in,
     output reg N, Z, C, V
 );
@@ -334,16 +342,19 @@ endmodule
 module ConditionHandler (
     input [3:0] ConditionCode,
     input N, Z, C, V,
-    input [31:0] instruction,
+    input [31:28] instruction,
+    input SIG_B,
+    input SIG_BL,
     output reg Branch,
-    output reg BranchLink
+    output reg BranchLink,
+
 );
     always @(*) begin
         Branch = 1'b0;
         BranchLink = 1'b0;
-        if (instruction[27:25] == 3'b101) begin
+        if (instruction == 3'b0101) begin
             Branch = 1'b1;
-            BranchLink = instruction[24];
+            BranchLink = instruction[24];           //double check this implementation
         end
     end
 endmodule
@@ -375,7 +386,8 @@ end
 
 endmodule
 
-module HazardUnit (
+module HazardUnit (         // double check this    must have 10 inputs and 4 outputs look at diagram!
+
     input [4:0] ID_Rn,             // Source register in ID stage
     input [4:0] ID_Rm,             // Source register in ID stage
     input [4:0] EX_Rd,             // Destination register in EX stage
