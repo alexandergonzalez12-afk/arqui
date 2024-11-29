@@ -387,18 +387,32 @@ end
 endmodule
 
 module HazardUnit (         // double check this    must have 10 inputs and 4 outputs look at diagram!
-
-    input [4:0] ID_Rn,             // Source register in ID stage
-    input [4:0] ID_Rm,             // Source register in ID stage
-    input [4:0] EX_Rd,             // Destination register in EX stage
-    input [4:0] MEM_Rd,            // Destination register in MEM stage
-    input EX_MemRead,              // EX stage memory read signal
-    input MEM_MemRead,             // MEM stage memory read signal
-    input Branch,                  // Branch signal from ConditionHandler
-    output reg stall,              // Signal to stall the pipeline
-    output reg flush               // Signal to flush the pipeline
+    input ID_LOAD,                   // Control Unit Signal Load
+    input ID_Enable_EX,              // Control Unit Signal E_EX
+    input ID_Enable_MEM,             // Control Unit Signal E_MEM
+    input ID_Enable_WB,              // Control Unit Signal E_WB
+    input INSTR_RA,                  // checks instruction on RA
+    input INSTR_RB,                  // checks instruction on RB
+    input INSTR_RD,                  // checks instruction on RD
+    input MUX_INSTR_I15_I12_EX,      // checks instruction of MUX on stage EX 
+    input MUX_INSTR_I15_I12_MEM,     // checks instruction of MUX on stage MEM
+    input MUX_INSTR_I15_I12_WB,      // checks instruction of MUX on stage WB
+    output Enable_IF_ID,             // Enables Stage IF_ID 
+    output [1:0] S_MUX_PA,           // Signals MUX_PA for a jump  
+    output [1:0] S_MUX_PB,           // Signals MUX_PB for a jump 
+    output S_MUX_ControlUnit         // Signals Control Unit when Hazard
+    
+    //input [4:0] ID_Rn,             // Source register in ID stage
+    //input [4:0] ID_Rm,             // Source register in ID stage
+    //input [4:0] EX_Rd,             // Destination register in EX stage
+    //input [4:0] MEM_Rd,            // Destination register in MEM stage
+    //input EX_MemRead,              // EX stage memory read signal
+    //input MEM_MemRead,             // MEM stage memory read signal
+    //input Branch,                  // Branch signal from ConditionHandler
+    //output reg stall,              // Signal to stall the pipeline
+    //output reg flush               // Signal to flush the pipeline
 );
-
+/*
 always @(*) begin
     // Default values
     stall = 0;
@@ -416,6 +430,7 @@ always @(*) begin
         flush = 1; // Flush pipeline on branch
     end
 end
+*/
 
 endmodule
 
