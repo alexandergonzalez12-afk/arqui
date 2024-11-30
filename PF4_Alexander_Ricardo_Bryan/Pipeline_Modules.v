@@ -402,54 +402,78 @@ end
 
 endmodule
 
-module HazardUnit (         
-    input ID_LOAD,                   // Control Unit Signal Load
-    input ID_Enable_EX,              // Control Unit Signal E_EX
-    input ID_Enable_MEM,             // Control Unit Signal E_MEM
-    input ID_Enable_WB,              // Control Unit Signal E_WB
-    input INSTR_RA,                  // checks instruction on RA
-    input INSTR_RB,                  // checks instruction on RB
-    input INSTR_RD,                  // checks instruction on RD
-    input MUX_INSTR_I15_I12_EX,      // checks instruction of MUX on stage EX 
-    input MUX_INSTR_I15_I12_MEM,     // checks instruction of MUX on stage MEM
-    input MUX_INSTR_I15_I12_WB,      // checks instruction of MUX on stage WB
-    output Enable_IF_ID,             // Enables Stage IF_ID 
-    output [1:0] S_MUX_PA,           // Signals MUX_PA for a jump  
-    output [1:0] S_MUX_PB,           // Signals MUX_PB for a jump 
-    output [1:0] S_MUX_PD,
-    output S_MUX_ControlUnit         // Signals Control Unit when Hazard
-
-    //input [4:0] ID_Rn,             // Source register in ID stage
-    //input [4:0] ID_Rm,             // Source register in ID stage
-    //input [4:0] EX_Rd,             // Destination register in EX stage
-    //input [4:0] MEM_Rd,            // Destination register in MEM stage
-    //input EX_MemRead,              // EX stage memory read signal
-    //input MEM_MemRead,             // MEM stage memory read signal
-    //input Branch,                  // Branch signal from ConditionHandler
-    //output reg stall,              // Signal to stall the pipeline
-    //output reg flush               // Signal to flush the pipeline
+module HazardUnit(
+    input EX_RF_enable, MEM_RF_enable, WB_RF_enable,    //  must be enable to foward if RF_Enable from the register is enabled
+    input [4:0] EX_Rd, MEM_Rd, WB_Rd,                   // Stages to be fowarded has instructions from I15-I12
+    input [4:0] ID_Rm, ID_Rn, ID_Rg,                    // Rm == Rb, Rn == Ra, Rg == Rd
+    input EX_Load,                                      // if EX_Load is 0 it stores if its 1 it loads
+    output reg [1:0] forward_Rm, forward_Rn, forward_Rg
 );
-/*
-always @(*) begin
-    // Default values
-    stall = 0;
-    flush = 0;
+    always @(*) begin
+        // Forwarding for Rm                signal will be sent to MUX_PB
+        if (EX_RF_enable && (ID_Rm == EX_Rd))
+            forward_Rm = 2'b01; // Forward from EX stage
+        else if (MEM_RF_enable && (ID_Rm == MEM_Rd))
+            forward_Rm = 2'b10; // Forward from MEM stage
+        else if (WB_RF_enable && (ID_Rm == WB_Rd))
+            forward_Rm = 2'b11; // Forward from WB stage
+        else
+            forward_Rm = 2'b00; // No forwarding
 
-    // checking for data hazards
-    if (EX_MemRead && (EX_Rd != 0) && ((EX_Rd == ID_Rn) || (EX_Rd == ID_Rm))) begin
-        stall = 1; // Stall pipeline if there's a data hazard
-    end else if (MEM_MemRead && (MEM_Rd != 0) && ((MEM_Rd == ID_Rn) || (MEM_Rd == ID_Rm))) begin
-        stall = 1; // if theres a hazard then a delay is created 
+        // Forwarding for Rn                signal will be sent to MUX_PA
+        if (EX_RF_enable && (ID_Rn == EX_Rd))
+            forward_Rn = 2'b01; // Forward from EX stage
+        else if (MEM_RF_enable && (ID_Rn == MEM_Rd))
+            forward_Rn = 2'b10; // Forward from MEM stage
+        else if (WB_RF_enable && (ID_Rn == WB_Rd))
+            forward_Rn = 2'b11; // Forward from WB stage
+        else
+            forward_Rn = 2'b00; // No forwarding
+
+        // Forwarding for Rg                signal will be sent to MUX_PD
+        if (EX_RF_enable && (ID_Rg == EX_Rd))
+            forward_Rg = 2'b01; // Forward from EX stage
+        else if (MEM_RF_enable && (ID_Rg == MEM_Rd))
+            forward_Rg = 2'b10; // Forward from MEM stage
+        else if (WB_RF_enable && (ID_Rg == WB_Rd))
+            forward_Rg = 2'b11; // Forward from WB stage
+        else
+            forward_Rg = 2'b00; // No forwarding
     end
 
-    // control hazard
-    if (Branch) begin
-        flush = 1; // Flush pipeline on branch
-    end
-end
-*/
+    always @(*) begin
+        // Forwarding for Rm                signal will be sent to MUX_PB
+        if (EX_Load && (ID_Rm == EX_Rd))
+            forward_Rm = 2'b01; // Forward from EX stage
+        else if (MEM_RF_enable && (ID_Rm == MEM_Rd))
+            forward_Rm = 2'b10; // Forward from MEM stage
+        else if (WB_RF_enable && (ID_Rm == WB_Rd))
+            forward_Rm = 2'b11; // Forward from WB stage
+        else
+            forward_Rm = 2'b00; // No forwarding
 
+        // Forwarding for Rn                signal will be sent to MUX_PA
+        if (EX_Load && (ID_Rn == EX_Rd))
+            forward_Rn = 2'b01; // Forward from EX stage
+        else if (MEM_RF_enable && (ID_Rn == MEM_Rd))
+            forward_Rn = 2'b10; // Forward from MEM stage
+        else if (WB_RF_enable && (ID_Rn == WB_Rd))
+            forward_Rn = 2'b11; // Forward from WB stage
+        else
+            forward_Rn = 2'b00; // No forwarding
+
+        // Forwarding for Rg                signal will be sent to MUX_PD
+        if (EX_Load && (ID_Rg == EX_Rd))
+            forward_Rg = 2'b01; // Forward from EX stage
+        else if (MEM_RF_enable && (ID_Rg == MEM_Rd))
+            forward_Rg = 2'b10; // Forward from MEM stage
+        else if (WB_RF_enable && (ID_Rg == WB_Rd))
+            forward_Rg = 2'b11; // Forward from WB stage
+        else
+            forward_Rg = 2'b00; // No forwarding
+    end
 endmodule
+
 
 //------------------------PHASE 3 MODULES -----------------------------
 module ControlUnit(
