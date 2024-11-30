@@ -669,13 +669,13 @@ module ID_EX (
     input ID_BL,
     input ID_B,
     input RF_ENABLE,
-    input BL_OUT,                   //added conections
+    input BL_OUT,                   //added connections
     input [7:0] NEXT_PC,
     input [31:0] MUX_PA,
     input [31:0] MUX_PB,
     input [31:0] PD,
     input [3:0] MUX_INSTR_I15_I12,
-    input [11:0] INSTR_I11_I0       // finished added conection
+    input [11:0] INSTR_I11_I0,      // finished added connection
 
     output reg [3:0] id_alu_op,
     output reg id_load,
@@ -687,14 +687,13 @@ module ID_EX (
     output reg id_bl,
     output reg id_b,
     output reg rf_enable,
-    output reg bl_out,              //added conections
+    output reg bl_out,              //added connections
     output reg [7:0] next_pc,
     output reg [31:0] mux_pa,
     output reg [31:0] mux_pb,
-    output reg [31:0] mux_pc,
     output reg [31:0] pd,
     output reg [3:0] mux_instr_i15_i12,
-    output reg [11:0] instr_i11_i0  // finished added conection
+    output reg [11:0] instr_i11_i0  // finished added connection
 );
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -708,6 +707,13 @@ module ID_EX (
             id_bl <= 0;
             id_b <= 0;
             rf_enable <= 0;
+            bl_out <= 0;              //added connections
+            next_pc <= 8'b0;
+            mux_pa <= 32'b0;
+            mux_pb <= 32'b0;
+            pd <= 32'b0;
+            mux_instr_i15_i12 <= 4'b0;
+            instr_i11_i0 <= 12'b0;    // finished added connection
         end else begin
             id_alu_op <= ID_ALU_OP;
             id_load <= ID_LOAD;
@@ -719,6 +725,13 @@ module ID_EX (
             id_bl <= ID_BL;
             id_b <= ID_B;
             rf_enable <= RF_ENABLE;
+            bl_out <= BL_OUT;              //added connections
+            next_pc <= NEXT_PC;
+            mux_pa <= MUX_PA;
+            mux_pb <= MUX_PB;
+            pd <= PD;
+            mux_instr_i15_i12 <= MUX_INSTR_I15_I12;
+            instr_i11_i0 <= INSTR_I11_I0;    // finished added connection
         end
     end
 endmodule
@@ -751,12 +764,18 @@ module EX_MEM(
             id_mem_size <= 0;
             id_mem_enable <= 0;
             rf_enable <= 0;
+            pd <= 32'b0;
+            dm_address <= 8'b0;
+            mux_instr_i15_i12 <= 4'b0;
         end else begin
             id_load <= ID_LOAD;
             id_mem_write <= ID_MEM_WRITE;
             id_mem_size <= ID_MEM_SIZE;
             id_mem_enable <= ID_MEM_ENABLE;
             rf_enable <= RF_ENABLE;
+            pd <= PD;
+            dm_address <= DM_ADDRESS;
+            mux_instr_i15_i12 <= MUX_INSTR_I15_I12;
         end
     end
 endmodule
@@ -774,8 +793,12 @@ module MEM_WB (
     always @(posedge clk or posedge reset) begin
         if (reset) begin
             rf_enable <= 0;
+            mux_instr_i15_i12 <= 4'b0;
+            mux_datamemory <= 32'b0;
         end else begin
             rf_enable <= RF_ENABLE;
+            mux_instr_i15_i12 <= MUX_INSTR_I15_I12;
+            mux_datamemory <= MUX_DATAMEMORY;
         end
     end
 endmodule
