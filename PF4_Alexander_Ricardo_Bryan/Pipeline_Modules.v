@@ -403,76 +403,60 @@ end
 endmodule
 
 module HazardUnit(
-    input EX_RF_enable, MEM_RF_enable, WB_RF_enable,    //  must be enable to foward if RF_Enable from the register is enabled
-    input [4:0] EX_Rd, MEM_Rd, WB_Rd,                   // Stages to be fowarded has instructions from I15-I12
-    input [4:0] ID_Rm, ID_Rn, ID_Rg,                    // Rm == Rb, Rn == Ra, Rg == Rd
-    input EX_Load,                                      // if EX_Load is 0 it stores if its 1 it loads
-    output reg [1:0] forward_Rm, forward_Rn, forward_Rg
+    input EX_RF_enable, MEM_RF_enable, WB_RF_enable,    // Register File Enable signals
+    input [4:0] EX_Rd, MEM_Rd, WB_Rd,                   // Destination registers in each stage
+    input [4:0] ID_Rm, ID_Rn, ID_Rg,                    // Source registers in the ID stage
+    input EX_Load,                                      // Load instruction signal in EX stage
+    output reg PC_Enable, IF_IF_Enable,                 // Control signals for stalling
+    output reg [1:0] forward_Rm, forward_Rn, forward_Rg,
+    output reg [31:0] NOP_EX                            // NOP signal for EX stage
 );
+
+    // Default values to prevent latches
     always @(*) begin
-        // Forwarding for Rm                signal will be sent to MUX_PB
+        PC_Enable = 1'b1;
+        IF_IF_Enable = 1'b1;
+        NOP_EX = 32'b0;
+        forward_Rm = 2'b00;
+        forward_Rn = 2'b00;
+        forward_Rg = 2'b00;
+
+        // Forwarding logic
+        // Forwarding for Rm
         if (EX_RF_enable && (ID_Rm == EX_Rd))
             forward_Rm = 2'b01; // Forward from EX stage
         else if (MEM_RF_enable && (ID_Rm == MEM_Rd))
             forward_Rm = 2'b10; // Forward from MEM stage
         else if (WB_RF_enable && (ID_Rm == WB_Rd))
             forward_Rm = 2'b11; // Forward from WB stage
-        else
-            forward_Rm = 2'b00; // No forwarding
 
-        // Forwarding for Rn                signal will be sent to MUX_PA
+        // Forwarding for Rn
         if (EX_RF_enable && (ID_Rn == EX_Rd))
             forward_Rn = 2'b01; // Forward from EX stage
         else if (MEM_RF_enable && (ID_Rn == MEM_Rd))
             forward_Rn = 2'b10; // Forward from MEM stage
         else if (WB_RF_enable && (ID_Rn == WB_Rd))
             forward_Rn = 2'b11; // Forward from WB stage
-        else
-            forward_Rn = 2'b00; // No forwarding
 
-        // Forwarding for Rg                signal will be sent to MUX_PD
+        // Forwarding for Rg
         if (EX_RF_enable && (ID_Rg == EX_Rd))
             forward_Rg = 2'b01; // Forward from EX stage
         else if (MEM_RF_enable && (ID_Rg == MEM_Rd))
             forward_Rg = 2'b10; // Forward from MEM stage
         else if (WB_RF_enable && (ID_Rg == WB_Rd))
             forward_Rg = 2'b11; // Forward from WB stage
-        else
-            forward_Rg = 2'b00; // No forwarding
-    end
 
-    always @(*) begin
-        // Forwarding for Rm                signal will be sent to MUX_PB
-        if (EX_Load && (ID_Rm == EX_Rd))
-            forward_Rm = 2'b01; // Forward from EX stage
-        else if (MEM_RF_enable && (ID_Rm == MEM_Rd))
-            forward_Rm = 2'b10; // Forward from MEM stage
-        else if (WB_RF_enable && (ID_Rm == WB_Rd))
-            forward_Rm = 2'b11; // Forward from WB stage
-        else
-            forward_Rm = 2'b00; // No forwarding
-
-        // Forwarding for Rn                signal will be sent to MUX_PA
-        if (EX_Load && (ID_Rn == EX_Rd))
-            forward_Rn = 2'b01; // Forward from EX stage
-        else if (MEM_RF_enable && (ID_Rn == MEM_Rd))
-            forward_Rn = 2'b10; // Forward from MEM stage
-        else if (WB_RF_enable && (ID_Rn == WB_Rd))
-            forward_Rn = 2'b11; // Forward from WB stage
-        else
-            forward_Rn = 2'b00; // No forwarding
-
-        // Forwarding for Rg                signal will be sent to MUX_PD
-        if (EX_Load && (ID_Rg == EX_Rd))
-            forward_Rg = 2'b01; // Forward from EX stage
-        else if (MEM_RF_enable && (ID_Rg == MEM_Rd))
-            forward_Rg = 2'b10; // Forward from MEM stage
-        else if (WB_RF_enable && (ID_Rg == WB_Rd))
-            forward_Rg = 2'b11; // Forward from WB stage
-        else
-            forward_Rg = 2'b00; // No forwarding
+        // Load hazard detection and stalling
+        if (EX_Load) begin
+            if ((ID_Rm == EX_Rd) || (ID_Rn == EX_Rd) || (ID_Rg == EX_Rd)) begin
+                PC_Enable = 1'b0;        // Stall PC update
+                IF_IF_Enable = 1'b0;    // Stall IF/ID pipeline register
+                NOP_EX = 32'b0;         // Insert NOP in EX stage
+            end
+        end
     end
 endmodule
+
 
 
 //------------------------PHASE 3 MODULES -----------------------------
