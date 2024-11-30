@@ -148,6 +148,22 @@ end
 
 endmodule
 
+module MUX_PD (
+    input [31:0] pd, jump_EX_pd, jump_MEM_pd, jump_WB_pd,
+    input [1:0] S_PD,
+    output reg [31:0] rf_pd  // Changed to reg
+);
+always @(*) begin
+    case (S_PD)
+        2'b00: rf_pd = pd;
+        2'b01: rf_pd = jump_EX_pd;
+        2'b10: rf_pd = jump_MEM_pd;
+        2'b11: rf_pd = jump_WB_pd;
+    endcase
+end
+
+endmodule
+
 module MUX_I15_I12 (
     input [3:0] inst_I15_I12, 
     input BL_out,
@@ -386,7 +402,7 @@ end
 
 endmodule
 
-module HazardUnit (         // double check this    must have 10 inputs and 4 outputs look at diagram!
+module HazardUnit (         
     input ID_LOAD,                   // Control Unit Signal Load
     input ID_Enable_EX,              // Control Unit Signal E_EX
     input ID_Enable_MEM,             // Control Unit Signal E_MEM
@@ -400,8 +416,9 @@ module HazardUnit (         // double check this    must have 10 inputs and 4 ou
     output Enable_IF_ID,             // Enables Stage IF_ID 
     output [1:0] S_MUX_PA,           // Signals MUX_PA for a jump  
     output [1:0] S_MUX_PB,           // Signals MUX_PB for a jump 
+    output [1:0] S_MUX_PD,
     output S_MUX_ControlUnit         // Signals Control Unit when Hazard
-    
+
     //input [4:0] ID_Rn,             // Source register in ID stage
     //input [4:0] ID_Rm,             // Source register in ID stage
     //input [4:0] EX_Rd,             // Destination register in EX stage
