@@ -405,10 +405,11 @@ endmodule
 module HazardUnit(
     input EX_RF_enable, MEM_RF_enable, WB_RF_enable,    // Register File Enable signals
     input [4:0] EX_Rd, MEM_Rd, WB_Rd,                   // Destination registers in each stage
-    input [4:0] ID_Rm, ID_Rn, ID_Rg,                    // Source registers in the ID stage
+    input [4:0] ID_Rm, ID_Rn, ID_Rd,                    // Source registers in the ID stage
     input EX_Load,                                      // Load instruction signal in EX stage
+    input ID_Store,                                     // Store instruction signal in ID stage
     output reg PC_Enable, IF_IF_Enable,                 // Control signals for stalling
-    output reg [1:0] forward_Rm, forward_Rn, forward_Rg,
+    output reg [1:0] forward_Rm, forward_Rn, forward_Rd,  forward_Rg
     output reg [31:0] NOP_EX                            // NOP signal for EX stage
 );
 
@@ -419,6 +420,7 @@ module HazardUnit(
         NOP_EX = 32'b0;
         forward_Rm = 2'b00;
         forward_Rn = 2'b00;
+        forward_Rd = 2'b00;
         forward_Rg = 2'b00;
 
         // Forwarding logic
@@ -438,7 +440,8 @@ module HazardUnit(
         else if (WB_RF_enable && (ID_Rn == WB_Rd))
             forward_Rn = 2'b11; // Forward from WB stage
 
-        // Forwarding for Rg
+
+            // Forwarding for Rg
         if (EX_RF_enable && (ID_Rg == EX_Rd))
             forward_Rg = 2'b01; // Forward from EX stage
         else if (MEM_RF_enable && (ID_Rg == MEM_Rd))
@@ -446,9 +449,20 @@ module HazardUnit(
         else if (WB_RF_enable && (ID_Rg == WB_Rd))
             forward_Rg = 2'b11; // Forward from WB stage
 
+
+        // Forwarding for Rd (only if it's a store instruction)
+        if (ID_Store) begin
+            if (EX_RF_enable && (ID_Rd == EX_Rd))
+                forward_Rd = 2'b01; // Forward from EX stage
+            else if (MEM_RF_enable && (ID_Rd == MEM_Rd))
+                forward_Rd = 2'b10; // Forward from MEM stage
+            else if (WB_RF_enable && (ID_Rd == WB_Rd))
+                forward_Rd = 2'b11; // Forward from WB stage
+        end
+
         // Load hazard detection and stalling
         if (EX_Load) begin
-            if ((ID_Rm == EX_Rd) || (ID_Rn == EX_Rd) || (ID_Rg == EX_Rd)) begin
+            if ((ID_Rm == EX_Rd) || (ID_Rn == EX_Rd) || (ID_Rd == EX_Rd)) begin
                 PC_Enable = 1'b0;        // Stall PC update
                 IF_IF_Enable = 1'b0;    // Stall IF/ID pipeline register
                 NOP_EX = 32'b0;         // Insert NOP in EX stage
