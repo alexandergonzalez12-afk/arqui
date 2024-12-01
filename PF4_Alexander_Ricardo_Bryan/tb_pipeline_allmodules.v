@@ -71,7 +71,11 @@ module tb_pipeline;
     reg [31:0] jump_MEM_instr;
     reg SIG_store_cc;
 
-    //ALU HERE
+    //ALU inputs
+    reg {31:0} A;
+    reg {31:0} B;
+    reg [3:0] alu_op;
+    reg C_IN;
 
     //MUX_ALU inputs
     reg [31:0] alu_result;
@@ -124,7 +128,11 @@ module tb_pipeline;
     // mux for condition codes
     wire [3:0] ConditionCodes;
 
-    //ALU HERE
+    //ALU outputs
+    wire [31:0] ALU_result;
+    wire [7:0] Next_PC;
+    wire BL_OUT;
+    wire N, Z, C, V;
 
     //MUX_ALU
     wire [7:0] DM_address;
@@ -278,6 +286,20 @@ module tb_pipeline;
         .Stall(Stall),
         .NOP_EX(NOP_EX)
     );
+
+    // Instantiate the ALU module
+    ALU uut_alu (
+        .A(A),
+        .B(B),
+        .ALU_OP(alu_op),
+        .C_IN(C_IN),
+        .ALU_result(ALU_result),
+        .N(N),
+        .Z(Z),
+        .C(C),
+        .V(V)
+    );
+
     // Clock generation with 2 time units toggle
     initial begin
         clk = 0;
