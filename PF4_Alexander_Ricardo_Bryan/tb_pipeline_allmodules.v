@@ -92,6 +92,17 @@ module tb_pipeline;
     reg [31:0] DataOut;    
     reg Sel;
 
+
+    //Flag register inputs (PSR)
+    reg clk;
+    reg reset;
+    reg update;
+    reg store_cc;
+    reg N_in; 
+    reg Z_in;
+    reg C_in;
+    reg V_in;
+    
     // Pipeline outputs
     // IF/ID
     wire [23:0]instr_i23_i0;
@@ -168,6 +179,11 @@ module tb_pipeline;
     wire [1:0] Stall;
     wire [1:0] NOP_EX;
 
+    // Flag register outputs
+    wire [1:0] N_out;
+    wire [1:0] Z_out;
+    wire [1:0] C_out;
+    wire [1:0] V_out;
 
     // Registers for monitoring
     reg [31:0] r1, r2, r3, r5;
@@ -300,6 +316,21 @@ module tb_pipeline;
         .V(V)
     );
 
+    // instantiate the flag register module
+    FlagRegister uut_flag_register (
+        .clk(clk),
+        .reset(reset),
+        .update(update),
+        .store_cc(store_cc),
+        .N_in(N_in),
+        .Z_in(Z_in),
+        .C_in(C_in),
+        .V_in(V_in),
+        .N_out(N_out),
+        .Z_out(Z_out),
+        .C_out(C_out),
+        .V_out(V_out)
+    );
     // Clock generation with 2 time units toggle
     initial begin
         clk = 0;
