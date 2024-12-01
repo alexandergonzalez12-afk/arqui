@@ -161,7 +161,7 @@ module tb_pipeline;
 
     // Preload data memory from the file
     initial begin
-        fi = $fopen("file_precarga_fase_I.txt", "r");
+        fi = $fopen("codigo_validacion.txt", "r");
         if (fi == 0) begin
             $display("Error: File could not be opened.");
             $finish;
