@@ -92,6 +92,10 @@ module tb_pipeline;
     reg [31:0] DataOut;    
     reg Sel;
 
+    //Data Memory
+    reg [31:0] dataMemoryIn;
+    reg [7:0] dataMemoryAdress;
+    reg dataMemory_mem_size, R/W, dataMemoryEnable; 
 
     //Flag register inputs (PSR)
     reg clk;
@@ -150,6 +154,9 @@ module tb_pipeline;
 
     // shifter output
     wire [31:0] N;
+
+    //DATA MEMORY
+    wire [31:0] Data_Memory_Out;    
 
     //MUX DATA MEMORY Output
     wire [31:0] MuxOut;
