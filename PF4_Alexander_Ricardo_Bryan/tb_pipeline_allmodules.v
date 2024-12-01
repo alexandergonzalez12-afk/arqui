@@ -14,15 +14,73 @@ module tb_pipeline;
     wire [31:0] instruction;
 
     // Pipeline registers for each stage
+    // IF
     reg [31:0] if_instruction;
+    reg ID_Load; // Signal LE for IF/ID
+    reg [7:0] Next_PC; // PC + 4
+    // ID
     reg [3:0] id_ALU_OP;
     reg [1:0] id_AM;
     reg id_LOAD, id_RF_E;
+    reg [31:0] mux_pa;
+    reg [31:0] mux_pb;
+    reg [31:0] mux_pd;
+    reg [3:0] mux_I15_I12;
+    reg [11:0] instr_I11_I0;
+    // EX
     reg [3:0] ex_ALU_OP;
     reg [1:0] ex_AM;
     reg ex_S, ex_LOAD;
+    reg [7:0] mux_alu;
+    // MEM
     reg mem_LOAD, mem_RF_E, mem_SIZE, mem_RW;
+    reg [31:0] mux_datamemory;
+    // WB
     reg wb_RF_E;
+
+    // register file 
+    reg [3:0] RA;
+    reg [3:0] RB;
+    reg [3:0] RD;
+    reg [3:0] RW;    // double check this bits 
+    reg [31:0] PW;   // double check this bits 
+    reg [3:0] INSTR_I15_I12;
+
+    //inputs mux pa, pb, pd
+     // all mux pa,pb,pd jumps
+    reg [31:0] jump_EX_pa;
+    reg [31:0] jump_MEM_pa;
+    reg [31:0] jump_WB_pa;
+    reg [31:0] jump_EX_pb;
+    reg [31:0] jump_MEM_pb;
+    reg [31:0] jump_WB_pb;
+    reg [31:0] jump_EX_pd;
+    reg [31:0] jump_MEM_pd;
+    reg [31:0] jump_WB_pd;
+
+
+    // Pipeline outputs
+    // IF/ID
+    wire [23:0]instr_i23_i0;
+    wire [7:0] NEXT_PC;
+    wire [3:0] instr_i3_i0;
+    wire [3:0] instr_i19_i16;
+    wire [3:0] instr_i31_i28;
+    wire [11:0] instr_i11_i0;
+    wire [3:0] instr_i15_i12;
+    // ID/EX
+    // uses next pc from previous stage
+    wire [31:0] MUX_PA;
+    wire [31:0] MUX_PB;
+    wire [31:0] MUX_PD;
+    wire [3:0] MUX_I15_I12;
+    // EX/MEM
+    // uses the same i15_i12
+    // uses the same pd
+    wire [7:0] MUX_ALU;
+    // MEM/WB
+    // uses the same i15_i12
+    wire [31:0] MUX_DATAMEMORY;
 
     // Control signals from ControlUnit
     wire [3:0] ALU_OP;
@@ -33,6 +91,25 @@ module tb_pipeline;
     wire [3:0] mux_alu_op;
     wire mux_id_load, mux_id_mem_write, mux_store_cc, mux_id_b, mux_id_bl, mux_id_mem_size, mux_id_mem_e, mux_rf_e;
     wire [1:0] mux_id_am;
+
+    // output TA
+    wire [7:0] TA;
+    wire [7:0] instr_SE;
+
+    //Register File
+    wire [31:0] PA;
+    wire [31:0] PB;
+    wire [31:0] PD;
+    // all mux pa,pb,pd jumps
+    wire [31:0] jump_EX_pa;
+    wire [31:0] jump_MEM_pa;
+    wire [31:0] jump_WB_pa;
+    wire [31:0] jump_EX_pb;
+    wire [31:0] jump_MEM_pb;
+    wire [31:0] jump_WB_pb;
+    wire [31:0] jump_EX_pd;
+    wire [31:0] jump_MEM_pd;
+    wire [31:0] jump_WB_pd;
 
     // Registers for monitoring
     reg [31:0] r1, r2, r3, r5;
