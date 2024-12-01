@@ -34,6 +34,9 @@ module tb_pipeline;
     wire mux_id_load, mux_id_mem_write, mux_store_cc, mux_id_b, mux_id_bl, mux_id_mem_size, mux_id_mem_e, mux_rf_e;
     wire [1:0] mux_id_am;
 
+    // Registers for monitoring
+    reg [31:0] r1, r2, r3, r5;
+
     integer fi, code;
     reg [31:0] data;       // For loading instruction data
     reg [7:0] address;     // Temporary address variable
@@ -122,6 +125,16 @@ module tb_pipeline;
         .A(pc) // Connect the program counter to the memory address
     );
 
+    // Instantiate the data memory (RAM)
+    Data_Memory_RAM data_mem_inst (
+        .data_out(data_out),
+        .address(dm_address),
+        .data_in(pd),
+        .size(mem_SIZE),
+        .rw(mem_RW),
+        .enable(mem_RF_E)
+    );
+
     // Clock generation with 2 time units toggle
     initial begin
         clk = 0;
@@ -141,6 +154,24 @@ module tb_pipeline;
         while (!$feof(fi)) begin
             code = $fscanf(fi, "%b", data);
             rom_inst.Mem[address] = data; // Preload the ROM memory
+            address = address + 1;
+        end
+        $fclose(fi);
+    end
+
+    // Preload data memory from the file
+    initial begin
+        fi = $fopen("file_precarga_fase_I.txt", "r");
+        if (fi == 0) begin
+            $display("Error: File could not be opened.");
+            $finish;
+        end
+
+        // Start loading data into the memory
+        address = 8'd0;
+        while (!$feof(fi)) begin
+            code = $fscanf(fi, "%b", data);
+            data_mem_inst.Mem[address] = data; // Preload the RAM memory
             address = address + 1;
         end
         $fclose(fi);
@@ -187,15 +218,14 @@ module tb_pipeline;
         wb_RF_E <= mux_rf_e;
     end
 
-    // Display outputs for each clock cycle
+    // Monitor outputs for each clock cycle
+    initial begin
+        $monitor("PC: %0d | Address: %0d | r1: %0d | r2: %0d | r3: %0d | r5: %0d", pc, address, r1, r2, r3, r5);
+    end
+
+    // Display control signals and instruction in ID stage when required
     always @(posedge clk) begin
-        $display("PC: %0d | Opcode: %s", pc, get_keyword(instruction[24:21]));
-        $display("-----------------------------------------------------------");
-        $display("Fetch Stage:    Instruction: %b", if_instruction);
-        $display("Decode Stage:   ALU_OP: %b | AM: %b | Load: %b | RF_E: %b", id_ALU_OP, id_AM, id_LOAD, id_RF_E);
-        $display("Execute Stage:  ALU_OP: %b | AM: %b | S: %b | Load: %b", ex_ALU_OP, ex_AM, ex_S, ex_LOAD);
-        $display("Memory Stage:   Load: %b | RF_E: %b | Mem Size: %b | RW: %b", mem_LOAD, mem_RF_E, mem_SIZE, mem_RW);
-        $display("Write Back:     RF_E: %b", wb_RF_E);
-        $display("-----------------------------------------------------------\n");
+        $display("Control Signals in ID Stage: ALU_OP: %b | AM: %b | Load: %b | RF_E: %b", id_ALU_OP, id_AM, id_LOAD, id_RF_E);
+        $display("Instruction in ID Stage: %b", if_instruction);
     end
 endmodule

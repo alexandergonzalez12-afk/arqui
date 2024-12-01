@@ -171,7 +171,7 @@ module MUX_I15_I12 (
 );
 always @(*) begin
     case (BL_out)
-        1'b0: result = 1'b1110;
+        1'b0: result = 4'b1110;
         1'b1: result = inst_I15_I12;
     endcase
 end
@@ -443,7 +443,7 @@ module HazardUnit(
     input EX_Load,                                      // Load instruction signal in EX stage
     input ID_Store,                                     // Store instruction signal in ID stage
     output reg PC_Enable, IF_IF_Enable,                 // Control signals for stalling
-    output reg [1:0] forward_Rm, forward_Rn, forward_Rd,  forward_Rg
+    output reg [1:0] forward_Rm, forward_Rn, forward_Rd, forward_Rg;
     output reg [31:0] NOP_EX                            // NOP signal for EX stage
 );
 
