@@ -371,15 +371,15 @@ module FlagRegister (
 endmodule
 module ConditionHandler (
     input [3:0] ConditionCode,
-    input N, Z, C, V,
+    input [1:0]  N, Z, C, V,
     input [31:28] instruction,
-    input SIG_B,
-    input SIG_BL,
-    input STORE_CC,  // Signal to indicate if the instruction modifies condition codes
-    output reg Branch,
-    output reg BranchLink,
-    output reg Stall,  // Signal to indicate a stall due to control hazard
-    output reg NOP_EX  // Signal to convert instruction to NOP if condition is not met
+    input [1:0] SIG_B,
+    input [1:0] SIG_BL,
+    input [1:0] STORE_CC,  // Signal to indicate if the instruction modifies condition codes
+    output reg [1:0]  Branch,
+    output reg [1:0]  BranchLink,
+    output reg [1:0] Stall,  // Signal to indicate a stall due to control hazard
+    output reg[1:0]  NOP_EX  // Signal to convert instruction to NOP if condition is not met
 );
     always @(*) begin
         Branch = 1'b0;

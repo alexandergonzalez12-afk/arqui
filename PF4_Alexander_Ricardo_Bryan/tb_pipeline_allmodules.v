@@ -59,13 +59,12 @@ module tb_pipeline;
     reg [31:0] jump_WB_pd;
 
     //Condition Handler inputs 
-    reg BL;
     reg [3:0] ConditionCode;
-    reg N;
-    reg Z;
-    reg C;
-    reg V;
-    // reg c_field; add the corresponding value for the c_field
+    reg [1:0] N, Z, C, V;
+    reg [31:0] instruction;
+    reg [1:0] SIG_B;
+    reg [1:0] SIG_BL;
+    reg [1:0]  STORE_CC;
 
     //mux for condition codes inputs
     reg [3:0] ConditionCode;
@@ -143,7 +142,7 @@ module tb_pipeline;
     //Register File
     wire [31:0] PA;
     wire [31:0] PB;
-    wire [31:0] PD;
+    wire [31:32] PD;
     // all mux pa,pb,pd jumps
     wire [31:0] jump_EX_pa;
     wire [31:0] jump_MEM_pa;
@@ -156,8 +155,10 @@ module tb_pipeline;
     wire [31:0] jump_WB_pd;
 
     //Condition Handler Outputs
-    wire Branch;
-    wire BranchLink;
+    wire [1:0] Branch;
+    wire [1:0]  BranchLink;
+    wire [1:0] Stall;
+    wire [1:0] NOP_EX;
 
 
     // Registers for monitoring
@@ -261,6 +262,22 @@ module tb_pipeline;
         .enable(mem_RF_E)
     );
 
+        // Instantiate the ConditionHandler
+    ConditionHandler uut_condition_handler (
+        .ConditionCode(ConditionCode),
+        .N(N),
+        .Z(Z),
+        .C(C),
+        .V(V),
+        .instruction(instruction[31:28]),
+        .SIG_B(SIG_B),
+        .SIG_BL(SIG_BL),
+        .STORE_CC(STORE_CC),
+        .Branch(Branch),
+        .BranchLink(BranchLink),
+        .Stall(Stall),
+        .NOP_EX(NOP_EX)
+    );
     // Clock generation with 2 time units toggle
     initial begin
         clk = 0;
