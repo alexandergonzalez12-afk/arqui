@@ -58,6 +58,36 @@ module tb_pipeline;
     reg [31:0] jump_MEM_pd;
     reg [31:0] jump_WB_pd;
 
+    //Condition Handler inputs 
+    reg BL;
+    reg [3:0] ConditionCode;
+    reg N;
+    reg Z;
+    reg C;
+    reg V;
+    // reg c_field; add the corresponding value for the c_field
+
+    //mux for condition codes inputs
+    reg [3:0] ConditionCode;
+    reg [31:0] jump_MEM_instr;
+    reg SIG_store_cc;
+
+    //ALU HERE
+
+    //MUX_ALU inputs
+    reg [31:0] alu_result;
+    reg [7:0] Next_PC;
+    reg BL_OUT;
+
+    // Shifter inputs
+    reg [31:0] Rm;            
+    reg [11:0] I;           
+    reg [1:0] AM;        
+
+    //MUX DATA MEMORY
+    reg [7:0] Addr;     
+    reg [31:0] DataOut;    
+    reg Sel;
 
     // Pipeline outputs
     // IF/ID
@@ -92,6 +122,20 @@ module tb_pipeline;
     wire mux_id_load, mux_id_mem_write, mux_store_cc, mux_id_b, mux_id_bl, mux_id_mem_size, mux_id_mem_e, mux_rf_e;
     wire [1:0] mux_id_am;
 
+    // mux for condition codes
+    wire [3:0] ConditionCodes;
+
+    //ALU HERE
+
+    //MUX_ALU
+    wire [7:0] DM_address;
+
+    // shifter output
+    wire [31:0] N;
+
+    //MUX DATA MEMORY Output
+    wire [31:0] MuxOut;
+
     // output TA
     wire [7:0] TA;
     wire [7:0] instr_SE;
@@ -110,6 +154,11 @@ module tb_pipeline;
     wire [31:0] jump_EX_pd;
     wire [31:0] jump_MEM_pd;
     wire [31:0] jump_WB_pd;
+
+    //Condition Handler Outputs
+    wire Branch;
+    wire BranchLink;
+
 
     // Registers for monitoring
     reg [31:0] r1, r2, r3, r5;

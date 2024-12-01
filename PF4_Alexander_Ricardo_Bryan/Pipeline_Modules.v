@@ -178,6 +178,21 @@ end
 
 endmodule
 
+module MUX_CC (
+    input [3:0] ConditionCode, 
+    input [31:0] jump_MEM_instr,
+    input SIG_store_cc,
+    output reg [3:0] ConditionCodes  // Changed to reg
+);
+always @(*) begin
+    case (SIG_store_cc)
+        1'b0: result = ConditionCode;
+        1'b1: result = jump_MEM_instr;
+    endcase
+end
+
+endmodule
+
 module SUM_RF (
     input [7:0] instr_SE,
     input [7:0] nextpc,
