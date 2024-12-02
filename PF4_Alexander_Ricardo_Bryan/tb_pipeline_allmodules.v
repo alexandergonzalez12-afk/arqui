@@ -94,7 +94,7 @@ module tb_pipeline;
 
     //Data Memory
     reg [31:0] dataMemoryIn;
-    reg [7:0] dataMemoryAdress;
+    reg [7:0] dataMemoryAddress;
     reg dataMemory_mem_size, R/W, dataMemoryEnable; 
 
     //Flag register inputs (PSR)
@@ -283,14 +283,22 @@ module tb_pipeline;
         .A(pc) // Connect the program counter to the memory address
     );
 
+    // Instantiate the data memory MUX
+    MUX_DataMemory MUXdatamemory (
+        .Addr(Addr),
+        .DataOut(DataOut),
+        .Sel(Sel),
+        .MuxOut( Data_Memory_Out)
+    );
+
     // Instantiate the data memory (RAM)
     Data_Memory_RAM data_mem_inst (
-        .data_out(data_out),
-        .address(dm_address),
-        .data_in(pd),
-        .size(mem_SIZE),
-        .rw(mem_RW),
-        .enable(mem_RF_E)
+        .data_out(Data_Memory_Out),
+        .address(dataMemoryAddress),
+        .data_in(dataMemoryIn),
+        .size(dataMemory_mem_size),
+        .rw(R/W),
+        .enable(dataMemoryEnable)
     );
 
         // Instantiate the ConditionHandler
