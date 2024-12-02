@@ -227,6 +227,64 @@ module tb_pipeline;
           endcase
       end
     endfunction
+    // // Instantiate the IF/ID stage 
+    // IF_ID if_id (
+    //     .E(enable_ifid),
+    //     .reset(),
+    //     .clk(clk),
+    //     .instr_in(if_instruction),
+    //     .signal_Hazard(),
+    //     .next_pc(Next_PC),
+
+    //     .instr_out(),
+    //     .instr_i23_i0(),    
+    //     .Next_PC(),
+    //     .instr_i3_i0(),
+    //     .instr_i19_i16(),
+    //     .instr_i31_i28(),
+    //     .instr_i11_i0(),
+    //     .instr_i15_i12()
+    // );
+    // // Instantiate ID/EX stage
+    // EX_ID ex_id(
+    //  .clk(),
+    //  .reset(),
+    //  .ID_ALU_OP(),
+    //  .ID_LOAD(),
+    //  .ID_MEM_WRITE(),
+    //  .ID_MEM_SIZE(),
+    //  .ID_MEM_ENABLE(),
+    //  .ID_AM(),
+    //  .STORE_CC(),
+    //  .ID_BL(),
+    //  .ID_B(),
+    //  .RF_ENABLE(),
+    //  .BL_OUT(),                   
+    //  .NEXT_PC(),
+    //  .MUX_PA(),
+    //  .MUX_PB(),
+    //  .PD(),
+    //  .MUX_INSTR_I15_I12(),
+    //  .INSTR_I11_I0(),      
+
+    //  .id_alu_op(),
+    //  .id_load(),
+    //  .id_mem_write(),
+    //  .id_mem_size(),
+    //  .id_mem_enable(),
+    //  .id_am(),
+    //  .store_cc(),
+    //  .id_bl(),
+    //  .id_b(),
+    //  .rf_enable(),
+    //  .bl_out(),             
+    //  .next_pc(),
+    //  .mux_pa(),
+    //  .mux_pb(),
+    //  .pd(),
+    //  .mux_instr_i15_i12(),
+    //  .instr_i11_i0() 
+    // );
 
     // Instantiate the PC module with PC increment of 4
     PC uut_pc (
@@ -409,11 +467,19 @@ module tb_pipeline;
         // IF stage
         if_instruction <= instruction;
 
+        // //Recently added
+        // Next_PC <= pc
+
         // ID stage
         id_ALU_OP <= ALU_OP;
         id_AM <= ID_AM;
         id_LOAD <= ID_LOAD;
         id_RF_E <= RF_E;
+
+        // //Recently added
+        // RA <= instr_i3_i0
+        // RB <= instr_i19_i16
+        // RD <= instr_i15_i12
 
         // EX stage
         ex_ALU_OP <= mux_alu_op;
