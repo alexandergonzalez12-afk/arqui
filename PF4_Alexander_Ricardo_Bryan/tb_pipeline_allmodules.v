@@ -65,7 +65,7 @@ module tb_pipeline;
     reg [1:0] SIG_B;
     reg [1:0] SIG_BL;
     reg [1:0]  STORE_CC;
-
+    reg [3:0] c_field;
     //mux for condition codes inputs
     reg [3:0] ConditionCode;
     reg [31:0] jump_MEM_instr;
@@ -293,7 +293,8 @@ module tb_pipeline;
         .enable(mem_RF_E)
     );
 
-        // Instantiate the ConditionHandler
+
+    // Instantiate the ConditionHandler
     ConditionHandler uut_condition_handler (
         .ConditionCode(ConditionCode),
         .N(N),
@@ -304,6 +305,7 @@ module tb_pipeline;
         .SIG_B(SIG_B),
         .SIG_BL(SIG_BL),
         .STORE_CC(STORE_CC),
+        .c_field(c_field), 
         .Branch(Branch),
         .BranchLink(BranchLink),
         .Stall(Stall),
