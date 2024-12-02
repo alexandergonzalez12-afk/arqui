@@ -371,37 +371,31 @@ module FlagRegister (
 endmodule
 module ConditionHandler (
     input [3:0] ConditionCode,
-    input [1:0]  N, Z, C, V,
+    input N, Z, C, V,
     input [31:28] instruction,
-    input [1:0] SIG_B,
-    input [1:0] SIG_BL,
-    input [1:0] STORE_CC,  // Signal to indicate if the instruction modifies condition codes
-    output reg [1:0]  Branch,
-    output reg [1:0]  BranchLink,
-    output reg [1:0] Stall,  // Signal to indicate a stall due to control hazard
-    output reg[1:0]  NOP_EX  // Signal to convert instruction to NOP if condition is not met
+    input SIG_B,
+    input SIG_BL,
+    input [3:0] c_field,
+    input STORE_CC,  // Signal to indicate if the instruction modifies condition codes
+    output reg Branch,
+    output reg BranchLink,
+    output reg Stall,  // Signal to indicate a stall due to control hazard
+    output reg NOP_EX  // Signal to convert instruction to NOP if condition is not met
 );
+
     always @(*) begin
         Branch = 1'b0;
         BranchLink = 1'b0;
         Stall = 1'b0;
         NOP_EX = 1'b0;
-        case (ConditionCode)
+
+        // Determine if the condition specified by c_field is met
+        case (c_field)
             4'b0000: if (Z) Branch = 1'b1;                 // EQ (Equal)
             4'b0001: if (!Z) Branch = 1'b1;                // NE (Not Equal)
-            4'b0010: if (C) Branch = 1'b1;                 // CS/HS (Carry Set)
-            4'b0011: if (!C) Branch = 1'b1;                // CC/LO (Carry Clear)
-            4'b0100: if (N) Branch = 1'b1;                 // MI (Negative)
-            4'b0101: if (!N) Branch = 1'b1;                // PL (Positive or Zero)
-            4'b0110: if (V) Branch = 1'b1;                 // VS (Overflow)
-            4'b0111: if (!V) Branch = 1'b1;                // VC (No Overflow)
-            4'b1000: if (C && !Z) Branch = 1'b1;           // HI (Unsigned Higher)
-            4'b1001: if (!C || Z) Branch = 1'b1;           // LS (Unsigned Lower or Same)
-            4'b1010: if (N == V) Branch = 1'b1;            // GE (Signed Greater or Equal)
-            4'b1011: if (N != V) Branch = 1'b1;            // LT (Signed Less Than)
-            4'b1100: if (!Z && (N == V)) Branch = 1'b1;    // GT (Signed Greater Than)
-            4'b1101: if (Z || (N != V)) Branch = 1'b1;     // LE (Signed Less or Equal)
-            4'b1110: Branch = 1'b1;                        // AL (Always)
+            4'b1010: if (N == V) Branch = 1'b1;            // GE (Greater or Equal)
+            4'b1011: if (N != V) Branch = 1'b1;            // LT (Less Than)
+            // Add other conditions as needed
             default: Branch = 1'b0;                        // No condition met
         endcase
 
