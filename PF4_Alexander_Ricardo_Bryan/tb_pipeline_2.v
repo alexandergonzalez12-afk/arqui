@@ -268,22 +268,17 @@ module tb_pipeline;
 // );
 
 
-//  ConditionHandler conditionhandler(
-//     .ConditionCode              (),
-//     .N                          (),
-//     .Z                          (),
-//     .C                          (),
-//     .V                          (),
-//     .instruction                (),
-//     .SIG_B                      (),
-//     .SIG_BL                     (),
-//     .c_field                    (),
-//     .STORE_CC                   (),
-//     .Branch                     (),
-//     .BranchLink                 (),
-//     .Stall                      (),
-//     .NOP_EX                     ()
-//  );
+ ConditionHandler conditionhandler(
+    .ID_BL_instr                (),
+    .ID_B_instr                 (),
+    .Z                          (),
+    .N                          (),
+    .C                          (),
+    .V                          (),
+    .Condition                  (),
+    .EX_BL_instr                (),
+    .Branched                   ()
+ );
 
 
 //     ALU alu (
