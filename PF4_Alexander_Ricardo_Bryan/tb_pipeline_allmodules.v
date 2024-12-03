@@ -247,7 +247,7 @@ module tb_pipeline;
     // );
     // // Instantiate ID/EX stage
     // EX_ID ex_id(
-    //  .clk(),
+    //  .clk(clk),
     //  .reset(),
     //  .ID_ALU_OP(),
     //  .ID_LOAD(),
