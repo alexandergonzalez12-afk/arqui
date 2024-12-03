@@ -32,7 +32,7 @@ module tb_pipeline;
 
     // Control signals from ControlUnit
     wire [3:0] ALU_OP;
-    wire ID_LOAD, ID_MEM_WRITE, STORE_CC, ID_B, ID_BL, ID_MEM_SIZE, ID_MEM_E, RF_E;
+    wire ID_LOAD, ID_MEM_WRITE, STORE_CC, ID_MEM_SIZE, ID_MEM_E, RF_E;
     wire [1:0] ID_AM;
 
     // Outputs from Multiplexer
@@ -126,6 +126,15 @@ module tb_pipeline;
     wire [3:0] idmux_out_ex;
 
 
+    // ====================================
+    // Condition handler
+    // ====================================
+
+    wire alu_z_chandler;
+    wire alu_n_chandler;
+    wire alu_c_chandler;
+    wire alu_v_chandler;
+    wire [3:0] chandlermux_cc_chandler;
 
     // Helper function to get the keyword based on opcode
     function [7*8:1] get_keyword;
@@ -228,62 +237,60 @@ module tb_pipeline;
 //     );    
 
 
-// ID_EX id_ex (
-//     .clk                    (),,
-//     .reset                  (),,
-//     .ID_ALU_OP                  (),
-//     .ID_LOAD                    (),
-//     .ID_MEM_WRITE                   (),
-//     .ID_MEM_SIZE                    (),
-//     .ID_MEM_ENABLE                  (),
-//     .ID_AM                  (),
-//     .STORE_CC                   (),
-//     .ID_BL                  (),
-//     .ID_B                   (),
-//     .RF_ENABLE                  (),
-//     .BL_OUT                 (),
-//     .NEXT_PC                    (),
-//     .MUX_PA                 (),
-//     .MUX_PB                 (),
-//     .PD                 (),
-//     .MUX_INSTR_I15_I12                  (),
-//     .INSTR_I11_I0                   (),
-//     .id_alu_op                  (),
-//     .id_load                    (),
-//     .id_mem_write                   (),
-//     .id_mem_size                    (),
-//     .id_mem_enable                  (),
-//     .id_am                  (),
-//     .store_cc                   (),
-//     .id_bl                  (),
-//     .id_b                   (),
-//     .rf_enable                  (),
-//     .bl_out                 (),
-//     .next_pc                    (),
-//     .mux_pa                 (),
-//     .mux_pb                 (),
-//     .pd                 (),
-//     .mux_instr_i15_i12                  (),
-//     .instr_i11_i0                   ()
-// );
+ID_EX id_ex (
+    .clk                    (clk),
+    .reset                  (reset),
+    .ID_ALU_OP              (ALU_OP),
+    .ID_LOAD                (ID_LOAD),
+    .ID_MEM_WRITE           (ID_MEM_WRITE),
+    .ID_MEM_SIZE            (ID_MEM_SIZE),
+    .ID_MEM_ENABLE          (ID_MEM_E),
+    .ID_AM                  (ID_AM),
+    .STORE_CC               (STORE_CC),
+    .RF_ENABLE              (RF_E),
+    
+    .BL_OUT                 (chandler_blout_idmux),
+    .NEXT_PC                (if_npc_fetch),
+    .MUX_PA                 (),
+    .MUX_PB                 (),
+    .MUX_PD                 (),
+    .MUX_INSTR_I15_I12      (idmux_out_ex),
+    .INSTR_I11_I0           (instr_i11_i0),
+
+    .id_alu_op              (ex_aluop_),
+    .id_load                (ex_load_),
+    .id_mem_write           (ex_memwrite_),
+    .id_mem_size            (ex_memsize_),
+    .id_mem_enable          (ex_memenable_),
+    .id_am                  (ex_am_),
+    .store_cc               (ex_storecc_),
+    .rf_enable              (ex_rfenable_mem),
+    .bl_out                 (ex_blout_muxalu),
+    .next_pc                (ex_nextpc_muxalu),
+    .mux_pa                 (ex_muxpa_alu),
+    .mux_pb                 (ex_muxpb_alu),
+    .mux_pd                 (ex_muxpd_mem),
+    .mux_instr_i15_i12      (ex_muxinstri15i12_memandhazard),
+    .instr_i11_i0           (ex_instri11i0_shifter)
+);
 
 
  ConditionHandler conditionhandler(
-    .ID_BL_instr                (),
-    .ID_B_instr                 (),
-    .Z                          (),
-    .N                          (),
-    .C                          (),
-    .V                          (),
-    .Condition                  (),
-    .EX_BL_instr                (),
-    .Branched                   ()
+    .ID_BL_instr                (mux_bl_chandler),
+    .ID_B_instr                 (mux_b_chandler),
+    .Z                          (alu_z_chandler),
+    .N                          (alu_n_chandler),
+    .C                          (alu_c_chandler),
+    .V                          (alu_v_chandler),
+    .Condition                  (chandlermux_cc_chandler),
+    .EX_BL_instr                (chandler_blout_idmux),
+    .Branched                   (chandler_branch_mux)
  );
 
 
-//     ALU alu (
+    ALU alu (
 
-//     );
+    );
 
 
     Three_port_register_file tprf (
@@ -318,27 +325,27 @@ module tb_pipeline;
 
     // Instantiate the Multiplexer
     Multiplexer uut_mux (
-        .alu_op(mux_alu_op),
-        .id_load(mux_id_load),
-        .id_mem_write(mux_id_mem_write),
-        .store_cc(mux_store_cc),
-        .id_b(mux_id_b),
-        .id_bl(mux_id_bl),
-        .id_mem_size(mux_id_mem_size),
-        .id_mem_e(mux_id_mem_e),
-        .rf_e(mux_rf_e),
-        .id_am(mux_id_am),
-        .S(S),
-        .ALU_OP(ALU_OP),
-        .ID_LOAD(ID_LOAD),
-        .ID_MEM_WRITE(ID_MEM_WRITE),
-        .STORE_CC(STORE_CC),
-        .ID_B(ID_B),
-        .ID_BL(ID_BL),
-        .ID_MEM_SIZE(ID_MEM_SIZE),
-        .ID_MEM_E(ID_MEM_E),
-        .RF_E(RF_E),
-        .ID_AM(ID_AM)
+        .alu_op         (mux_alu_op),
+        .id_load        (mux_id_load),
+        .id_mem_write   (mux_id_mem_write),
+        .store_cc       (mux_store_cc),
+        .id_bl          (mux_bl_chandler),
+        .id_b           (mux_b_chandler),
+        .id_mem_size    (mux_id_mem_size),
+        .id_mem_e       (mux_id_mem_e),
+        .rf_e           (mux_rf_e),
+        .id_am          (mux_id_am),
+        .S              (S),
+        .ALU_OP         (ALU_OP),
+        .ID_LOAD        (ID_LOAD),
+        .ID_MEM_WRITE   (ID_MEM_WRITE),
+        .ID_MEM_SIZE    (ID_MEM_SIZE),
+        .ID_MEM_E       (ID_MEM_E),
+        .ID_AM          (ID_AM),
+        .STORE_CC       (STORE_CC),
+        .ID_BL          (cu_idbl_mux),
+        .ID_B           (cu_idb_mux),
+        .RF_E           (RF_E)
     );
 
 

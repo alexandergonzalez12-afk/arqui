@@ -823,14 +823,12 @@ module ID_EX (
     input ID_MEM_ENABLE,
     input [1:0] ID_AM,
     input STORE_CC,
-    input ID_BL,
-    input ID_B,
     input RF_ENABLE,
     input BL_OUT,                   //added connections
     input [31:0] NEXT_PC,
     input [31:0] MUX_PA,
     input [31:0] MUX_PB,
-    input [31:0] PD,
+    input [31:0] MUX_PD,
     input [3:0]  MUX_INSTR_I15_I12,
     input [11:0] INSTR_I11_I0,      // finished added connection
 
@@ -841,14 +839,12 @@ module ID_EX (
     output reg id_mem_enable,
     output reg [1:0] id_am,
     output reg store_cc,
-    output reg id_bl,
-    output reg id_b,
     output reg rf_enable,
     output reg bl_out,              //added connections
     output reg [31:0] next_pc,
     output reg [31:0] mux_pa,
     output reg [31:0] mux_pb,
-    output reg [31:0] pd,
+    output reg [31:0] mux_pd,
     output reg [3:0]  mux_instr_i15_i12,
     output reg [11:0] instr_i11_i0  // finished added connection
 );
@@ -861,14 +857,12 @@ module ID_EX (
             id_mem_enable <= 0;
             id_am <= 2'b0;
             store_cc <= 0;
-            id_bl <= 0;
-            id_b <= 0;
             rf_enable <= 0;
             bl_out <= 0;              //added connections
             next_pc <= 32'b0;
             mux_pa <= 32'b0;
             mux_pb <= 32'b0;
-            pd <= 32'b0;
+            mux_pd <= 32'b0;
             mux_instr_i15_i12 <= 4'b0;
             instr_i11_i0 <= 12'b0;    // finished added connection
         end else begin
@@ -879,14 +873,12 @@ module ID_EX (
             id_mem_enable <= ID_MEM_ENABLE;
             id_am <= ID_AM;
             store_cc <= STORE_CC;
-            id_bl <= ID_BL;
-            id_b <= ID_B;
             rf_enable <= RF_ENABLE;
             bl_out <= BL_OUT;              //added connections
             next_pc <= NEXT_PC;
             mux_pa <= MUX_PA;
             mux_pb <= MUX_PB;
-            pd <= PD;
+            mux_pd <= MUX_PD;
             mux_instr_i15_i12 <= MUX_INSTR_I15_I12;
             instr_i11_i0 <= INSTR_I11_I0;    // finished added connection
         end
@@ -901,7 +893,7 @@ module EX_MEM(
     input ID_MEM_SIZE,
     input ID_MEM_ENABLE,
     input RF_ENABLE,
-    input [31:0] PD,
+    input [31:0] MUX_PD,
     input [7:0] DM_ADDRESS,
     input [3:0] MUX_INSTR_I15_I12,
 
@@ -910,7 +902,7 @@ module EX_MEM(
     output reg id_mem_write,
     output reg id_mem_enable,
     output reg rf_enable,
-    output reg [31:0] pd,
+    output reg [31:0] mux_pd,
     output reg [7:0] dm_address,
     output reg [3:0] mux_instr_i15_i12
 );
@@ -921,7 +913,7 @@ module EX_MEM(
             id_mem_size <= 0;
             id_mem_enable <= 0;
             rf_enable <= 0;
-            pd <= 32'b0;
+            mux_pd <= 32'b0;
             dm_address <= 8'b0;
             mux_instr_i15_i12 <= 4'b0;
         end else begin
@@ -930,7 +922,7 @@ module EX_MEM(
             id_mem_size <= ID_MEM_SIZE;
             id_mem_enable <= ID_MEM_ENABLE;
             rf_enable <= RF_ENABLE;
-            pd <= PD;
+            mux_pd <= MUX_PD;
             dm_address <= DM_ADDRESS;
             mux_instr_i15_i12 <= MUX_INSTR_I15_I12;
         end
