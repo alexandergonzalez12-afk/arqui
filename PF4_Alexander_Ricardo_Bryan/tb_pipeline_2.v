@@ -166,15 +166,15 @@ module tb_pipeline;
     endfunction
 
     adder addy(
-        .PC (npc),
+        .PC (npc), // next pc
         .pc (pc_adder)
     );
 
     // Instantiate the PC module with PC increment of 4
     PC uut_pc (
-        .next_pc         (pc),
-        .pc         (pc_adder),
-        .E     (enable_pc),
+        .next_pc    (pc + 32'd4), // input
+        .pc         (pc_adder), // output
+        .E          (enable_pc),
         .clk        (clk),
         .reset      (reset)
     );
@@ -184,10 +184,10 @@ module tb_pipeline;
         .E(enable_ifid),
         .reset(reset),
         .clk(clk),
-        .instr_in(if_instruction),
+        .instr_in(instruction),
         .next_pc(npc),
 
-        .instr_out(instruction),
+        .instr_out(if_instruction),
         .instr_i23_i0(instr_i23_i0),    
         .Next_PC(if_npc_fetch),
         .instr_i3_i0(instr_i3_i0),
@@ -272,6 +272,7 @@ module tb_pipeline;
     .PD   (rf_registerpd_mux)
     );
 
+
     // ID_EX id_ex(
 
     // )
@@ -309,7 +310,6 @@ module tb_pipeline;
         end
 
         // Start loading instructions from the file
-        // Preload data memory from the file
         address = 8'd0;
         while (!$feof(fi)) begin
             code = $fscanf(fi, "%b", data);
@@ -334,7 +334,7 @@ module tb_pipeline;
         // Start simulation
         #3 reset = 0;
         #32 S = 1;
-        #20 $finish; // Stop simulation at time 40
+        // #20 $finish; // Stop simulation at time 40
     end
 
 //     // Pipeline stages update
@@ -364,17 +364,18 @@ module tb_pipeline;
 
 //         // WB stage
 //         // wb_RF_E <= mux_rf_e;
-//     end
+    end
 
-//     // Display outputs for each clock cycle
-//     always @(posedge clk) begin
-//         $display("PC: %0d | Opcode: %s", pc, get_keyword(instruction[24:21]));
-//         $display("-----------------------------------------------------------");
-//         $display("Fetch Stage:    Instruction: %b", if_instruction);
-//         $display("Decode Stage:   ALU_OP: %b | AM: %b | Load: %b | RF_E: %b", id_ALU_OP, id_AM, id_LOAD, id_RF_E);
-//         $display("Execute Stage:  ALU_OP: %b | AM: %b | S: %b | Load: %b", ex_ALU_OP, ex_AM, ex_S, ex_LOAD);
-//         $display("Memory Stage:   Load: %b | RF_E: %b | Mem Size: %b | RW: %b", mem_LOAD, mem_RF_E, mem_SIZE, mem_RW);
-//         $display("Write Back:     RF_E: %b", wb_RF_E);
-//         $display("-----------------------------------------------------------\n");
+    // Display outputs for each clock cycle
+    always @(posedge clk) begin
+        $display("PC: %0d | Opcode: %s", pc, get_keyword(instruction[24:21]));
+        $display("FUNCIONA CABRON: %d", if_instruction);
+        $display("-----------------------------------------------------------");
+        // $display("Fetch Stage:    Instruction: %b", if_instruction);
+        // $display("Decode Stage:   ALU_OP: %b | AM: %b | Load: %b | RF_E: %b", id_ALU_OP, id_AM, id_LOAD, id_RF_E);
+        // $display("Execute Stage:  ALU_OP: %b | AM: %b | S: %b | Load: %b", ex_ALU_OP, ex_AM, ex_S, ex_LOAD);
+        // $display("Memory Stage:   Load: %b | RF_E: %b | Mem Size: %b | RW: %b", mem_LOAD, mem_RF_E, mem_SIZE, mem_RW);
+        // $display("Write Back:     RF_E: %b", wb_RF_E);
+        $display("-----------------------------------------------------------\n");
     end
 endmodule
