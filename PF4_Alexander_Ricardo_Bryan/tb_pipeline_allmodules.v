@@ -10,14 +10,14 @@ module tb_pipeline;
     reg S; // Multiplexer select
 
     // Outputs
-    wire [7:0] pc;
+    wire [31:0] pc;
     wire [31:0] instruction;
 
     // Pipeline registers for each stage
     // IF
     reg [31:0] if_instruction;
     reg ID_Load; // Signal LE for IF/ID
-    reg [7:0] Next_PC; // PC + 4
+    reg [31:0] Next_PC; // PC + 4
     // ID
     reg [3:0] id_ALU_OP;
     reg [1:0] id_AM;
@@ -42,6 +42,7 @@ module tb_pipeline;
     reg [3:0] RA;
     reg [3:0] RB;
     reg [3:0] RD;
+    reg [31:0] PC;
     reg [3:0] RW;    // double check this bits 
     reg [31:0] PW;   // double check this bits 
     reg [3:0] INSTR_I15_I12;
@@ -110,7 +111,7 @@ module tb_pipeline;
     // Pipeline outputs
     // IF/ID
     wire [23:0]instr_i23_i0;
-    wire [7:0] NEXT_PC;
+    wire [31:0] NEXT_PC;
     wire [3:0] instr_i3_i0;
     wire [3:0] instr_i19_i16;
     wire [3:0] instr_i31_i28;
@@ -145,7 +146,7 @@ module tb_pipeline;
 
     //ALU outputs
     wire [31:0] ALU_result;
-    wire [7:0] Next_PC;
+    wire [31:0] Next_PC;
     wire BL_OUT;
     wire N, Z, C, V;
 
@@ -182,7 +183,7 @@ module tb_pipeline;
 
     //Condition Handler Outputs
     wire [1:0] Branch;
-    wire [1:0]  BranchLink;
+    wire [1:0] BranchLink;
     wire [1:0] Stall;
     wire [1:0] NOP_EX;
 
@@ -227,24 +228,23 @@ module tb_pipeline;
           endcase
       end
     endfunction
-    // // Instantiate the IF/ID stage 
-    // IF_ID if_id (
-    //     .E(enable_ifid),
-    //     .reset(),
-    //     .clk(clk),
-    //     .instr_in(if_instruction),
-    //     .signal_Hazard(),
-    //     .next_pc(Next_PC),
+    // Instantiate the IF/ID stage 
+    IF_ID if_id (
+        .E(enable_ifid),
+        .reset(reset),
+        .clk(clk),
+        .instr_in(if_instruction),
+        .next_pc(Next_PC),
 
-    //     .instr_out(if_instruction),
-    //     .instr_i23_i0(if_instruction),    
-    //     .Next_PC(),
-    //     .instr_i3_i0(if_instruction),
-    //     .instr_i19_i16(if_instruction),
-    //     .instr_i31_i28(if_instruction),
-    //     .instr_i11_i0(if_instruction),
-    //     .instr_i15_i12(if_instruction)
-    // );
+        .instr_out(if_instruction),
+        .instr_i23_i0(if_instruction),    
+        .Next_PC(next_pc),
+        .instr_i3_i0(if_instruction),
+        .instr_i19_i16(if_instruction),
+        .instr_i31_i28(if_instruction),
+        .instr_i11_i0(if_instruction),
+        .instr_i15_i12(if_instruction)
+    );
     // // Instantiate ID/EX stage
     // EX_ID ex_id(
     //  .clk(clk),
@@ -462,13 +462,18 @@ module tb_pipeline;
         #20 $finish; // Stop simulation at time 40
     end
 
+    always @(*) begin
+        PC <= pc;
+
+    end
+
     // Pipeline stages update
     always @(posedge clk) begin
         // IF stage
         if_instruction <= instruction;
 
         // //Recently added
-        // Next_PC <= pc
+        Next_PC <= pc;
 
         // ID stage
         id_ALU_OP <= ALU_OP;
@@ -476,10 +481,10 @@ module tb_pipeline;
         id_LOAD <= ID_LOAD;
         id_RF_E <= RF_E;
 
-        // //Recently added
-        // RA <= instr_i3_i0
-        // RB <= instr_i19_i16
-        // RD <= instr_i15_i12
+        //Recently added
+        RA <= instr_i3_i0;
+        RB <= instr_i19_i16;
+        RD <= instr_i15_i12;
 
         // EX stage
         ex_ALU_OP <= mux_alu_op;

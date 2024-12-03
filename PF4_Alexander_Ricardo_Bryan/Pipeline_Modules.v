@@ -186,17 +186,17 @@ module MUX_CC (
 );
 always @(*) begin
     case (SIG_store_cc)
-        1'b0: result = ConditionCode;
-        1'b1: result = jump_MEM_instr;
+        1'b0: ConditionCodes = ConditionCode;
+        1'b1: ConditionCodes = jump_MEM_instr;
     endcase
 end
 
 endmodule
 
 module SUM_RF (
-    input [7:0] instr_SE,
-    input [7:0] nextpc,
-    output reg [7:0] TA  // Changed to reg
+    input [31:0] instr_SE,
+    input [31:0] nextpc,
+    output reg [31:0] TA  // Changed to reg
 );
 always @(*) begin
     TA = instr_SE + nextpc;
@@ -220,29 +220,24 @@ endmodule
 
 module X4_SE(
     input [23:0] instr_I23_I0,  // Input 24-bit signal
-    output reg [7:0] instr_SE   // Output 8-bit sign-extended signal
+    output reg [31:0] instr_SE // Output 32-bit sign-extended signal
 );
 
-    wire [7:0] selected_bits;  // Extracted bits for multiplication
-    wire [9:0] multiplied_bits; // Result after multiplication by 4
-
-    // Extract specific bits (for example, the 8 LSBs)
-    assign selected_bits = instr_I23_I0[7:0];
-
-    // Multiply by 4
-    assign multiplied_bits = selected_bits * 4;
+    reg [31:0] sign_extended;  // Intermediate sign-extended signal
+    reg [31:0] multiplied_value; // Result after multiplication by 4
 
     always @(*) begin
-        // Perform sign extension
-        if (multiplied_bits[9] == 1) begin
-            // If the result is negative (assuming signed operation)
-            instr_SE = {1'b1, multiplied_bits[7:0]}; // Extend with MSB = 1
-        end else begin
-            // If the result is positive
-            instr_SE = multiplied_bits[7:0]; // Use lower 8 bits directly
-        end
+        // Perform sign extension from 24 bits to 32 bits
+        sign_extended = {{8{instr_I23_I0[23]}}, instr_I23_I0};
+
+        // Multiply the sign-extended value by 4
+        multiplied_value = sign_extended << 2;
+
+        // Assign the result to the output
+        instr_SE = multiplied_value;
     end
 endmodule
+
 
 module Data_Memory_RAM (
     output reg [31:0] data_out, 
@@ -280,7 +275,7 @@ module Data_Memory_RAM (
 endmodule
 
 module MUX_DataMemory(
-    input [7:0] Addr,        
+    input [31:0] Addr,        
     input [31:0] DataOut,    
     input Sel,               
     output reg [31:0] MuxOut 
@@ -290,16 +285,16 @@ module MUX_DataMemory(
         if (Sel)
             MuxOut = DataOut;  // Select DataOut when Sel = 1
         else
-            MuxOut = {24'b0, Addr};  // Zero-extend Addr to 32 bits when Sel = 0
+            MuxOut = Addr;  // Zero-extend Addr to 32 bits when Sel = 0
     end
 
 endmodule
 
 module MUX_Fetch (
-    input [7:0] SUMOUT,        
-    input [7:0] TA,         
+    input [31:0] SUMOUT,        
+    input [31:0] TA,         
     input Sel,               
-    output reg [7:0] MuxOut  
+    output reg [31:0] MuxOut  
 );
 
     always @(*) begin
@@ -334,10 +329,10 @@ endmodule
 
 module MUX_ALU (
     input [31:0] alu_result,
-    input [7:0] Next_PC,
+    input [31:0] Next_PC,
     input BL_OUT,
 
-    output reg [7:0] DM_address
+    output reg [31:0] DM_address
 );
     always @(*) begin
         if (BL_OUT)
@@ -618,24 +613,24 @@ module PC (
   input clk,                // Clock signal
   input reset,              // Reset signal to initialize PC to 0
   input E,                  // Enable signal for updating PC
-  input [7:0] next_pc,      // 8-bit external incremented PC input
-  output reg [7:0] pc       // 8-bit Program Counter
+  input [31:0] next_pc,      // 8-bit external incremented PC input
+  output reg [31:0] pc       // 8-bit Program Counter
 );
 
   always @(posedge clk or posedge reset) begin
     if (reset)
-      pc <= 8'b0;               // Reset PC to 0
+      pc <= 32'b0;               // Reset PC to 0
     else if (E)
       pc <= next_pc;            // Update PC from external adder result
   end
 endmodule
 
 module adder (
-  input [7:0] address,       // 8-bit input address
-  output [7:0] result        // 8-bit output result (address + 4)
+  input [31:0] pc,       // 8-bit input address
+  output [31:0] PC        // 8-bit output result (address + 4)
 );
 
-  assign result = address + 8'd4;  // Increment address by 4
+  assign PC = pc + 32'd4;  // Increment address by 4
 endmodule
 
 module IF_ID (
@@ -643,8 +638,7 @@ module IF_ID (
     input reset,
     input clk,
     input [31:0] instr_in,
-    input signal_Hazard,                //added input signals
-    input [7:0] next_pc,
+    input [31:0] next_pc,
 
     output reg [31:0] instr_out,
     output reg [23:0] instr_i23_i0,    // added output signals
@@ -660,7 +654,7 @@ module IF_ID (
         if (reset) begin
             instr_out <= 32'b0;
             instr_i23_i0 <=24'b0;
-            Next_PC <=8'b0;
+            Next_PC <=32'b0;
             instr_i3_i0 <= 4'b0;
             instr_i19_i16 <= 4'b0;
             instr_i31_i28 <= 4'b0;
@@ -694,7 +688,7 @@ module ID_EX (
     input ID_B,
     input RF_ENABLE,
     input BL_OUT,                   //added connections
-    input [7:0] NEXT_PC,
+    input [31:0] NEXT_PC,
     input [31:0] MUX_PA,
     input [31:0] MUX_PB,
     input [31:0] PD,
@@ -712,7 +706,7 @@ module ID_EX (
     output reg id_b,
     output reg rf_enable,
     output reg bl_out,              //added connections
-    output reg [7:0] next_pc,
+    output reg [31:0] next_pc,
     output reg [31:0] mux_pa,
     output reg [31:0] mux_pb,
     output reg [31:0] pd,
@@ -732,7 +726,7 @@ module ID_EX (
             id_b <= 0;
             rf_enable <= 0;
             bl_out <= 0;              //added connections
-            next_pc <= 8'b0;
+            next_pc <= 32'b0;
             mux_pa <= 32'b0;
             mux_pb <= 32'b0;
             pd <= 32'b0;
