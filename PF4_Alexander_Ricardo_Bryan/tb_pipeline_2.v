@@ -46,11 +46,48 @@ module tb_pipeline;
     wire cu_idmeme_mux;
     wire cu_rfe_rfmux;
 
+    // ====================================
     // RF Enable Mux
-
+    // ====================================
     wire rfmux_rfe_cumux;
     wire chandler_blout_rfmux;
 
+
+    // ====================================
+    // Control Unit Mux wires
+    // ====================================
+
+    wire [3:0] mux_aluop_id;
+    wire mux_idload_id;
+    wire mux_memwrite_id;
+    wire mux_storecc_id;
+    wire mux_memsize_id;
+    wire mux_meme_id;
+    wire mux_rfe_id;
+    wire [1:0] mux_idam_id;
+
+    wire mux_bl_chandler;
+    wire mux_b_chandler;
+    wire hazard_cumuxenable_mux;
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+
+    // ====================================
+    // 
+    // ====================================
 
 
     /////////////////////////////////////////////////
@@ -164,13 +201,14 @@ module tb_pipeline;
         .ALU_OP             (cu_idaluop_mux),
         .ID_LOAD            (cu_idload_mux),
         .ID_MEM_WRITE       (cu_idmemwrite_mux),
-        .ID_AM              (cu_idam_mux),
         .STORE_CC           (cu_storecc_mux),
-        .ID_B               (cu_idb_mux),
-        .ID_BL              (cu_idbl_mux),
         .ID_MEM_SIZE        (cu_idmemsize_mux),
         .ID_MEM_E           (cu_idmeme_mux),
-        .RF_E               (cu_rfe_rfmux)
+        .RF_E               (cu_rfe_rfmux),
+        .ID_AM              (cu_idam_mux),
+
+        .ID_B               (cu_idb_mux),
+        .ID_BL              (cu_idbl_mux)
     );
 
     // RF Enable Mux
@@ -179,31 +217,36 @@ module tb_pipeline;
         .s_rfenable (chandler_blout_rfmux),
         .out_rf_enable (rfmux_rfe_cumux)
     );
+    
 
-//     // Instantiate the Multiplexer
-//     Multiplexer uut_mux (
-//         .alu_op(mux_alu_op),
-//         .id_load(mux_id_load),
-//         .id_mem_write(mux_id_mem_write),
-//         .store_cc(mux_store_cc),
-//         .id_b(mux_id_b),
-//         .id_bl(mux_id_bl),
-//         .id_mem_size(mux_id_mem_size),
-//         .id_mem_e(mux_id_mem_e),
-//         .rf_e(mux_rf_e),
-//         .id_am(mux_id_am),
-//         .S(S),
-//         .ALU_OP(ALU_OP),
-//         .ID_LOAD(ID_LOAD),
-//         .ID_MEM_WRITE(ID_MEM_WRITE),
-//         .STORE_CC(STORE_CC),
-//         .ID_B(ID_B),
-//         .ID_BL(ID_BL),
-//         .ID_MEM_SIZE(ID_MEM_SIZE),
-//         .ID_MEM_E(ID_MEM_E),
-//         .RF_E(RF_E),
-//         .ID_AM(ID_AM)
-//     );
+    // Instantiate the Multiplexer
+    Multiplexer uut_mux (
+        .alu_op         (cu_idaluop_mux),
+        .id_load        (cu_idload_mux),
+        .id_mem_write   (cu_idmemwrite_mux),
+        .store_cc       (cu_storecc_mux),
+        .id_mem_size    (cu_idmemsize_mux),
+        .id_mem_e       (cu_idmeme_mux),
+        .rf_e           (cu_rfe_rfmux),
+        .id_am          (cu_idam_mux),
+
+        .id_bl          (mux_bl_chandler),
+        .id_b           (mux_b_chandler),
+
+        .S              (hazard_cumuxenable_mux),
+
+        .ALU_OP         (mux_aluop_id),
+        .ID_LOAD        (mux_idload_id),
+        .ID_MEM_WRITE   (mux_memwrite_id),
+        .STORE_CC       (mux_storecc_id),
+        .ID_MEM_SIZE    (mux_memsize_id),
+        .ID_MEM_E       (mux_meme_id),
+        .RF_E           (mux_rfe_id),
+        .ID_AM          (mux_idam_id),
+
+        .ID_B           (mux_bl_chandler),
+        .ID_BL          (mux_b_chandler)
+    );
 
 
     // Instantiate the instruction memory (ROM)
