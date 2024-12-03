@@ -119,6 +119,13 @@ module tb_pipeline;
     wire [31:0] fetch_npc_pc;
 //= ==
 
+    // ====================================
+    // Muxes or something
+    // ====================================
+    wire chandler_blout_idmux;
+    wire [3:0] idmux_out_ex;
+
+
 
     // Helper function to get the keyword based on opcode
     function [7*8:1] get_keyword;
@@ -184,8 +191,119 @@ module tb_pipeline;
         .TA         (adderrf_ta_fetch)
     );
 
-    
+    MUX_I15_I12 mux_i15_i12 ( // this is the immediate destiny mux btw
+        .inst_I15_I12 (instr_i15_i12),
+        .BL_out       (chandler_blout_idmux),
+        .result       (idmux_out_ex)
+    );
 
+
+
+
+    // MUX_PA mux_pa (
+    //     .pa             (rf_registerpa_mux),
+    //     .jump_EX_pa     (),
+    //     .jump_MEM_pa    (),
+    //     .jump_WB_pa     (),
+    //     .S_PB           (),
+    //     .rf_pb          ()
+    // );
+
+//     MUX_PB mux_pb (
+//         .pb             (rf_registerpb_mux),
+//         .jump_EX_pb     (),
+//         .jump_MEM_pb    (),
+//         .jump_WB_pb     (),
+//         .S_PB           (),
+//         .rf_pB          ()
+//     );
+
+//     MUX_PD mux_pd (
+//         .pd             (rf_registerpd_mux),
+//         .jump_EX_pd     (),
+//         .jump_MEM_pd    (),
+//         .jump_WB_pd     (),
+//         .S_PD           (),
+//         .rf_pd          ()
+//     );    
+
+
+// ID_EX id_ex (
+//     .clk                    (),,
+//     .reset                  (),,
+//     .ID_ALU_OP                  (),
+//     .ID_LOAD                    (),
+//     .ID_MEM_WRITE                   (),
+//     .ID_MEM_SIZE                    (),
+//     .ID_MEM_ENABLE                  (),
+//     .ID_AM                  (),
+//     .STORE_CC                   (),
+//     .ID_BL                  (),
+//     .ID_B                   (),
+//     .RF_ENABLE                  (),
+//     .BL_OUT                 (),
+//     .NEXT_PC                    (),
+//     .MUX_PA                 (),
+//     .MUX_PB                 (),
+//     .PD                 (),
+//     .MUX_INSTR_I15_I12                  (),
+//     .INSTR_I11_I0                   (),
+//     .id_alu_op                  (),
+//     .id_load                    (),
+//     .id_mem_write                   (),
+//     .id_mem_size                    (),
+//     .id_mem_enable                  (),
+//     .id_am                  (),
+//     .store_cc                   (),
+//     .id_bl                  (),
+//     .id_b                   (),
+//     .rf_enable                  (),
+//     .bl_out                 (),
+//     .next_pc                    (),
+//     .mux_pa                 (),
+//     .mux_pb                 (),
+//     .pd                 (),
+//     .mux_instr_i15_i12                  (),
+//     .instr_i11_i0                   ()
+// );
+
+
+//  ConditionHandler conditionhandler(
+//     .ConditionCode              (),
+//     .N                          (),
+//     .Z                          (),
+//     .C                          (),
+//     .V                          (),
+//     .instruction                (),
+//     .SIG_B                      (),
+//     .SIG_BL                     (),
+//     .c_field                    (),
+//     .STORE_CC                   (),
+//     .Branch                     (),
+//     .BranchLink                 (),
+//     .Stall                      (),
+//     .NOP_EX                     ()
+//  );
+
+
+//     ALU alu (
+
+//     );
+
+
+    Three_port_register_file tprf (
+        .RA   (instr_i3_i0),
+        .RB   (instr_i19_i16),
+        .RD   (instr_i15_i12),
+        .RW   (wb_registerrw_rf),
+        .PW   (wb_registerpw_rf),
+        .PC   (pc),
+        .Clk  (clk), 
+        .LE   (wb_registerle_rf),
+        .PA   (rf_registerpa_mux), 
+        .PB   (rf_registerpb_mux), 
+        .PD   (rf_registerpd_mux)
+    );
 
     // Instantiate the ControlUnit module
     ControlUnit uut_control (

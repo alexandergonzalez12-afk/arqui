@@ -327,6 +327,7 @@ module ALU (
     end
 endmodule
 
+
 module MUX_ALU (
     input [31:0] alu_result,
     input [31:0] Next_PC,
@@ -364,53 +365,191 @@ module FlagRegister (
         end
     end
 endmodule
-module ConditionHandler (
-    input [3:0] ConditionCode,
-    input N, Z, C, V,
-    input [31:28] instruction,
-    input SIG_B,
-    input SIG_BL,
-    input [3:0] c_field,
-    input STORE_CC,  // Signal to indicate if the instruction modifies condition codes
-    output reg Branch,
-    output reg BranchLink,
-    output reg Stall,  // Signal to indicate a stall due to control hazard
-    output reg NOP_EX  // Signal to convert instruction to NOP if condition is not met
+module ConditionHandler(
+  input ID_BL_instr,
+  input ID_B_instr,
+  input Z,
+  input N,
+  input C,
+  input V,
+  input [3:0] Condition,
+  output reg EX_BL_instr, 
+  output reg Branched
 );
+always @(*) begin 
+  EX_BL_instr = 0;
+  Branched = 0;
 
-    always @(*) begin
-        Branch = 1'b0;
-        BranchLink = 1'b0;
-        Stall = 1'b0;
-        NOP_EX = 1'b0;
-
-        // Determine if the condition specified by c_field is met
-        case (c_field)
-            4'b0000: if (Z) Branch = 1'b1;                 // EQ (Equal)
-            4'b0001: if (!Z) Branch = 1'b1;                // NE (Not Equal)
-            4'b1010: if (N == V) Branch = 1'b1;            // GE (Greater or Equal)
-            4'b1011: if (N != V) Branch = 1'b1;            // LT (Less Than)
-            // Add other conditions as needed
-            default: Branch = 1'b0;                        // No condition met
-        endcase
-
-        // Handle BranchLink signal
-        if (SIG_BL || (Branch && instruction[24])) begin
-            BranchLink = 1'b1;
+  if(ID_B_instr) begin
+  case (Condition) 
+      4'b0000: begin
+        if(Z) begin
+          Branched = 1;
         end
-
-        // Handle control hazard due to condition code modification
-        if (Branch && STORE_CC) begin
-            Stall = 1'b1;  // Stall the pipeline if the branch instruction modifies condition codes
-        end else if (Branch && !STORE_CC) begin
-            Stall = 1'b0;  // Do not stall if branch does not modify condition codes
+      end
+      4'b0001: begin
+        if(!Z) begin
+          Branched = 1;
         end
-
-        // Convert instruction to NOP if condition is not met
-        if (!Branch && ConditionCode != 4'b1110) begin
-            NOP_EX = 1'b1;
+      end
+      4'b0010: begin
+        if(C) begin
+          Branched = 1;
         end
+      end
+      4'b0011: begin
+        if(!C) begin
+          Branched = 1;
+        end
+      end
+      4'b0100: begin
+        if(N) begin
+          Branched = 1;
+        end
+      end
+      4'b0101: begin
+        if(!N) begin
+          Branched = 1;
+        end
+      end
+      4'b0110: begin
+      if(V) begin
+          Branched = 1;
+      end
+      end
+      4'b0111: begin
+      if(!V) begin
+          Branched = 1;
+      end
+      end
+      4'b1000: begin
+      if(C & !Z) begin
+          Branched = 1;
+      end
+      end
+      4'b1001: begin
+      if(!C || Z) begin
+          Branched = 1;
+      end
+      end
+      4'b1010: begin
+        if(N == V) begin
+          Branched = 1;
+      end
+      end
+      4'b1011: begin
+        if(!N == V) begin
+          Branched = 1;
+      end
+      end
+      4'b1100: begin
+        if(Z == 0 & N == V) begin
+          Branched = 1;
+      end
+      end
+      4'b1101: begin
+        if(Z == 1 || N == !V) begin
+          Branched = 1;
+      	end   
+      end
+    
+    endcase
+  end
+         
+   else if(ID_BL_instr) begin
+  	case (Condition) 
+      4'b0000: begin
+        if(Z) begin
+          Branched = 1;
+          EX_BL_instr = 1;
+        end
+      end
+      4'b0001: begin
+        if(!Z) begin
+          Branched = 1;
+          EX_BL_instr = 1;          
+        end
+      end
+      4'b0010: begin
+        if(C) begin
+          Branched = 1;
+          EX_BL_instr = 1;
+        end
+      end
+      4'b0011: begin
+        if(!C) begin
+          Branched = 1;
+          EX_BL_instr = 1;
+
+        end
+      end
+      4'b0100: begin
+        if(N) begin
+          Branched = 1;
+          EX_BL_instr = 1;
+
+        end
+      end
+      4'b0101: begin
+        if(!N) begin
+          Branched = 1;
+          EX_BL_instr = 1;
+
+        end
+      end
+      4'b0110: begin
+      if(V) begin
+          Branched = 1;
+          EX_BL_instr = 1;
+
+      end
+      end
+      4'b0111: begin
+      if(!V) begin
+          Branched = 1;
+          EX_BL_instr = 1;
+
+      end
+      end
+      4'b1000: begin
+      if(C & !Z) begin
+          Branched = 1;
+          EX_BL_instr = 1;
+	  	end
+      end
+      4'b1001: begin
+      if(!C || Z) begin
+          Branched = 1;
+          EX_BL_instr = 1;
+      	end
+      end
+      4'b1010: begin
+        if(N == V) begin
+          Branched = 1;
+          EX_BL_instr = 1;
+      	end
+      end
+      4'b1011: begin
+        if(!N == V) begin
+          Branched = 1;
+          EX_BL_instr = 1;
+    	end
+      end
+      4'b1100: begin
+        if(Z == 0 & N == V) begin
+          Branched = 1;
+          EX_BL_instr = 1;
+      	end
+      end
+      4'b1101: begin
+        if(Z == 1 || N == !V) begin
+          Branched = 1;
+          EX_BL_instr = 1;
+      	end
+      end 
+    endcase
     end
+  end
 endmodule
 
 module ARM_Shifter (
@@ -692,7 +831,7 @@ module ID_EX (
     input [31:0] MUX_PA,
     input [31:0] MUX_PB,
     input [31:0] PD,
-    input [3:0] MUX_INSTR_I15_I12,
+    input [3:0]  MUX_INSTR_I15_I12,
     input [11:0] INSTR_I11_I0,      // finished added connection
 
     output reg [3:0] id_alu_op,
@@ -710,7 +849,7 @@ module ID_EX (
     output reg [31:0] mux_pa,
     output reg [31:0] mux_pb,
     output reg [31:0] pd,
-    output reg [3:0] mux_instr_i15_i12,
+    output reg [3:0]  mux_instr_i15_i12,
     output reg [11:0] instr_i11_i0  // finished added connection
 );
     always @(posedge clk or posedge reset) begin
