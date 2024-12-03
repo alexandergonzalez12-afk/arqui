@@ -80,7 +80,7 @@ module tb_pipeline;
 
     //MUX_ALU inputs
     reg [31:0] alu_result;
-    reg [7:0] Next_PC;
+    reg [31:0] Next_PC;
     reg BL_OUT;
 
     // Shifter inputs
@@ -89,7 +89,7 @@ module tb_pipeline;
     reg [1:0] AM;        
 
     //MUX DATA MEMORY
-    reg [7:0] Addr;     
+    reg [31:0] Addr;     
     reg [31:0] DataOut;    
     reg Sel;
 
@@ -163,8 +163,8 @@ module tb_pipeline;
     wire [31:0] MuxOut;
 
     // output TA
-    wire [7:0] TA;
-    wire [7:0] instr_SE;
+    wire [31:0] TA;
+    wire [31:0] instr_SE;
 
     //Register File
     wire [31:0] PA;
@@ -291,7 +291,7 @@ module tb_pipeline;
         .clk(clk),
         .reset(reset),
         .E(enable_pc),
-        .next_pc(pc + 8'd4), // Increment PC by 4
+        .next_pc(pc + 32'd4), // Increment PC by 4
         .pc(pc)
     );
 
