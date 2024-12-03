@@ -236,14 +236,14 @@ module tb_pipeline;
     //     .signal_Hazard(),
     //     .next_pc(Next_PC),
 
-    //     .instr_out(),
-    //     .instr_i23_i0(),    
+    //     .instr_out(if_instruction),
+    //     .instr_i23_i0(if_instruction),    
     //     .Next_PC(),
-    //     .instr_i3_i0(),
-    //     .instr_i19_i16(),
-    //     .instr_i31_i28(),
-    //     .instr_i11_i0(),
-    //     .instr_i15_i12()
+    //     .instr_i3_i0(if_instruction),
+    //     .instr_i19_i16(if_instruction),
+    //     .instr_i31_i28(if_instruction),
+    //     .instr_i11_i0(if_instruction),
+    //     .instr_i15_i12(if_instruction)
     // );
     // // Instantiate ID/EX stage
     // EX_ID ex_id(

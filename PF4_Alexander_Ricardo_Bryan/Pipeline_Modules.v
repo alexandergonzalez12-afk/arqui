@@ -659,8 +659,23 @@ module IF_ID (
     always @(posedge clk or posedge reset) begin
         if (reset) begin
             instr_out <= 32'b0;
+            instr_i23_i0 <=24'b0;
+            Next_PC <=8'b0;
+            instr_i3_i0 <= 4'b0;
+            instr_i19_i16 <= 4'b0;
+            instr_i31_i28 <= 4'b0;
+            instr_i11_i0 <= 12'b0;
+            instr_i15_i12 <=4'b0
+
+
         end else if (E) begin
             instr_out <= instr_in;
+            Next_PC <= next_pc;
+            instr_i3_i0 <= instr_in[3:0];
+            instr_i19_i16 <= instr_in[19:16];
+            instr_i31_i28 <= instr_in[31:28];
+            instr_i11_i0 <= instr_in[11:0];
+            instr_i15_i12 <=instr_in[15:12];
         end
     end
 endmodule
