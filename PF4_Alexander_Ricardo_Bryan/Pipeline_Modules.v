@@ -179,15 +179,15 @@ end
 endmodule
 
 module MUX_CC (
-    input [3:0] ConditionCode, 
-    input [31:0] jump_MEM_instr,
-    input SIG_store_cc,
+    input N,Z,C,V,
+    input [3:0] Flag_out,
+    input SIG_store_cc, //selector
     output reg [3:0] ConditionCodes  // Changed to reg
 );
 always @(*) begin
     case (SIG_store_cc)
-        1'b0: ConditionCodes = ConditionCode;
-        1'b1: ConditionCodes = jump_MEM_instr;
+        1'b0: ConditionCodes = {N,Z,C,V}; // show this to professor, is this in order?
+        1'b1: ConditionCodes = Flag_out;
     endcase
 end
 
@@ -343,28 +343,24 @@ module MUX_ALU (
     end
 endmodule
 
-module FlagRegister (
-    input clk,
-    input reset,
-    input update,
-    input STORE_CC,             //added signal store cc
-    input N_in, Z_in, C_in, V_in,
-    output reg N, Z, C, V
+module PSR(
+ input STORE_CC,
+ input Z_in,C_in,N_in,V_in,
+ output reg Z_out,N_out,C_out,V_out //Z, N, C, V
 );
-    always @(posedge clk or posedge reset) begin
-        if (reset) begin
-            N <= 1'b0;
-            Z <= 1'b0;
-            C <= 1'b0;
-            V <= 1'b0;
-        end else if (update) begin
-            N <= N_in;
-            Z <= Z_in;
-            C <= C_in;
-            V <= V_in;
-        end
-    end
+always @(*) begin
+  if(STORE_CC) begin
+    Z_out <= Z_in;
+    N_out <= N_in;
+    C_out <= C_in;
+    V_out <= V_in;
+  end
+end
 endmodule
+
+
+
+
 module ConditionHandler(
   input ID_BL_instr,
   input ID_B_instr,
@@ -886,25 +882,25 @@ module ID_EX (
 endmodule
 
 module EX_MEM(
-    input clk,
-    input reset,
-    input ID_LOAD,
-    input ID_MEM_WRITE,
-    input ID_MEM_SIZE,
-    input ID_MEM_ENABLE,
-    input RF_ENABLE,
-    input [31:0] MUX_PD,
-    input [7:0] DM_ADDRESS,
-    input [3:0] MUX_INSTR_I15_I12,
+    input               clk,
+    input               reset,
+    input               ID_LOAD,
+    input               ID_MEM_WRITE,
+    input               ID_MEM_SIZE,
+    input               ID_MEM_ENABLE,
+    input               RF_ENABLE,
+    input [31:0]        MUX_PD,
+    input [7:0]         DM_ADDRESS,
+    input [3:0]         MUX_INSTR_I15_I12,
 
-    output reg id_load,
-    output reg id_mem_size,
-    output reg id_mem_write,
-    output reg id_mem_enable,
-    output reg rf_enable,
-    output reg [31:0] mux_pd,
-    output reg [7:0] dm_address,
-    output reg [3:0] mux_instr_i15_i12
+    output reg          id_load,
+    output reg          id_mem_size,
+    output reg          id_mem_write,
+    output reg          id_mem_enable,
+    output reg          rf_enable,
+    output reg [31:0]   mux_pd,
+    output reg [7:0]    dm_address,
+    output reg [3:0]    mux_instr_i15_i12
 );
     always @(posedge clk or posedge reset) begin
         if (reset) begin

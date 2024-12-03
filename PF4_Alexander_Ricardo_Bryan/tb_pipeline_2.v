@@ -251,19 +251,19 @@ ID_EX id_ex (
     
     .BL_OUT                 (chandler_blout_idmux),
     .NEXT_PC                (if_npc_fetch),
-    .MUX_PA                 (),
-    .MUX_PB                 (),
-    .MUX_PD                 (),
+    .MUX_PA                 (), // salida de los muxes de la etapa id/ex (inputs)
+    .MUX_PB                 (), // salida de los muxes de la etapa id/ex (inputs)
+    .MUX_PD                 (), // salida de los muxes de la etapa id/ex (inputs)
     .MUX_INSTR_I15_I12      (idmux_out_ex),
     .INSTR_I11_I0           (instr_i11_i0),
 
-    .id_alu_op              (ex_aluop_),
+    .id_alu_op              (ex_aluop_alu),
     .id_load                (ex_load_),
     .id_mem_write           (ex_memwrite_),
     .id_mem_size            (ex_memsize_),
     .id_mem_enable          (ex_memenable_),
     .id_am                  (ex_am_),
-    .store_cc               (ex_storecc_),
+    .store_cc               (ex_storecc_psr),
     .rf_enable              (ex_rfenable_mem),
     .bl_out                 (ex_blout_muxalu),
     .next_pc                (ex_nextpc_muxalu),
@@ -287,9 +287,74 @@ ID_EX id_ex (
     .Branched                   (chandler_branch_mux)
  );
 
+    MUX_ALU mux_alu (
+        .alu_result  (alu_out_muxaluandidmuxes),
+        .Next_PC     (ex_nextpc_muxalu),
+        .BL_OUT      (ex_blout_muxalu),
+        .DM_address  (alumux_dmaddress_mem)
+    );
 
     ALU alu (
+        .A          (ex_muxpa_alu),
+        .B          (ex_muxpb_alu),
+        .alu_op     (ex_aluop_alu),
+        .C_IN       (psr_cin_alu),
+        .result     (alu_out_muxaluandidmuxes),
+        .Z          (alu_z_chandler),
+        .N          (alu_n_chandler),
+        .C          (alu_c_chandler),
+        .V          (alu_v_chandler)
+    );
 
+    
+    // ARM_Shifter arm_shifter (
+    //     .Rm (),
+    //     .I  (),
+    //     .AM (),
+    //     .N  ()
+    // );
+
+    EX_MEM ex_mem (
+        .clk                    (),
+        .reset                  (),
+        .ID_LOAD                (),
+        .ID_MEM_WRITE           (),
+        .ID_MEM_SIZE            (),
+        .ID_MEM_ENABLE          (),
+        .RF_ENABLE              (),
+        .MUX_PD                 (),
+        .DM_ADDRESS             (),
+        .MUX_INSTR_I15_I12      (),
+
+        .id_load                (),
+        .id_mem_size            (),
+        .id_mem_write           (),
+        .id_mem_enable          (),
+        .rf_enable              (),
+        .mux_pd                 (),
+        .dm_address             (),
+        .mux_instr_i15_i12      ()
+    );
+
+    PSR psr (
+        .STORE_CC           (ex_storecc_psr),
+        .Z_in               (alu_z_chandler),
+        .N_in               (alu_n_chandler),
+        .C_in               (alu_c_chandler),
+        .V_in               (alu_v_chandler),
+        .Z_out              (psr_z_muxcc),
+        .N_out              (psr_n_muxcc),
+        .C_out              (psr_c_muxcc),
+        .V_out              (psr_v_muxcc)
+    );
+
+    MUX_CC mux_cc (
+        .Z                  (alu_z_chandler),
+        .N                  (alu_n_chandler),
+        .C                  (alu_c_chandler),
+        .V                  (alu_v_chandler),
+        .Flag_out           ({ psr_z_muxcc, psr_n_muxcc, psr_c_muxcc, psr_v_muxcc}),
+        .ConditionCodes     (chandlermux_cc_chandler)
     );
 
 
@@ -300,10 +365,10 @@ ID_EX id_ex (
         .RW   (wb_registerrw_rf),
         .PW   (wb_registerpw_rf),
         .PC   (pc),
-        .Clk  (clk), 
+        .Clk  (clk),
         .LE   (wb_registerle_rf),
-        .PA   (rf_registerpa_mux), 
-        .PB   (rf_registerpb_mux), 
+        .PA   (rf_registerpa_mux),
+        .PB   (rf_registerpb_mux),
         .PD   (rf_registerpd_mux)
     );
 
@@ -413,33 +478,6 @@ ID_EX id_ex (
         #3 reset = 0;
         #32 S = 1;
         #20 $finish; // Stop simulation at time 40
-    end
-
-    // Pipeline stages update
-    always @(posedge clk) begin
-        // IF stage
-        // if_instruction <= instruction;
-
-        // // ID stage
-        // id_ALU_OP <= ALU_OP;
-        // id_AM <= ID_AM;
-        // id_LOAD <= ID_LOAD;
-        // id_RF_E <= RF_E;
-
-        // // EX stage
-        // ex_ALU_OP <= mux_alu_op;
-        // ex_AM <= mux_id_am;
-        // ex_S <= S;
-        // ex_LOAD <= mux_id_load;
-
-        // // MEM stage
-        // mem_LOAD <= mux_id_load;
-        // mem_RF_E <= mux_rf_e;
-        // mem_SIZE <= mux_id_mem_size;
-        // mem_RW <= mux_id_mem_write;
-
-        // WB stage
-        // wb_RF_E <= mux_rf_e;
     end
 
     // Display outputs for each clock cycle
