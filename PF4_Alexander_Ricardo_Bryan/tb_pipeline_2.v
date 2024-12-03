@@ -35,8 +35,25 @@ module tb_pipeline;
     wire [11:0] instr_i11_i0;
     wire [3:0] instr_i15_i12;
 
-    /////////////////////////////////////////////////
+    wire [3:0] cu_idaluop_mux;
+    wire cu_idload_mux;
+    wire cu_idmemwrite_mux;
+    wire [1:0] cu_idam_mux;
+    wire cu_storecc_mux;
+    wire cu_idb_mux;
+    wire cu_idbl_mux;
+    wire cu_idmemsize_mux;
+    wire cu_idmeme_mux;
+    wire cu_rfe_rfmux;
 
+    // RF Enable Mux
+
+    wire rfmux_rfe_cumux;
+    wire chandler_blout_rfmux;
+
+
+
+    /////////////////////////////////////////////////
 
 
     wire [3:0] id_ALU_OP;
@@ -142,19 +159,26 @@ module tb_pipeline;
     );
 
     // Instantiate the ControlUnit module
-    // ControlUnit uut_control (
-    //     .instruction(instruction),
-    //     .ALU_OP(),
-    //     .ID_LOAD(),
-    //     .ID_MEM_WRITE(),
-    //     .ID_AM(),
-    //     .STORE_CC(STORE_CC),
-    //     .ID_B(ID_B),
-    //     .ID_BL(ID_BL),
-    //     .ID_MEM_SIZE(ID_MEM_SIZE),
-    //     .ID_MEM_E(ID_MEM_E),
-    //     .RF_E(RF_E)
-    // );
+    ControlUnit uut_control (
+        .instruction        (instruction),
+        .ALU_OP             (cu_idaluop_mux),
+        .ID_LOAD            (cu_idload_mux),
+        .ID_MEM_WRITE       (cu_idmemwrite_mux),
+        .ID_AM              (cu_idam_mux),
+        .STORE_CC           (cu_storecc_mux),
+        .ID_B               (cu_idb_mux),
+        .ID_BL              (cu_idbl_mux),
+        .ID_MEM_SIZE        (cu_idmemsize_mux),
+        .ID_MEM_E           (cu_idmeme_mux),
+        .RF_E               (cu_rfe_rfmux)
+    );
+
+    // RF Enable Mux
+    MUX_RFenable mux_rf (
+        .id_rf_e (cu_rfe_rfmux),
+        .s_rfenable (chandler_blout_rfmux),
+        .out_rf_enable (rfmux_rfe_cumux)
+    );
 
 //     // Instantiate the Multiplexer
 //     Multiplexer uut_mux (

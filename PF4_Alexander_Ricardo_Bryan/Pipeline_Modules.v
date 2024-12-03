@@ -205,9 +205,9 @@ end
 endmodule
 
 module MUX_RFenable (
-    input id_rf_e,
-    input s_rfenable,
-    output reg out_rf_enable  // Changed to reg
+    input       id_rf_e,
+    input       s_rfenable,
+    output reg  out_rf_enable  // Changed to reg
 );
 always @(*) begin
     case (s_rfenable)
