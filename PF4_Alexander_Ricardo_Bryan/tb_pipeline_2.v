@@ -1,6 +1,7 @@
 `timescale 1ns / 1ps
 `include "Pipeline_Modules.v"
 
+
 module tb_pipeline;
 
     // Inputs
@@ -10,23 +11,49 @@ module tb_pipeline;
     reg enable_ifid;
     reg S; // Multiplexer select
 
-
-    wire [31:0] adderrf_ta_fetch;
-    wire chandler_branch_mux;
-
     // Outputs
     wire [31:0] pc;
     wire [31:0] npc;
-    wire [31:0] fetch_npc_pc;
+
+
     wire [31:0] if_npc_fetch;
-    wire [31:0] pc_adder;
     wire [31:0] instruction;
 
     // Pipeline registers for each stage
     wire [31:0] if_instruction;
+    reg [3:0] id_ALU_OP;
+    reg [1:0] id_AM;
+    reg id_LOAD, id_RF_E;
+    reg [3:0] ex_ALU_OP;
+    reg [1:0] ex_AM;
+    reg ex_S, ex_LOAD;
+    reg mem_LOAD, mem_RF_E, mem_SIZE, mem_RW;
+    reg wb_RF_E;
 
-    // Pipeline outputs
+    // Control signals from ControlUnit
+    wire [3:0] ALU_OP;
+    wire ID_LOAD, ID_MEM_WRITE, STORE_CC, ID_B, ID_BL, ID_MEM_SIZE, ID_MEM_E, RF_E;
+    wire [1:0] ID_AM;
+
+    // Outputs from Multiplexer
+    wire [3:0] mux_alu_op;
+    wire mux_id_load, mux_id_mem_write, mux_store_cc, mux_id_b, mux_id_bl, mux_id_mem_size, mux_id_mem_e, mux_rf_e;
+    wire [1:0] mux_id_am;
+
+    integer fi, code;
+    reg [31:0] data;       // For loading instruction data
+    reg [7:0] address;     // Temporary address variable
+
+
+    // ====================================
+    // Mux of Target Address
+    // ====================================
+    wire [31:0] adderrf_ta_fetch;
+    wire chandler_branch_mux;
+
+    // ====================================
     // IF/ID
+    // ====================================
     wire [23:0]instr_i23_i0;
     wire [31:0] NEXT_PC;
     wire [3:0] instr_i3_i0;
@@ -82,59 +109,16 @@ module tb_pipeline;
     wire [31:0] rf_registerpb_mux;
     wire [31:0] rf_registerpd_mux;
 
-    
-    
-    
-    
-    
-    
-
-
-
-
-
 
     // ====================================
-    // 
+    // 4X SE 
     // ====================================
+    wire [31:0] x4_shift_adderta;
 
+// ===
+    wire [31:0] fetch_npc_pc;
+//= ==
 
-    /////////////////////////////////////////////////
-
-
-    wire [3:0] id_ALU_OP;
-    wire [1:0] id_AM;
-    wire id_LOAD, id_RF_E;
-    wire [3:0] ex_ALU_OP;
-    wire [1:0] ex_AM;
-    wire ex_S, ex_LOAD;
-    wire mem_LOAD, mem_RF_E, mem_SIZE, mem_RW;
-    wire wb_RF_E;
-
-    // Control signals from ControlUnit
-    wire [3:0] ALU_OP;
-    wire ID_LOAD, ID_MEM_WRITE, STORE_CC, ID_B, ID_BL, ID_MEM_SIZE, ID_MEM_E, RF_E;
-    wire [1:0] ID_AM;
-
-    // Outputs from Multiplexer
-    wire [3:0] mux_alu_op;
-    wire mux_id_load, mux_id_mem_write, mux_store_cc, mux_id_b, mux_id_bl, mux_id_mem_size, mux_id_mem_e, mux_rf_e;
-    wire [1:0] mux_id_am;
-
-
-
-
-    // ID/EX
-    // uses next pc from previous stage
-    wire [31:0] MUX_PA;
-    wire [31:0] MUX_PB;
-    wire [31:0] MUX_PD;
-    wire [3:0] MUX_I15_I12;
-
-
-    integer fi, code;
-    reg [31:0] data;       // For loading instruction data
-    reg [7:0] address;     // Temporary address variable
 
     // Helper function to get the keyword based on opcode
     function [7*8:1] get_keyword;
@@ -165,37 +149,26 @@ module tb_pipeline;
       end
     endfunction
 
-    adder addy(
-        .PC (npc), // next pc
-        .pc (pc_adder)
-    );
-
     // Instantiate the PC module with PC increment of 4
     PC uut_pc (
-        .next_pc    (pc + 32'd4), // input
-        .pc         (pc_adder), // output
-        .E          (enable_pc),
-        .clk        (clk),
-        .reset      (reset)
-    );
-
-
-    IF_ID if_id (
-        .E(enable_ifid),
-        .reset(reset),
         .clk(clk),
-        .instr_in(instruction),
-        .next_pc(npc),
-
-        .instr_out(if_instruction),
-        .instr_i23_i0(instr_i23_i0),    
-        .Next_PC(if_npc_fetch),
-        .instr_i3_i0(instr_i3_i0),
-        .instr_i19_i16(instr_i19_i16),
-        .instr_i31_i28(instr_i31_i28),
-        .instr_i11_i0(instr_i11_i0),
-        .instr_i15_i12(instr_i15_i12)
+        .reset(reset),
+        .E(enable_pc),
+        .next_pc(fetch_npc_pc), // Increment PC by 4 // in
+        .pc(pc) // out
     );
+
+    adder addy (
+        .pc (pc), // in
+        .PC (npc) // out
+    );
+
+
+    X4_SE x4_se (
+        .instr_I23_I0 (instr_i23_i0),
+        .instr_SE     (x4_shift_adderta)
+    );
+
 
     MUX_Fetch fetch (
         .SUMOUT (npc),
@@ -203,6 +176,16 @@ module tb_pipeline;
         .Sel    (chandler_branch_mux),
         .MuxOut (fetch_npc_pc)
     );
+
+
+    SUM_RF sum_rf (
+        .instr_SE   (x4_shift_adderta),
+        .nextpc     (if_npc_fetch),
+        .TA         (adderrf_ta_fetch)
+    );
+
+    
+
 
     // Instantiate the ControlUnit module
     ControlUnit uut_control (
@@ -220,62 +203,51 @@ module tb_pipeline;
         .ID_BL              (cu_idbl_mux)
     );
 
-    // RF Enable Mux
-    MUX_RFenable mux_rf (
-        .id_rf_e (cu_rfe_rfmux),
-        .s_rfenable (chandler_blout_rfmux),
-        .out_rf_enable (rfmux_rfe_cumux)
-    );
-    
-
     // Instantiate the Multiplexer
     Multiplexer uut_mux (
-        .alu_op         (cu_idaluop_mux),
-        .id_load        (cu_idload_mux),
-        .id_mem_write   (cu_idmemwrite_mux),
-        .store_cc       (cu_storecc_mux),
-        .id_mem_size    (cu_idmemsize_mux),
-        .id_mem_e       (cu_idmeme_mux),
-        .rf_e           (cu_rfe_rfmux),
-        .id_am          (cu_idam_mux),
-
-        .id_bl          (mux_bl_chandler),
-        .id_b           (mux_b_chandler),
-
-        .S              (hazard_cumuxenable_mux),
-
-        .ALU_OP         (mux_aluop_id),
-        .ID_LOAD        (mux_idload_id),
-        .ID_MEM_WRITE   (mux_memwrite_id),
-        .STORE_CC       (mux_storecc_id),
-        .ID_MEM_SIZE    (mux_memsize_id),
-        .ID_MEM_E       (mux_meme_id),
-        .RF_E           (mux_rfe_id),
-        .ID_AM          (mux_idam_id),
-
-        .ID_B           (mux_bl_chandler),
-        .ID_BL          (mux_b_chandler)
+        .alu_op(mux_alu_op),
+        .id_load(mux_id_load),
+        .id_mem_write(mux_id_mem_write),
+        .store_cc(mux_store_cc),
+        .id_b(mux_id_b),
+        .id_bl(mux_id_bl),
+        .id_mem_size(mux_id_mem_size),
+        .id_mem_e(mux_id_mem_e),
+        .rf_e(mux_rf_e),
+        .id_am(mux_id_am),
+        .S(S),
+        .ALU_OP(ALU_OP),
+        .ID_LOAD(ID_LOAD),
+        .ID_MEM_WRITE(ID_MEM_WRITE),
+        .STORE_CC(STORE_CC),
+        .ID_B(ID_B),
+        .ID_BL(ID_BL),
+        .ID_MEM_SIZE(ID_MEM_SIZE),
+        .ID_MEM_E(ID_MEM_E),
+        .RF_E(RF_E),
+        .ID_AM(ID_AM)
     );
 
 
-    Three_port_register_file tprf (
-    .RA   (instr_i3_i0),
-    .RB   (instr_i19_i16),
-    .RD   (instr_i15_i12),
-    .RW   (wb_registerrw_rf),
-    .PW   (wb_registerpw_rf),
-    .PC   (pc),
-    .Clk  (clk), 
-    .LE   (wb_registerle_rf),
-    .PA   (rf_registerpa_mux), 
-    .PB   (rf_registerpb_mux), 
-    .PD   (rf_registerpd_mux)
+    IF_ID if_id (
+        .E(enable_ifid),
+        .reset(reset),
+        .clk(clk),
+        .instr_in(instruction),
+        .next_pc(pc),
+
+        .instr_out(if_instruction),
+        .instr_i23_i0(instr_i23_i0),    
+        .Next_PC(if_npc_fetch),
+        .instr_i3_i0(instr_i3_i0),
+        .instr_i19_i16(instr_i19_i16),
+        .instr_i31_i28(instr_i31_i28),
+        .instr_i11_i0(instr_i11_i0),
+        .instr_i15_i12(instr_i15_i12)
     );
 
 
-    // ID_EX id_ex(
 
-    // )
 
 
     // Instantiate the instruction memory (ROM)
@@ -285,23 +257,13 @@ module tb_pipeline;
     );
 
 
-    // // Instantiate the data memory (RAM)
-    // Data_Memory_RAM data_mem_inst (
-    //     .data_out(Data_Memory_Out),
-    //     .address(dataMemoryAddress),
-    //     .data_in(dataMemoryIn),
-    //     .size(dataMemory_mem_size),
-    //     .rw(R/W),
-    //     .enable(dataMemoryEnable)
-    // );
-
     // Clock generation with 2 time units toggle
     initial begin
         clk = 0;
         forever #2 clk = ~clk;
     end
 
-   // Preload instructions from the file into the instruction memory
+    // Preload instructions from the file into the instruction memory
     initial begin
         fi = $fopen("codigo_validacion.txt", "r");
         if (fi == 0) begin
@@ -314,14 +276,10 @@ module tb_pipeline;
         while (!$feof(fi)) begin
             code = $fscanf(fi, "%b", data);
             rom_inst.Mem[address] = data; // Preload the ROM memory
-            //  data_mem_inst.Mem[address] = data; // Preload the RAM memory
             address = address + 1;
         end
         $fclose(fi);
     end
-
-
-
 
     // Test sequence with enforced stop time at 40
     initial begin
@@ -334,48 +292,50 @@ module tb_pipeline;
         // Start simulation
         #3 reset = 0;
         #32 S = 1;
-        // #20 $finish; // Stop simulation at time 40
+        #20 $finish; // Stop simulation at time 40
     end
 
-//     // Pipeline stages update
+    // Pipeline stages update
     always @(posedge clk) begin
+        // IF stage
+        // if_instruction <= instruction;
 
+        // // ID stage
+        // id_ALU_OP <= ALU_OP;
+        // id_AM <= ID_AM;
+        // id_LOAD <= ID_LOAD;
+        // id_RF_E <= RF_E;
 
-//         // // IF stage
-//         // if_instruction <= instruction;
+        // // EX stage
+        // ex_ALU_OP <= mux_alu_op;
+        // ex_AM <= mux_id_am;
+        // ex_S <= S;
+        // ex_LOAD <= mux_id_load;
 
-//         // // ID stage
-//         // id_ALU_OP <= ALU_OP;
-//         // id_AM <= ID_AM;
-//         // id_LOAD <= ID_LOAD;
-//         // id_RF_E <= RF_E;
+        // // MEM stage
+        // mem_LOAD <= mux_id_load;
+        // mem_RF_E <= mux_rf_e;
+        // mem_SIZE <= mux_id_mem_size;
+        // mem_RW <= mux_id_mem_write;
 
-//         // // EX stage
-//         // ex_ALU_OP <= mux_alu_op;
-//         // ex_AM <= mux_id_am;
-//         // ex_S <= S;
-//         // ex_LOAD <= mux_id_load;
-
-//         // // MEM stage
-//         // mem_LOAD <= mux_id_load;
-//         // mem_RF_E <= mux_rf_e;
-//         // mem_SIZE <= mux_id_mem_size;
-//         // mem_RW <= mux_id_mem_write;
-
-//         // WB stage
-//         // wb_RF_E <= mux_rf_e;
+        // WB stage
+        // wb_RF_E <= mux_rf_e;
     end
 
     // Display outputs for each clock cycle
     always @(posedge clk) begin
         $display("PC: %0d | Opcode: %s", pc, get_keyword(instruction[24:21]));
-        $display("FUNCIONA CABRON: %d", if_instruction);
         $display("-----------------------------------------------------------");
-        // $display("Fetch Stage:    Instruction: %b", if_instruction);
-        // $display("Decode Stage:   ALU_OP: %b | AM: %b | Load: %b | RF_E: %b", id_ALU_OP, id_AM, id_LOAD, id_RF_E);
-        // $display("Execute Stage:  ALU_OP: %b | AM: %b | S: %b | Load: %b", ex_ALU_OP, ex_AM, ex_S, ex_LOAD);
-        // $display("Memory Stage:   Load: %b | RF_E: %b | Mem Size: %b | RW: %b", mem_LOAD, mem_RF_E, mem_SIZE, mem_RW);
-        // $display("Write Back:     RF_E: %b", wb_RF_E);
+        $display("Fetch Stage:    Instruction: %b", instruction);
+        $display("Control Unit:   ALU_OP: %b | AM: %b | Load: %b | RF_E: %b", cu_idaluop_mux, cu_idam_mux, cu_idload_mux, cu_rfe_rfmux);
+        $display("IF/ID:          Instruction OUT: %b", if_instruction);
+        $display("Register File:  RA: %b | RB: %b | RD: %b | PA: %b | PB: %b | PD %d", instr_i3_i0, instr_i19_i16,  instr_i15_i12, rf_registerpa_mux, rf_registerpb_mux, rf_registerpd_mux);
+        $display("PC states:      PC: %b |nPC: %bPC | Fetch: %b", pc, npc, fetch_npc_pc);
+        $display("Control Unit Mux - ");
+        $display("Execute Stage:  ALU_OP: %b | AM: %b | S: %b | Load: %b", ex_ALU_OP, ex_AM, ex_S, ex_LOAD);
+        $display("Memory Stage:   Load: %b | RF_E: %b | Mem Size: %b | RW: %b", mem_LOAD, mem_RF_E, mem_SIZE, mem_RW);
+
+        $display("Write Back:     RF_E: %b", wb_RF_E);
         $display("-----------------------------------------------------------\n");
     end
 endmodule
