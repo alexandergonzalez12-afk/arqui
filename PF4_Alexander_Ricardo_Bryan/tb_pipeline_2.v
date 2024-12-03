@@ -24,6 +24,21 @@ module tb_pipeline;
 
     // Pipeline registers for each stage
     wire [31:0] if_instruction;
+
+    // Pipeline outputs
+    // IF/ID
+    wire [23:0]instr_i23_i0;
+    wire [31:0] NEXT_PC;
+    wire [3:0] instr_i3_i0;
+    wire [3:0] instr_i19_i16;
+    wire [3:0] instr_i31_i28;
+    wire [11:0] instr_i11_i0;
+    wire [3:0] instr_i15_i12;
+
+    /////////////////////////////////////////////////
+
+
+
     wire [3:0] id_ALU_OP;
     wire [1:0] id_AM;
     wire id_LOAD, id_RF_E;
@@ -44,15 +59,8 @@ module tb_pipeline;
     wire [1:0] mux_id_am;
 
 
-    // Pipeline outputs
-    // IF/ID
-    wire [23:0]instr_i23_i0;
-    wire [31:0] NEXT_PC;
-    wire [3:0] instr_i3_i0;
-    wire [3:0] instr_i19_i16;
-    wire [3:0] instr_i31_i28;
-    wire [11:0] instr_i11_i0;
-    wire [3:0] instr_i15_i12;
+
+
     // ID/EX
     // uses next pc from previous stage
     wire [31:0] MUX_PA;
@@ -133,23 +141,20 @@ module tb_pipeline;
         .MuxOut (fetch_npc_pc)
     );
 
-
-
-
-//     // Instantiate the ControlUnit module
-//     ControlUnit uut_control (
-//         .instruction(instruction),
-//         .ALU_OP(),
-//         .ID_LOAD(),
-//         .ID_MEM_WRITE(),
-//         .ID_AM(),
-//         .STORE_CC(STORE_CC),
-//         .ID_B(ID_B),
-//         .ID_BL(ID_BL),
-//         .ID_MEM_SIZE(ID_MEM_SIZE),
-//         .ID_MEM_E(ID_MEM_E),
-//         .RF_E(RF_E)
-//     );
+    // Instantiate the ControlUnit module
+    // ControlUnit uut_control (
+    //     .instruction(instruction),
+    //     .ALU_OP(),
+    //     .ID_LOAD(),
+    //     .ID_MEM_WRITE(),
+    //     .ID_AM(),
+    //     .STORE_CC(STORE_CC),
+    //     .ID_B(ID_B),
+    //     .ID_BL(ID_BL),
+    //     .ID_MEM_SIZE(ID_MEM_SIZE),
+    //     .ID_MEM_E(ID_MEM_E),
+    //     .RF_E(RF_E)
+    // );
 
 //     // Instantiate the Multiplexer
 //     Multiplexer uut_mux (
@@ -177,56 +182,68 @@ module tb_pipeline;
 //     );
 
 
-//     // Instantiate the instruction memory (ROM)
-//     Instruction_Memory_ROM rom_inst (
-//         .I(instruction),
-//         .A(pc) // Connect the program counter to the memory address
-//     );
-
-//     // Clock generation with 2 time units toggle
-//     initial begin
-//         clk = 0;
-//         forever #2 clk = ~clk;
-//     end
-
-//     // Preload instructions from the file into the instruction memory
-//     initial begin
-//         fi = $fopen("codigo_validacion.txt", "r");
-//         if (fi == 0) begin
-//             $display("Error: File could not be opened.");
-//             $finish;
-//         end
-
-//         // Start loading instructions from the file
-//         address = 8'd0;
-//         while (!$feof(fi)) begin
-//             code = $fscanf(fi, "%b", data);
-//             rom_inst.Mem[address] = data; // Preload the ROM memory
-//             address = address + 1;
-//         end
-//         $fclose(fi);
-//     end
+    // Instantiate the instruction memory (ROM)
+    Instruction_Memory_ROM rom_inst (
+        .I(instruction),
+        .A(pc[7:0]) // Connect the program counter to the memory address
+    );
 
 
+    // // Instantiate the data memory (RAM)
+    // Data_Memory_RAM data_mem_inst (
+    //     .data_out(Data_Memory_Out),
+    //     .address(dataMemoryAddress),
+    //     .data_in(dataMemoryIn),
+    //     .size(dataMemory_mem_size),
+    //     .rw(R/W),
+    //     .enable(dataMemoryEnable)
+    // );
+
+    // Clock generation with 2 time units toggle
+    initial begin
+        clk = 0;
+        forever #2 clk = ~clk;
+    end
+
+   // Preload instructions from the file into the instruction memory
+    initial begin
+        fi = $fopen("codigo_validacion.txt", "r");
+        if (fi == 0) begin
+            $display("Error: File could not be opened.");
+            $finish;
+        end
+
+        // Start loading instructions from the file
+        // Preload data memory from the file
+        address = 8'd0;
+        while (!$feof(fi)) begin
+            code = $fscanf(fi, "%b", data);
+            rom_inst.Mem[address] = data; // Preload the ROM memory
+            //  data_mem_inst.Mem[address] = data; // Preload the RAM memory
+            address = address + 1;
+        end
+        $fclose(fi);
+    end
 
 
 
-//     // Test sequence with enforced stop time at 40
-//     initial begin
-//         // Initialize signals
-//         reset = 1;
-//         enable_pc = 1;
-//         enable_ifid = 1;
-//         S = 0;
 
-//         // Start simulation
-//         #3 reset = 0;
-//         #32 S = 1;
-//         #20 $finish; // Stop simulation at time 40
-//     end
+    // Test sequence with enforced stop time at 40
+    initial begin
+        // Initialize signals
+        reset = 1;
+        enable_pc = 1;
+        enable_ifid = 1;
+        S = 0;
+
+        // Start simulation
+        #3 reset = 0;
+        #32 S = 1;
+        #20 $finish; // Stop simulation at time 40
+    end
 
 //     // Pipeline stages update
-//     always @(posedge clk) begin
+    always @(posedge clk) begin
 
 
 //         // // IF stage
@@ -264,5 +281,5 @@ module tb_pipeline;
 //         $display("Memory Stage:   Load: %b | RF_E: %b | Mem Size: %b | RW: %b", mem_LOAD, mem_RF_E, mem_SIZE, mem_RW);
 //         $display("Write Back:     RF_E: %b", wb_RF_E);
 //         $display("-----------------------------------------------------------\n");
-//     end
+    end
 endmodule
