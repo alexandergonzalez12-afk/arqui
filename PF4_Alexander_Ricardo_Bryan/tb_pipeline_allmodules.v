@@ -151,7 +151,7 @@ module tb_pipeline;
     wire N, Z, C, V;
 
     //MUX_ALU
-    wire [7:0] DM_address;
+    wire [31:0] DM_address;
 
     // shifter output
     wire [31:0] N;
@@ -169,7 +169,7 @@ module tb_pipeline;
     //Register File
     wire [31:0] PA;
     wire [31:0] PB;
-    wire [31:32] PD;
+    wire [31:0] PD;
     // all mux pa,pb,pd jumps
     wire [31:0] jump_EX_pa;
     wire [31:0] jump_MEM_pa;
@@ -248,7 +248,7 @@ module tb_pipeline;
     // // Instantiate ID/EX stage
     // EX_ID ex_id(
     //  .clk(clk),
-    //  .reset(),
+    //  .reset(reset),
     //  .ID_ALU_OP(),
     //  .ID_LOAD(),
     //  .ID_MEM_WRITE(),
@@ -421,32 +421,34 @@ module tb_pipeline;
         end
 
         // Start loading instructions from the file
+        // Preload data memory from the file
         address = 8'd0;
         while (!$feof(fi)) begin
             code = $fscanf(fi, "%b", data);
             rom_inst.Mem[address] = data; // Preload the ROM memory
+             data_mem_inst.Mem[address] = data; // Preload the RAM memory
             address = address + 1;
         end
         $fclose(fi);
     end
 
     // Preload data memory from the file
-    initial begin
-        fi = $fopen("codigo_validacion.txt", "r");
-        if (fi == 0) begin
-            $display("Error: File could not be opened.");
-            $finish;
-        end
+    // initial begin
+    //     fi = $fopen("codigo_validacion.txt", "r");
+    //     if (fi == 0) begin
+    //         $display("Error: File could not be opened.");
+    //         $finish;
+    //     end
 
-        // Start loading data into the memory
-        address = 8'd0;
-        while (!$feof(fi)) begin
-            code = $fscanf(fi, "%b", data);
-            data_mem_inst.Mem[address] = data; // Preload the RAM memory
-            address = address + 1;
-        end
-        $fclose(fi);
-    end
+    //     // Start loading data into the memory
+    //     address = 8'd0;
+    //     while (!$feof(fi)) begin
+    //         code = $fscanf(fi, "%b", data);
+           
+    //         address = address + 1;
+    //     end
+    //     $fclose(fi);
+    // end
 
     // Test sequence with enforced stop time at 40
     initial begin

@@ -447,7 +447,7 @@ module HazardUnit(
     input EX_Load,                                      // Load instruction signal in EX stage
     input ID_Store,                                     // Store instruction signal in ID stage
     output reg PC_Enable, IF_IF_Enable,                 // Control signals for stalling
-    output reg [1:0] forward_Rm, forward_Rn, forward_Rd, forward_Rg;
+    output reg [1:0] forward_Rm, forward_Rn, forward_Rd, forward_Rg,
     output reg [31:0] NOP_EX                            // NOP signal for EX stage
 );
 
@@ -480,11 +480,11 @@ module HazardUnit(
 
 
             // Forwarding for Rg
-        if (EX_RF_enable && (ID_Rg == EX_Rd))
+        if (EX_RF_enable && (ID_Rd == EX_Rd))
             forward_Rg = 2'b01; // Forward from EX stage
-        else if (MEM_RF_enable && (ID_Rg == MEM_Rd))
+        else if (MEM_RF_enable && (ID_Rd == MEM_Rd))
             forward_Rg = 2'b10; // Forward from MEM stage
-        else if (WB_RF_enable && (ID_Rg == WB_Rd))
+        else if (WB_RF_enable && (ID_Rd == WB_Rd))
             forward_Rg = 2'b11; // Forward from WB stage
 
 
@@ -642,7 +642,7 @@ module IF_ID (
 
     output reg [31:0] instr_out,
     output reg [23:0] instr_i23_i0,    // added output signals
-    output reg [7:0] Next_PC,
+    output reg [31:0] Next_PC,
     output reg [3:0] instr_i3_i0,
     output reg [3:0] instr_i19_i16,
     output reg [3:0] instr_i31_i28,
@@ -659,7 +659,7 @@ module IF_ID (
             instr_i19_i16 <= 4'b0;
             instr_i31_i28 <= 4'b0;
             instr_i11_i0 <= 12'b0;
-            instr_i15_i12 <=4'b0
+            instr_i15_i12 <=4'b0;
 
 
         end else if (E) begin
