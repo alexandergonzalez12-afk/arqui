@@ -70,9 +70,18 @@ module tb_pipeline;
     wire mux_b_chandler;
     wire hazard_cumuxenable_mux;
 
+    // ====================================
+    // Control Unit Mux wires
+    // ====================================
 
+    wire [3:0] wb_registerrw_rf;
+    wire wb_registerle_rf;
+    wire [31:0] wb_registerpw_rf;
     
-    
+    wire [31:0] rf_registerpa_mux;
+    wire [31:0] rf_registerpb_mux;
+    wire [31:0] rf_registerpd_mux;
+
     
     
     
@@ -247,6 +256,25 @@ module tb_pipeline;
         .ID_B           (mux_bl_chandler),
         .ID_BL          (mux_b_chandler)
     );
+
+
+    Three_port_register_file tprf (
+    .RA   (instr_i3_i0),
+    .RB   (instr_i19_i16),
+    .RD   (instr_i15_i12),
+    .RW   (wb_registerrw_rf),
+    .PW   (wb_registerpw_rf),
+    .PC   (pc),
+    .Clk  (clk), 
+    .LE   (wb_registerle_rf),
+    .PA   (rf_registerpa_mux), 
+    .PB   (rf_registerpb_mux), 
+    .PD   (rf_registerpd_mux)
+    );
+
+    // ID_EX id_ex(
+
+    // )
 
 
     // Instantiate the instruction memory (ROM)
