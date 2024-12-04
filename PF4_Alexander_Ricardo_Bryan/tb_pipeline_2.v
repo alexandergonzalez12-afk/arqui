@@ -104,7 +104,7 @@ module tb_pipeline;
     wire hazard_cumuxenable_mux;
 
     // ====================================
-    // Control Unit Mux wires
+    // register file 
     // ====================================
 
     wire [3:0] wb_registerrw_rf;
@@ -141,6 +141,44 @@ module tb_pipeline;
     wire alu_c_chandler;
     wire alu_v_chandler;
     wire [3:0] chandlermux_cc_chandler;
+
+    // ====================================
+    // ID/EX
+    // ====================================
+
+    wire [3:0] ex_aluop_alu;
+    wire ex_load_mem;
+    wire ex_memwrite_mem;
+    wire ex_memsize_mem;
+    wire ex_memenable_mem;
+    wire [1:0] ex_am_shifter;
+    wire ex_storecc_psr;
+    wire ex_rfenable_mem;
+    wire ex_blout_muxalu;
+    wire [31:0] ex_nextpc_muxalu;
+    wire [31:0] ex_muxpa_alu;
+    wire [31:0] ex_muxpb_shifter;
+    wire [31:0] ex_muxpd_mem;
+    wire [3:0] ex_muxinstri15i12_memandhazard;
+    wire [11:0] ex_instri11i0_shifter;
+
+    // ====================================
+    // ALU MUX
+    // ====================================
+
+    wire [31:0] alu_out_muxaluandidmuxes;
+    wire [31:0] alumux_dmaddress_mem;
+
+    // ====================================
+    // ALU
+    // ====================================
+
+    wire [31:0] shifter_n_alu;
+    
+
+    // ====================================
+    // 
+    // ====================================
 
     // Helper function to get the keyword based on opcode
     function [7*8:1] get_keyword;
@@ -246,14 +284,14 @@ module tb_pipeline;
 ID_EX id_ex (
     .clk                    (clk),
     .reset                  (reset),
-    .ID_ALU_OP              (ALU_OP),
-    .ID_LOAD                (ID_LOAD),
-    .ID_MEM_WRITE           (ID_MEM_WRITE),
-    .ID_MEM_SIZE            (ID_MEM_SIZE),
-    .ID_MEM_ENABLE          (ID_MEM_E),
-    .ID_AM                  (ID_AM),
-    .STORE_CC               (STORE_CC),
-    .RF_ENABLE              (RF_E),
+    .ID_ALU_OP              (mux_aluop_id),
+    .ID_LOAD                (mux_idload_id),
+    .ID_MEM_WRITE           (mux_memwrite_id),
+    .ID_MEM_SIZE            (mux_memsize_id),
+    .ID_MEM_ENABLE          (mux_meme_id),
+    .ID_AM                  (mux_idam_id),
+    .STORE_CC               (mux_storecc_id),
+    .RF_ENABLE              (mux_rfe_id),
     
     .BL_OUT                 (chandler_blout_idmux),
     .NEXT_PC                (if_npc_fetch),
@@ -264,10 +302,10 @@ ID_EX id_ex (
     .INSTR_I11_I0           (instr_i11_i0),
 
     .id_alu_op              (ex_aluop_alu),
-    .id_load                (ex_load_),
-    .id_mem_write           (ex_memwrite_),
-    .id_mem_size            (ex_memsize_),
-    .id_mem_enable          (ex_memenable_),
+    .id_load                (ex_load_mem),
+    .id_mem_write           (ex_memwrite_mem),
+    .id_mem_size            (ex_memsize_mem),
+    .id_mem_enable          (ex_memenable_mem),
     .id_am                  (ex_am_shifter),
     .store_cc               (ex_storecc_psr),
     .rf_enable              (ex_rfenable_mem),
@@ -396,18 +434,7 @@ ID_EX id_ex (
 
     // Instantiate the Multiplexer
     Multiplexer uut_mux (
-        .alu_op         (mux_alu_op),
-        .id_load        (mux_id_load),
-        .id_mem_write   (mux_id_mem_write),
-        .store_cc       (mux_store_cc),
-        .id_bl          (mux_bl_chandler),
-        .id_b           (mux_b_chandler),
-        .id_mem_size    (mux_id_mem_size),
-        .id_mem_e       (mux_id_mem_e),
-        .rf_e           (mux_rf_e),
-        .id_am          (mux_id_am),
-        .S              (S),
-        .ALU_OP         (cu_aluop_mux),
+        .ALU_OP         (cu_idaluop_mux),
         .ID_LOAD        (cu_idload_mux),
         .ID_MEM_WRITE   (cu_idmemwrite_mux),
         .STORE_CC       (cu_storecc_mux),
@@ -416,7 +443,19 @@ ID_EX id_ex (
         .ID_MEM_SIZE    (cu_idmemsize_mux),
         .ID_MEM_E       (cu_meme_mux),
         .RF_E           (cu_rfe_mux),
-        .ID_AM          (cu_idam_mux)
+        .ID_AM          (cu_idam_mux),
+        .S              (hazard_cumuxenable_mux),
+        .alu_op         (mux_aluop_id),
+        .id_load        (mux_idload_id),
+        .id_mem_write   (mux_memwrite_id),
+        .store_cc       (mux_storecc_id),
+        .id_bl          (mux_bl_chandler),
+        .id_b           (mux_b_chandler),
+        .id_mem_size    (mux_memsize_id),
+        .id_mem_e       (mux_meme_id),
+        .rf_e           (mux_rfe_id),
+        .id_am          (mux_idam_id)
+        
     );
 
 
@@ -489,21 +528,17 @@ ID_EX id_ex (
     // Display outputs for each clock cycle
     always @(posedge clk) begin
         $display("PC: %0d | Opcode: %s", pc, get_keyword(instruction[24:21]));
-        $display("-----------------------------------------------------------");
-        $display("Fetch Stage:    Instruction: %b", instruction);
-        $display("Control Unit:   ALU_OP: %b | AM: %b | Load: %b | RF_E: %b", cu_idaluop_mux, cu_idam_mux, cu_idload_mux, cu_rfe_rfmux);
-        $display("IF/ID:          Instruction OUT: %b", if_instruction);
-        $display("Register File:  RA: %b | RB: %b | RD: %b | PA: %b | PB: %b | PD %d", instr_i3_i0, instr_i19_i16,  instr_i15_i12, rf_registerpa_mux, rf_registerpb_mux, rf_registerpd_mux);
-        $display("PC states:      PC: %b |nPC: %bPC | Fetch: %b", pc, npc, fetch_npc_pc);
-        $display("Control Unit Mux -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
-        $display("ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | STORE_CC: %b | ID_BL: %b | ID_B: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | RF_E: %b | ID_AM: %b", cu_aluop_mux, cu_idload_mux, cu_idmemwrite_mux, cu_storecc_mux, cu_idbl_mux, cu_idb_mux, cu_idmemsize_mux, cu_meme_mux, cu_rfe_mux, cu_idam_mux);
-        $display("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
-        $display("IF/ID Stage Pipeline -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
-        $display("")
-        $display("Execute Stage:  ALU_OP: %b | AM: %b | S: %b | Load: %b", ex_ALU_OP, ex_AM, ex_S, ex_LOAD);
-        $display("Memory Stage:   Load: %b | RF_E: %b | Mem Size: %b | RW: %b", mem_LOAD, mem_RF_E, mem_SIZE, mem_RW);
-
-        $display("Write Back:     RF_E: %b", wb_RF_E);
-        $display("-----------------------------------------------------------\n");
+        $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
+        $display("IF/ID");
+        $display("Instruction           %b", if_instruction);
+        $display("Register File:    RA: %b | RB: %b | RD: %b | PA: %b | PB: %b | PD %d", instr_i3_i0, instr_i19_i16,  instr_i15_i12, rf_registerpa_mux, rf_registerpb_mux, rf_registerpd_mux);
+        $display("PC states:        PC: %b |nPC: %bPC | Fetch: %b", pc, npc, fetch_npc_pc);
+        $display("Control Unit:     ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | STORE_CC: %b | ID_BL: %b | ID_B: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | RF_E: %b | ID_AM: %b", cu_idaluop_mux, cu_idload_mux, cu_idmemwrite_mux, cu_storecc_mux, cu_idbl_mux, cu_idb_mux, cu_idmemsize_mux, cu_meme_mux, cu_rfe_mux, cu_idam_mux);
+        $display("Control Unit Mux: ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | STORE_CC: %b | ID_BL: %b | ID_B: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | RF_E: %b | ID_AM: %b", mux_aluop_id, mux_idload_id, mux_memwrite_id, mux_storecc_id, mux_bl_chandler, mux_b_chandler, mux_memsize_id, mux_meme_id, mux_rfe_id, mux_idam_id);
+        $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
+        $display("ID/EX");
+        $display("ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | ID_AM: %b | STORE_CC: %b | RF_E: %b | BL_Out: %b | Next PC: %b | MUX_PA: %b | MUX_PB: %b | MUX_PD: %b | MUX_15-12: %b | INSTR_11-0: %b", ex_aluop_alu, ex_load_mem, ex_memwrite_mem, ex_memsize_mem, ex_memenable_mem, ex_am_shifter, ex_storecc_psr, ex_rfenable_mem, ex_blout_muxalu, ex_nextpc_muxalu, ex_muxpa_alu, ex_muxpb_shifter, ex_muxpd_mem, ex_muxinstri15i12_memandhazard, ex_instri11i0_shifter);
+        $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
+        $display("");
     end
 endmodule
