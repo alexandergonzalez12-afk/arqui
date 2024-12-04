@@ -7,8 +7,8 @@ module tb_pipeline;
     // Inputs
     reg clk;
     reg reset;
-    reg enable_pc;
-    reg enable_ifid;
+    wire enable_pc;
+    wire enable_ifid;
     reg S; // Multiplexer select
 
     // Outputs
@@ -181,10 +181,10 @@ module tb_pipeline;
     // ====================================
 
     wire [31:0] nop;
-    reg foward_rm;
-    reg foward_rn;
-    reg foward_rd;
-    reg foward_rg;
+    wire [1:0] forward_rm;
+    wire [1:0] forward_rn;
+    wire [1:0] forward_rd;
+    wire [1:0] forward_rg;
 
     // ====================================
     // hazard Unit
@@ -368,27 +368,27 @@ ID_EX id_ex (
         .N  (shifter_n_alu)
     );
 
-    // HazardUnit hazardunit (
-    //     .EX_RF_enable   (ex_rfenable_mem),
-    //     .MEM_RF_enable  (),          
-    //     .WB_RF_enable   (),
-    //     .EX_Rd          (ex_muxpd_mem),
-    //     .MEM_Rd         (),
-    //     .WB_Rd          (),
-    //     .ID_Rm          (instr_i3_i0),
-    //     .ID_Rn          (instr_i19_i16),
-    //     .ID_Rd          (instr_i15_i12),
-    //     .EX_Load        (ex_load_mem),
-    //     .ID_Store       (ex_storecc_psr),
+    HazardUnit hazardunit (
+        .EX_RF_enable   (ex_rfenable_mem),
+        .MEM_RF_enable  (),          
+        .WB_RF_enable   (),
+        .EX_Rd          (ex_muxpd_mem),
+        .MEM_Rd         (),
+        .WB_Rd          (),
+        .ID_Rm          (instr_i3_i0),
+        .ID_Rn          (instr_i19_i16),
+        .ID_Rd          (instr_i15_i12),
+        .EX_Load        (ex_load_mem),
+        .ID_Store       (ex_storecc_psr),
 
-    //     .PC_Enable      (enable_pc),
-    //     .IF_IF_Enable   (enable_ifid),
-    //     .foward_Rm      (foward_rm),
-    //     .foward_Rn      (foward_rn),
-    //     .foward_Rd      (foward_rd),
-    //     .foward_Rg      (foward_rg),
-    //     .NOP_EX         (nop)
-    // );
+        .PC_Enable      (enable_pc),
+        .IF_IF_Enable   (enable_ifid),
+        .forward_Rm      (forward_rm),
+        .forward_Rn      (forward_rn),
+        .forward_Rd      (forward_rd),
+        .forward_Rg      (forward_rg),
+        .NOP_EX         (nop)
+    );
 
     // EX_MEM ex_mem (
     //     .clk                    (),
@@ -432,7 +432,12 @@ ID_EX id_ex (
         .Flag_out           ({ psr_z_muxcc, psr_n_muxcc, psr_c_muxcc, psr_v_muxcc}),
         .ConditionCodes     (chandlermux_cc_chandler)
     );
-
+    
+    MUX_RFenable mux_rfenable(
+        .id_rf_e            (cu_rfe_mux),
+        .s_rfenable         (chandler_blout_idmux),
+        .out_rf_enable      (mux_rfenable_cumux)  
+    );
 
     Three_port_register_file tprf (
         .RA   (instr_i3_i0),
@@ -473,7 +478,7 @@ ID_EX id_ex (
         .ID_B           (cu_idb_mux),
         .ID_MEM_SIZE    (cu_idmemsize_mux),
         .ID_MEM_E       (cu_meme_mux),
-        .RF_E           (cu_rfe_mux),
+        .RF_E           (mux_rfenable_cumux),
         .ID_AM          (cu_idam_mux),
         .S              (hazard_cumuxenable_mux),
         .alu_op         (mux_aluop_id),
@@ -546,8 +551,8 @@ ID_EX id_ex (
     initial begin
         // Initialize signals
         reset = 1;
-        enable_pc = 1;
-        enable_ifid = 1;
+        //enable_pc = 1;
+        //enable_ifid = 1;
         S = 0;
 
         // Start simulation
