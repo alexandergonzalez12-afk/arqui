@@ -30,6 +30,8 @@ module tb_pipeline;
     reg mem_LOAD, mem_RF_E, mem_SIZE, mem_RW;
     reg wb_RF_E;
 
+
+
     // Control signals from ControlUnit
     wire [3:0] ALU_OP;
     wire ID_LOAD, ID_MEM_WRITE, STORE_CC, ID_MEM_SIZE, ID_MEM_E, RF_E;
@@ -72,6 +74,10 @@ module tb_pipeline;
     wire cu_idmemsize_mux;
     wire cu_idmeme_mux;
     wire cu_rfe_rfmux;
+    wire cu_aluop_mux;
+    wire cu_meme_mux;
+    wire cu_rfe_mux;
+
 
     // ====================================
     // RF Enable Mux
@@ -262,13 +268,13 @@ ID_EX id_ex (
     .id_mem_write           (ex_memwrite_),
     .id_mem_size            (ex_memsize_),
     .id_mem_enable          (ex_memenable_),
-    .id_am                  (ex_am_),
+    .id_am                  (ex_am_shifter),
     .store_cc               (ex_storecc_psr),
     .rf_enable              (ex_rfenable_mem),
     .bl_out                 (ex_blout_muxalu),
     .next_pc                (ex_nextpc_muxalu),
     .mux_pa                 (ex_muxpa_alu),
-    .mux_pb                 (ex_muxpb_alu),
+    .mux_pb                 (ex_muxpb_shifter),
     .mux_pd                 (ex_muxpd_mem),
     .mux_instr_i15_i12      (ex_muxinstri15i12_memandhazard),
     .instr_i11_i0           (ex_instri11i0_shifter)
@@ -296,7 +302,7 @@ ID_EX id_ex (
 
     ALU alu (
         .A          (ex_muxpa_alu),
-        .B          (ex_muxpb_alu),
+        .B          (shifter_n_alu),
         .alu_op     (ex_aluop_alu),
         .C_IN       (psr_cin_alu),
         .result     (alu_out_muxaluandidmuxes),
@@ -307,34 +313,34 @@ ID_EX id_ex (
     );
 
     
-    // ARM_Shifter arm_shifter (
-    //     .Rm (),
-    //     .I  (),
-    //     .AM (),
-    //     .N  ()
-    // );
-
-    EX_MEM ex_mem (
-        .clk                    (),
-        .reset                  (),
-        .ID_LOAD                (),
-        .ID_MEM_WRITE           (),
-        .ID_MEM_SIZE            (),
-        .ID_MEM_ENABLE          (),
-        .RF_ENABLE              (),
-        .MUX_PD                 (),
-        .DM_ADDRESS             (),
-        .MUX_INSTR_I15_I12      (),
-
-        .id_load                (),
-        .id_mem_size            (),
-        .id_mem_write           (),
-        .id_mem_enable          (),
-        .rf_enable              (),
-        .mux_pd                 (),
-        .dm_address             (),
-        .mux_instr_i15_i12      ()
+    ARM_Shifter arm_shifter (
+        .Rm (ex_muxpb_shifter),
+        .I  (ex_instri11i0_shifter),
+        .AM (ex_am_shifter),
+        .N  (shifter_n_alu)
     );
+
+    // EX_MEM ex_mem (
+    //     .clk                    (),
+    //     .reset                  (),
+    //     .ID_LOAD                (),
+    //     .ID_MEM_WRITE           (),
+    //     .ID_MEM_SIZE            (),
+    //     .ID_MEM_ENABLE          (),
+    //     .RF_ENABLE              (),
+    //     .MUX_PD                 (),
+    //     .DM_ADDRESS             (),
+    //     .MUX_INSTR_I15_I12      (),
+
+    //     .id_load                (),
+    //     .id_mem_size            (),
+    //     .id_mem_write           (),
+    //     .id_mem_enable          (),
+    //     .rf_enable              (),
+    //     .mux_pd                 (),
+    //     .dm_address             (),
+    //     .mux_instr_i15_i12      ()
+    // );
 
     PSR psr (
         .STORE_CC           (ex_storecc_psr),
@@ -374,8 +380,8 @@ ID_EX id_ex (
 
     // Instantiate the ControlUnit module
     ControlUnit uut_control (
-        .instruction        (instruction),
-        .ALU_OP             (cu_idaluop_mux),
+        .instruction        (instruction),  // instruction
+        .ALU_OP             (cu_idaluop_mux), //out
         .ID_LOAD            (cu_idload_mux),
         .ID_MEM_WRITE       (cu_idmemwrite_mux),
         .STORE_CC           (cu_storecc_mux),
@@ -401,16 +407,16 @@ ID_EX id_ex (
         .rf_e           (mux_rf_e),
         .id_am          (mux_id_am),
         .S              (S),
-        .ALU_OP         (ALU_OP),
-        .ID_LOAD        (ID_LOAD),
-        .ID_MEM_WRITE   (ID_MEM_WRITE),
-        .ID_MEM_SIZE    (ID_MEM_SIZE),
-        .ID_MEM_E       (ID_MEM_E),
-        .ID_AM          (ID_AM),
-        .STORE_CC       (STORE_CC),
+        .ALU_OP         (cu_aluop_mux),
+        .ID_LOAD        (cu_idload_mux),
+        .ID_MEM_WRITE   (cu_idmemwrite_mux),
+        .STORE_CC       (cu_storecc_mux),
         .ID_BL          (cu_idbl_mux),
         .ID_B           (cu_idb_mux),
-        .RF_E           (RF_E)
+        .ID_MEM_SIZE    (cu_idmemsize_mux),
+        .ID_MEM_E       (cu_meme_mux),
+        .RF_E           (cu_rfe_mux),
+        .ID_AM          (cu_idam_mux)
     );
 
 
@@ -489,7 +495,11 @@ ID_EX id_ex (
         $display("IF/ID:          Instruction OUT: %b", if_instruction);
         $display("Register File:  RA: %b | RB: %b | RD: %b | PA: %b | PB: %b | PD %d", instr_i3_i0, instr_i19_i16,  instr_i15_i12, rf_registerpa_mux, rf_registerpb_mux, rf_registerpd_mux);
         $display("PC states:      PC: %b |nPC: %bPC | Fetch: %b", pc, npc, fetch_npc_pc);
-        $display("Control Unit Mux - ");
+        $display("Control Unit Mux -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
+        $display("ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | STORE_CC: %b | ID_BL: %b | ID_B: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | RF_E: %b | ID_AM: %b", cu_aluop_mux, cu_idload_mux, cu_idmemwrite_mux, cu_storecc_mux, cu_idbl_mux, cu_idb_mux, cu_idmemsize_mux, cu_meme_mux, cu_rfe_mux, cu_idam_mux);
+        $display("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
+        $display("IF/ID Stage Pipeline -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
+        $display("")
         $display("Execute Stage:  ALU_OP: %b | AM: %b | S: %b | Load: %b", ex_ALU_OP, ex_AM, ex_S, ex_LOAD);
         $display("Memory Stage:   Load: %b | RF_E: %b | Mem Size: %b | RW: %b", mem_LOAD, mem_RF_E, mem_SIZE, mem_RW);
 

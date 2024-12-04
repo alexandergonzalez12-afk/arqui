@@ -1,0 +1,211 @@
+PC: 0 | Opcode:     MOV
+-----------------------------------------------------------
+Fetch Stage:    Instruction: 11100011101000000101000000110100
+Control Unit:   ALU_OP: 1101 | AM: 01 | Load: 0 | RF_E: 0
+IF/ID:          Instruction OUT: 00000000000000000000000000000000
+Register File:  RA: 0000 | RB: 0000 | RD: 0000 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+PC states:      PC: 00000000000000000000000000000000 |nPC: 00000000000000000000000000000100PC | Fetch: 00000000000000000000000000000100
+Control Unit Mux -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ALU_OP: z | ID_LOAD: 0 | ID_MEM_WRITE: 1 | STORE_CC: 0 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 0 | ID_MEM_E: z | RF_E: z | ID_AM: 01
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Execute Stage:  ALU_OP: xxxx | AM: xx | S: x | Load: x
+Memory Stage:   Load: x | RF_E: x | Mem Size: x | RW: x
+Write Back:     RF_E: x
+-----------------------------------------------------------
+
+PC: 0 | Opcode:     MOV
+-----------------------------------------------------------
+Fetch Stage:    Instruction: 11100011101000000101000000110100
+Control Unit:   ALU_OP: 1101 | AM: 01 | Load: 0 | RF_E: 0
+IF/ID:          Instruction OUT: 00000000000000000000000000000000
+Register File:  RA: 0000 | RB: 0000 | RD: 0000 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+PC states:      PC: 00000000000000000000000000000000 |nPC: 00000000000000000000000000000100PC | Fetch: 00000000000000000000000000000100
+Control Unit Mux -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ALU_OP: z | ID_LOAD: 0 | ID_MEM_WRITE: 1 | STORE_CC: 0 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 0 | ID_MEM_E: z | RF_E: z | ID_AM: 01
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Execute Stage:  ALU_OP: xxxx | AM: xx | S: x | Load: x
+Memory Stage:   Load: x | RF_E: x | Mem Size: x | RW: x
+Write Back:     RF_E: x
+-----------------------------------------------------------
+
+PC: 4 | Opcode:     ORR
+-----------------------------------------------------------
+Fetch Stage:    Instruction: 11100101100101010001000000000000
+Control Unit:   ALU_OP: 1100 | AM: 10 | Load: 1 | RF_E: 0
+IF/ID:          Instruction OUT: 11100011101000000101000000110100
+Register File:  RA: 0100 | RB: 0000 | RD: 0101 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+PC states:      PC: 00000000000000000000000000000100 |nPC: 00000000000000000000000000001000PC | Fetch: 00000000000000000000000000001000
+Control Unit Mux -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ALU_OP: z | ID_LOAD: 1 | ID_MEM_WRITE: 0 | STORE_CC: 1 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 0 | ID_MEM_E: z | RF_E: z | ID_AM: 10
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Execute Stage:  ALU_OP: xxxx | AM: xx | S: x | Load: x
+Memory Stage:   Load: x | RF_E: x | Mem Size: x | RW: x
+Write Back:     RF_E: x
+-----------------------------------------------------------
+
+PC: 8 | Opcode:     BIC
+-----------------------------------------------------------
+Fetch Stage:    Instruction: 11100101110101010010000000000100
+Control Unit:   ALU_OP: 1110 | AM: 10 | Load: 1 | RF_E: 0
+IF/ID:          Instruction OUT: 11100101100101010001000000000000
+Register File:  RA: 0000 | RB: 0101 | RD: 0001 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+PC states:      PC: 00000000000000000000000000001000 |nPC: 00000000000000000000000000001100PC | Fetch: 00000000000000000000000000001100
+Control Unit Mux -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ALU_OP: z | ID_LOAD: 1 | ID_MEM_WRITE: 0 | STORE_CC: 1 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 1 | ID_MEM_E: z | RF_E: z | ID_AM: 10
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Execute Stage:  ALU_OP: xxxx | AM: xx | S: x | Load: x
+Memory Stage:   Load: x | RF_E: x | Mem Size: x | RW: x
+Write Back:     RF_E: x
+-----------------------------------------------------------
+
+PC: 12 | Opcode:     BIC
+-----------------------------------------------------------
+Fetch Stage:    Instruction: 11100101110101010011000000000101
+Control Unit:   ALU_OP: 1110 | AM: 10 | Load: 1 | RF_E: 0
+IF/ID:          Instruction OUT: 11100101110101010010000000000100
+Register File:  RA: 0100 | RB: 0101 | RD: 0010 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+PC states:      PC: 00000000000000000000000000001100 |nPC: 00000000000000000000000000010000PC | Fetch: 00000000000000000000000000010000
+Control Unit Mux -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ALU_OP: z | ID_LOAD: 1 | ID_MEM_WRITE: 0 | STORE_CC: 1 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 1 | ID_MEM_E: z | RF_E: z | ID_AM: 10
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Execute Stage:  ALU_OP: xxxx | AM: xx | S: x | Load: x
+Memory Stage:   Load: x | RF_E: x | Mem Size: x | RW: x
+Write Back:     RF_E: x
+-----------------------------------------------------------
+
+PC: 16 | Opcode:     MOV
+-----------------------------------------------------------
+Fetch Stage:    Instruction: 11100001101100001010000000000001
+Control Unit:   ALU_OP: 1101 | AM: 00 | Load: 1 | RF_E: 0
+IF/ID:          Instruction OUT: 11100101110101010011000000000101
+Register File:  RA: 0101 | RB: 0101 | RD: 0011 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+PC states:      PC: 00000000000000000000000000010000 |nPC: 00000000000000000000000000010100PC | Fetch: 00000000000000000000000000010100
+Control Unit Mux -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ALU_OP: z | ID_LOAD: 1 | ID_MEM_WRITE: 1 | STORE_CC: 1 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 0 | ID_MEM_E: z | RF_E: z | ID_AM: 00
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Execute Stage:  ALU_OP: xxxx | AM: xx | S: x | Load: x
+Memory Stage:   Load: x | RF_E: x | Mem Size: x | RW: x
+Write Back:     RF_E: x
+-----------------------------------------------------------
+
+PC: 20 | Opcode:     AND
+-----------------------------------------------------------
+Fetch Stage:    Instruction: 01011010000000000000000000000100
+Control Unit:   ALU_OP: 0000 | AM: 01 | Load: 0 | RF_E: 0
+IF/ID:          Instruction OUT: 11100001101100001010000000000001
+Register File:  RA: 0001 | RB: 0000 | RD: 1010 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+PC states:      PC: 00000000000000000000000000010100 |nPC: 00000000000000000000000000011000PC | Fetch: 00000000000000000000000000011000
+Control Unit Mux -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ALU_OP: z | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 1 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: z | RF_E: z | ID_AM: 01
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Execute Stage:  ALU_OP: xxxx | AM: xx | S: x | Load: x
+Memory Stage:   Load: x | RF_E: x | Mem Size: x | RW: x
+Write Back:     RF_E: x
+-----------------------------------------------------------
+
+PC: 24 | Opcode:     SUB
+-----------------------------------------------------------
+Fetch Stage:    Instruction: 11100000010000110110000000000010
+Control Unit:   ALU_OP: 0010 | AM: 00 | Load: 0 | RF_E: 0
+IF/ID:          Instruction OUT: 01011010000000000000000000000100
+Register File:  RA: 0100 | RB: 0000 | RD: 0000 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+PC states:      PC: 00000000000000000000000000011000 |nPC: 00000000000000000000000000011100PC | Fetch: 00000000000000000000000000011100
+Control Unit Mux -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ALU_OP: z | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 1 | ID_MEM_E: z | RF_E: z | ID_AM: 00
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Execute Stage:  ALU_OP: xxxx | AM: xx | S: x | Load: x
+Memory Stage:   Load: x | RF_E: x | Mem Size: x | RW: x
+Write Back:     RF_E: x
+-----------------------------------------------------------
+
+PC: 28 | Opcode:     NOP
+-----------------------------------------------------------
+Fetch Stage:    Instruction: 00000000000000000000000000000000
+Control Unit:   ALU_OP: 0000 | AM: 00 | Load: 0 | RF_E: 0
+IF/ID:          Instruction OUT: 11100000010000110110000000000010
+Register File:  RA: 0010 | RB: 0011 | RD: 0110 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+PC states:      PC: 00000000000000000000000000011100 |nPC: 00000000000000000000000000100000PC | Fetch: 00000000000000000000000000100000
+Control Unit Mux -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ALU_OP: z | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: z | RF_E: z | ID_AM: 00
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Execute Stage:  ALU_OP: xxxx | AM: xx | S: x | Load: x
+Memory Stage:   Load: x | RF_E: x | Mem Size: x | RW: x
+Write Back:     RF_E: x
+-----------------------------------------------------------
+
+PC: 32 | Opcode:     NOP
+-----------------------------------------------------------
+Fetch Stage:    Instruction: 00000000000000000000000000000000
+Control Unit:   ALU_OP: 0000 | AM: 00 | Load: 0 | RF_E: 0
+IF/ID:          Instruction OUT: 00000000000000000000000000000000
+Register File:  RA: 0000 | RB: 0000 | RD: 0000 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+PC states:      PC: 00000000000000000000000000100000 |nPC: 00000000000000000000000000100100PC | Fetch: 00000000000000000000000000100100
+Control Unit Mux -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ALU_OP: z | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: z | RF_E: z | ID_AM: 00
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Execute Stage:  ALU_OP: xxxx | AM: xx | S: x | Load: x
+Memory Stage:   Load: x | RF_E: x | Mem Size: x | RW: x
+Write Back:     RF_E: x
+-----------------------------------------------------------
+
+PC: 36 | Opcode:     AND
+-----------------------------------------------------------
+Fetch Stage:    Instruction: 11101010000000000000000000000100
+Control Unit:   ALU_OP: 0000 | AM: 01 | Load: 0 | RF_E: 0
+IF/ID:          Instruction OUT: 00000000000000000000000000000000
+Register File:  RA: 0000 | RB: 0000 | RD: 0000 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+PC states:      PC: 00000000000000000000000000100100 |nPC: 00000000000000000000000000101000PC | Fetch: 00000000000000000000000000101000
+Control Unit Mux -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ALU_OP: z | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 1 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: z | RF_E: z | ID_AM: 01
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Execute Stage:  ALU_OP: xxxx | AM: xx | S: x | Load: x
+Memory Stage:   Load: x | RF_E: x | Mem Size: x | RW: x
+Write Back:     RF_E: x
+-----------------------------------------------------------
+
+PC: 40 | Opcode:     ADD
+-----------------------------------------------------------
+Fetch Stage:    Instruction: 11100000100000110110000000000010
+Control Unit:   ALU_OP: 0100 | AM: 00 | Load: 0 | RF_E: 0
+IF/ID:          Instruction OUT: 11101010000000000000000000000100
+Register File:  RA: 0100 | RB: 0000 | RD: 0000 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+PC states:      PC: 00000000000000000000000000101000 |nPC: 00000000000000000000000000101100PC | Fetch: 00000000000000000000000000101100
+Control Unit Mux -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ALU_OP: z | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: z | RF_E: z | ID_AM: 00
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Execute Stage:  ALU_OP: xxxx | AM: xx | S: x | Load: x
+Memory Stage:   Load: x | RF_E: x | Mem Size: x | RW: x
+Write Back:     RF_E: x
+-----------------------------------------------------------
+
+PC: 44 | Opcode:     BIC
+-----------------------------------------------------------
+Fetch Stage:    Instruction: 11100101110001010110000000000110
+Control Unit:   ALU_OP: 1110 | AM: 10 | Load: 0 | RF_E: 0
+IF/ID:          Instruction OUT: 11100000100000110110000000000010
+Register File:  RA: 0010 | RB: 0011 | RD: 0110 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+PC states:      PC: 00000000000000000000000000101100 |nPC: 00000000000000000000000000110000PC | Fetch: 00000000000000000000000000110000
+Control Unit Mux -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ALU_OP: z | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 1 | ID_MEM_E: z | RF_E: z | ID_AM: 10
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Execute Stage:  ALU_OP: xxxx | AM: xx | S: x | Load: x
+Memory Stage:   Load: x | RF_E: x | Mem Size: x | RW: x
+Write Back:     RF_E: x
+-----------------------------------------------------------
+
+PC: 48 | Opcode:     RSC
+-----------------------------------------------------------
+Fetch Stage:    Instruction: 11101010111111111111111111111111
+Control Unit:   ALU_OP: 0111 | AM: 01 | Load: 1 | RF_E: 1
+IF/ID:          Instruction OUT: 11100101110001010110000000000110
+Register File:  RA: 0110 | RB: 0101 | RD: 0110 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+PC states:      PC: 00000000000000000000000000110000 |nPC: 00000000000000000000000000110100PC | Fetch: 00000000000000000000000000110100
+Control Unit Mux -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ALU_OP: z | ID_LOAD: 1 | ID_MEM_WRITE: 1 | STORE_CC: 1 | ID_BL: 1 | ID_B: 0 | ID_MEM_SIZE: 1 | ID_MEM_E: z | RF_E: z | ID_AM: 01
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Execute Stage:  ALU_OP: xxxx | AM: xx | S: x | Load: x
+Memory Stage:   Load: x | RF_E: x | Mem Size: x | RW: x
+Write Back:     RF_E: x
+-----------------------------------------------------------
+
+tb_pipeline_2.v:486: $finish called at 55000 (1ps)

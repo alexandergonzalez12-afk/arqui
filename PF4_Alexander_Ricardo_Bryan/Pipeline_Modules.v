@@ -343,7 +343,7 @@ module MUX_ALU (
     end
 endmodule
 
-module PSR(
+module PSR (
  input STORE_CC,
  input Z_in,C_in,N_in,V_in,
  output reg Z_out,N_out,C_out,V_out //Z, N, C, V
