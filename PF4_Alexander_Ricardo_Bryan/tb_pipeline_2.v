@@ -163,21 +163,31 @@ module tb_pipeline;
     wire [11:0] ex_instri11i0_shifter;
 
     // ====================================
-    // ALU MUX
+    // ALU MUX / ALU
     // ====================================
 
     wire [31:0] alu_out_muxaluandidmuxes;
     wire [31:0] alumux_dmaddress_mem;
 
     // ====================================
-    // ALU
+    // SHIFTER
     // ====================================
 
     wire [31:0] shifter_n_alu;
     
 
     // ====================================
-    // 
+    // hazard Unit
+    // ====================================
+
+    wire [31:0] nop;
+    reg foward_rm;
+    reg foward_rn;
+    reg foward_rd;
+    reg foward_rg;
+
+    // ====================================
+    // hazard Unit
     // ====================================
 
     // Helper function to get the keyword based on opcode
@@ -358,6 +368,28 @@ ID_EX id_ex (
         .N  (shifter_n_alu)
     );
 
+    // HazardUnit hazardunit (
+    //     .EX_RF_enable   (ex_rfenable_mem),
+    //     .MEM_RF_enable  (),          
+    //     .WB_RF_enable   (),
+    //     .EX_Rd          (ex_muxpd_mem),
+    //     .MEM_Rd         (),
+    //     .WB_Rd          (),
+    //     .ID_Rm          (instr_i3_i0),
+    //     .ID_Rn          (instr_i19_i16),
+    //     .ID_Rd          (instr_i15_i12),
+    //     .EX_Load        (ex_load_mem),
+    //     .ID_Store       (ex_storecc_psr),
+
+    //     .PC_Enable      (enable_pc),
+    //     .IF_IF_Enable   (enable_ifid),
+    //     .foward_Rm      (foward_rm),
+    //     .foward_Rn      (foward_rn),
+    //     .foward_Rd      (foward_rd),
+    //     .foward_Rg      (foward_rg),
+    //     .NOP_EX         (nop)
+    // );
+
     // EX_MEM ex_mem (
     //     .clk                    (),
     //     .reset                  (),
@@ -427,7 +459,6 @@ ID_EX id_ex (
         .ID_MEM_E           (cu_idmeme_mux),
         .RF_E               (cu_rfe_rfmux),
         .ID_AM              (cu_idam_mux),
-
         .ID_B               (cu_idb_mux),
         .ID_BL              (cu_idbl_mux)
     );

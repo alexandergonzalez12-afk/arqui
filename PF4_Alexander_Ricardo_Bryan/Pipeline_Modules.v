@@ -577,8 +577,8 @@ endmodule
 
 module HazardUnit(
     input EX_RF_enable, MEM_RF_enable, WB_RF_enable,    // Register File Enable signals
-    input [4:0] EX_Rd, MEM_Rd, WB_Rd,                   // Destination registers in each stage
-    input [4:0] ID_Rm, ID_Rn, ID_Rd,                    // Source registers in the ID stage
+    input [31:0] EX_Rd, MEM_Rd, WB_Rd,                   // Destination registers in each stage
+    input [3:0] ID_Rm, ID_Rn, ID_Rd,                    // Source registers in the ID stage
     input EX_Load,                                      // Load instruction signal in EX stage
     input ID_Store,                                     // Store instruction signal in ID stage
     output reg PC_Enable, IF_IF_Enable,                 // Control signals for stalling
