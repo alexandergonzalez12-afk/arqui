@@ -115,6 +115,13 @@ module tb_pipeline;
     wire [31:0] rf_registerpb_mux;
     wire [31:0] rf_registerpd_mux;
 
+    // ====================================
+    // Muxes or something
+    // ====================================
+
+    wire  [31:0]  mux_pa_id;
+    wire  [31:0]  mux_pb_id;
+    wire  [31:0]  mux_pd_id;
 
     // ====================================
     // 4X SE 
@@ -187,7 +194,22 @@ module tb_pipeline;
     wire [1:0] forward_rg;
 
     // ====================================
-    // hazard Unit
+    // EX/MEM
+    // ====================================
+
+
+    // ====================================
+    // DATA MEMORY
+    // ====================================
+
+
+    // ====================================
+    // RF DATA MEMORY
+    // ====================================
+
+
+    // ====================================
+    // WRITE BACK
     // ====================================
 
     // Helper function to get the keyword based on opcode
@@ -263,32 +285,32 @@ module tb_pipeline;
 
 
 
-    // MUX_PA mux_pa (
-    //     .pa             (rf_registerpa_mux),
-    //     .jump_EX_pa     (),
-    //     .jump_MEM_pa    (),
-    //     .jump_WB_pa     (),
-    //     .S_PB           (),
-    //     .rf_pb          ()
-    // );
+    MUX_PA mux_pa (
+        .pa             (rf_registerpa_mux),
+        .jump_EX_pa     (),
+        .jump_MEM_pa    (),
+        .jump_WB_pa     (),
+        .S_PA           (forward_rn),
+        .rf_pa          (mux_pa_id)
+    );
 
-//     MUX_PB mux_pb (
-//         .pb             (rf_registerpb_mux),
-//         .jump_EX_pb     (),
-//         .jump_MEM_pb    (),
-//         .jump_WB_pb     (),
-//         .S_PB           (),
-//         .rf_pB          ()
-//     );
+    MUX_PB mux_pb (
+        .pb             (rf_registerpb_mux),
+        .jump_EX_pb     (),
+        .jump_MEM_pb    (),
+        .jump_WB_pb     (),
+        .S_PB           (forward_rm),
+        .rf_pb          (mux_pb_id)
+    );
 
-//     MUX_PD mux_pd (
-//         .pd             (rf_registerpd_mux),
-//         .jump_EX_pd     (),
-//         .jump_MEM_pd    (),
-//         .jump_WB_pd     (),
-//         .S_PD           (),
-//         .rf_pd          ()
-//     );    
+    MUX_PD mux_pd (
+        .pd             (rf_registerpd_mux),
+        .jump_EX_pd     (),
+        .jump_MEM_pd    (),
+        .jump_WB_pd     (),
+        .S_PD           (forward_rg),
+        .rf_pd          (mux_pd_id)
+    );    
 
 
 ID_EX id_ex (
@@ -305,9 +327,9 @@ ID_EX id_ex (
     
     .BL_OUT                 (chandler_blout_idmux),
     .NEXT_PC                (if_npc_fetch),
-    .MUX_PA                 (), // salida de los muxes de la etapa id/ex (inputs)
-    .MUX_PB                 (), // salida de los muxes de la etapa id/ex (inputs)
-    .MUX_PD                 (), // salida de los muxes de la etapa id/ex (inputs)
+    .MUX_PA                 (mux_pa_id), // salida de los muxes de la etapa id/ex (inputs)
+    .MUX_PB                 (mux_pb_id), // salida de los muxes de la etapa id/ex (inputs)
+    .MUX_PD                 (mux_pd_id), // salida de los muxes de la etapa id/ex (inputs)
     .MUX_INSTR_I15_I12      (idmux_out_ex),
     .INSTR_I11_I0           (instr_i11_i0),
 
@@ -411,6 +433,16 @@ ID_EX id_ex (
     //     .dm_address             (),
     //     .mux_instr_i15_i12      ()
     // );
+
+    Data_Memory_RAM dmram(
+        .data_out       (),
+        .address        (),
+        .data_in        (),
+        .size           (),
+        .rw             (),
+        .enable         (),
+
+    );
 
     PSR psr (
         .STORE_CC           (ex_storecc_psr),
@@ -542,6 +574,7 @@ ID_EX id_ex (
         while (!$feof(fi)) begin
             code = $fscanf(fi, "%b", data);
             rom_inst.Mem[address] = data; // Preload the ROM memory
+            ram_inst.Mem[address] = data; // Preload the RAM memory
             address = address + 1;
         end
         $fclose(fi);
