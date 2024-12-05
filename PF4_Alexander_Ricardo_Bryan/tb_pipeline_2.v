@@ -197,9 +197,9 @@ module tb_pipeline;
     // EX/MEM
     // ====================================
 
-    wire [31:0] mem_pd_inputdm;
+    wire [31:0]  mem_pd_inputdm;
     wire [31:0]  mem_address_dmandmux;
-    wire [3:0]  mem_muxi15i12_wb;
+    wire [3:0]   mem_muxi15i12_wb;
 
     // ====================================
     // DATA MEMORY
@@ -500,9 +500,9 @@ ID_EX id_ex (
         .RB   (instr_i19_i16),
         .RD   (instr_i15_i12),
         .RW   (wb_registerrw_rf),
-        .PW   (wb_registerpw_rf),
         .PC   (pc),
         .Clk  (clk),
+        .PW   (wb_registerpw_rf),
         .LE   (wb_registerle_rf),
         .PA   (rf_registerpa_mux),
         .PB   (rf_registerpb_mux),
@@ -615,12 +615,12 @@ ID_EX id_ex (
         // Start simulation
         #3 reset = 0;
         #32 S = 1;
-        #20 $finish; // Stop simulation at time 40
+        #80 $finish; // Stop simulation at time 40
     end
 
     // Display outputs for each clock cycle
     always @(posedge clk) begin
-        $display("PC: %0d", pc);
+        $display("PC: %d | Instruction Type: %s", pc, get_keyword(instruction[24:21]));
         $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
         $display("IF/ID");
         $display("Instruction           %b", if_instruction);
@@ -631,10 +631,34 @@ ID_EX id_ex (
         $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
         $display("ID/EX");
         $display("ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | ID_AM: %b | STORE_CC: %b | RF_E: %b | BL_Out: %b | Next PC: %b | MUX_PA: %b | MUX_PB: %b | MUX_PD: %b | MUX_15-12: %b | INSTR_11-0: %b", ex_aluop_alu, ex_load_mem, ex_memwrite_mem, ex_memsize_mem, ex_memenable_mem, ex_am_shifter, ex_storecc_psr, ex_rfenable_mem, ex_blout_muxalu, ex_nextpc_muxalu, ex_muxpa_alu, ex_muxpb_shifter, ex_muxpd_mem, ex_muxinstri15i12_memandhazard, ex_instri11i0_shifter);
+        $display("LE: %b | PW: %b", wb_registerpw_rf, wb_registerle_rf);
         $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
         $display("EX/MEM");
+        $display("mem_pd_inputdm: %b | mem_address_dmandmux: %b | mem_muxi15i12_wb", mem_pd_inputdm, mem_address_dmandmux, mem_muxi15i12_wb);
         $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
         $display("MEM/WB");
+        $display("dm_output_muxdm: %b | mem_address_dmandmux: %b | mem_pd_inputdm: %b | mem_size_dm: %b | mem_write_dm: %b | mem_enable_dm: %b ",dm_output_muxdm, mem_address_dmandmux, mem_pd_inputdm, mem_size_dm, mem_write_dm, mem_enable_dm);
+        $display("-=-=-=-=-=-=--=-=-=-=--=-=-=-=-=-=-=-=--=-=-=-=--=-=--=-==-=-=-=-=-=-=--==-==-=-==-=-==-=-==-=-");
+        $display("Register File memmory -=-=-=-=-=-=-==-=-=");
+        $display("Selectv O : %d", tprf.O);
+        $display("R0: %d | A0", tprf.R0);
+        $display("R1: %d | A1", tprf.R1);
+        $display("R2: %d | A2", tprf.R2);
+        $display("R3: %d | A3", tprf.R3);
+        $display("R4: %d | A4", tprf.R4);
+        $display("R5: %d | A5", tprf.R5);
+        $display("R6: %d | A6", tprf.R6);
+        $display("R7: %d | A7", tprf.R7);
+        $display("R8: %d | A8", tprf.R8);
+        $display("R9: %d | A9", tprf.R9);
+        $display("R10: %d | A10", tprf.R10);
+        $display("R11: %d | A11", tprf.R11);
+        $display("R12: %d | A12", tprf.R12);
+        $display("R13: %d | A13", tprf.R13);
+        $display("R14: %d | A14", tprf.R14);
+        $display("R15: %d | A15", tprf.R15);
+
+
         $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
         $display("");
 
