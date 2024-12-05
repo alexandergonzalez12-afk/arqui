@@ -499,9 +499,9 @@ ID_EX id_ex (
     );
 
     Three_port_register_file tprf (
-        .RA   (Ra),
-        .RB   (Rb),
-        .RD   (Rd),
+        .RA   (instr_i3_i0),
+        .RB   (instr_i19_i16),
+        .RD   (instr_i15_i12),
         .RW   (wb_registerrw_rf),
         .PC   (pc),
         .Clk  (clk),
