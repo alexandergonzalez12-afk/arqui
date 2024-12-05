@@ -307,24 +307,51 @@ module MUX_Fetch (
 endmodule
 
 module ALU (
-    input [31:0] A, B,
-    input [3:0] alu_op,
-    input C_IN,
-    output reg [31:0] result,
-    output reg N, Z, C, V
+    input [31:0] A, B,         // A & B 
+    input CIN,                 // Carry in 
+    input [3:0] OP,            // Operation code 
+    output reg [31:0] Out,     // Output de 32
+    output reg Z, N, C, V      // Flags
 );
-    always @(*) begin
-        case (alu_op)
-            4'b0000: result = A & B; // AND
-            4'b0001: result = A | B; // OR
-            4'b0010: {C, result} = A - B; // SUB with carry out
-            4'b0011: {C, result} = A + B; // ADD with carry out
-            default: result = 32'b0;
-        endcase
-        N = result[31];
-        Z = (result == 32'b0);
-        V = ((A[31] == B[31]) && (result[31] != A[31]));
+
+// Logic to handle ALU operations and set flags
+always @(*) begin
+    // Inicializamos
+    Out = 32'b0;
+    Z = 0;
+    N = 0;
+    C = 0;
+    V = 0;
+
+    case (OP)
+        4'b0000: {C, Out} = A & B;             // A & B
+        4'b0101: {C, Out} = A + B + CIN;       // A + B + CIN (with carry)
+        4'b0010: {C, Out} = A - B;             // A - B
+        4'b0110: {C, Out} = A - B - CIN;       // A - B - CIN (with carry)
+        4'b0011: {C, Out} = B - A;             // B - A
+        4'b0101: {C, Out} = B - A - CIN;       // B - A - CIN
+        4'b0100: Out = A + B;                  // Bitwise AND
+        4'b1100: Out = A | B;                  // Bitwise OR
+        4'b0001: Out = A ^ B;                  // Bitwise XOR
+        4'b1001: Out = A;                      // Pass A
+        4'b1010: Out = B;                      // Pass B
+        4'b1011: Out = ~B;                     // Bitwise NOT B
+        4'b1110: Out = A & ~B;                 // Bit Clear (A AND NOT B)
+        default: Out = 32'b0;                  // Default case
+    endcase
+
+    // Setear los flags
+    Z = (Out == 32'b0);      // Z flag (Zero flag)
+    N = Out[31];             // N flag (Negative flag)
+
+    // Handler para Carry & Overflow 
+    if (OP == 4'b0100 || OP == 4'b0001) begin  // add
+        V = (~A[31] & ~B[31] & Out[31]) | (A[31] & B[31] & ~Out[31]); // overflow detection for A + B
+    end else if (OP == 4'b0010 || OP == 4'b0011) begin  // sub
+        V = (A[31] & ~B[31] & ~Out[31]) | (~A[31] & B[31] & Out[31]); // overflow detection for A - B
     end
+end
+
 endmodule
 
 
