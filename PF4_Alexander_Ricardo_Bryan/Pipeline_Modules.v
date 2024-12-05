@@ -308,9 +308,9 @@ endmodule
 
 module ALU (
     input [31:0] A, B,         // A & B 
-    input CIN,                 // Carry in 
-    input [3:0] OP,            // Operation code 
-    output reg [31:0] Out,     // Output de 32
+    input C_IN,                 // Carry in 
+    input [3:0] alu_op,            // Operation code 
+    output reg [31:0] result,     // Output de 32
     output reg Z, N, C, V      // Flags
 );
 
