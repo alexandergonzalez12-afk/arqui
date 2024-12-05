@@ -243,7 +243,7 @@ module Data_Memory_RAM (
     output reg [31:0] data_out, 
     input [7:0] address, 
     input [31:0] data_in, 
-    input [1:0] size, 
+    input size, 
     input rw, 
     input enable
     );
@@ -890,7 +890,7 @@ module EX_MEM(
     input               ID_MEM_ENABLE,
     input               RF_ENABLE,
     input [31:0]        MUX_PD,
-    input [7:0]         DM_ADDRESS,
+    input [31:0]         DM_ADDRESS,
     input [3:0]         MUX_INSTR_I15_I12,
 
     output reg          id_load,
@@ -899,7 +899,7 @@ module EX_MEM(
     output reg          id_mem_enable,
     output reg          rf_enable,
     output reg [31:0]   mux_pd,
-    output reg [7:0]    dm_address,
+    output reg [31:0]    dm_address,
     output reg [3:0]    mux_instr_i15_i12
 );
     always @(posedge clk or posedge reset) begin
@@ -910,7 +910,7 @@ module EX_MEM(
             id_mem_enable <= 0;
             rf_enable <= 0;
             mux_pd <= 32'b0;
-            dm_address <= 8'b0;
+            dm_address <= 32'b0;
             mux_instr_i15_i12 <= 4'b0;
         end else begin
             id_load <= ID_LOAD;

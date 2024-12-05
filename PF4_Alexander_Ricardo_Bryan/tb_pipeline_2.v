@@ -197,11 +197,16 @@ module tb_pipeline;
     // EX/MEM
     // ====================================
 
+    wire [31:0] mem_pd_inputdm;
+    wire [31:0]  mem_address_dmandmux;
+    wire [3:0]  mem_muxi15i12_wb;
 
     // ====================================
     // DATA MEMORY
     // ====================================
 
+    wire [31:0] dm_output_muxdm;
+    wire mem_size_dm;
 
     // ====================================
     // RF DATA MEMORY
@@ -392,10 +397,10 @@ ID_EX id_ex (
 
     HazardUnit hazardunit (
         .EX_RF_enable   (ex_rfenable_mem),
-        .MEM_RF_enable  (),          
+        .MEM_RF_enable  (mem_rfenable_wb),          
         .WB_RF_enable   (),
-        .EX_Rd          (ex_muxpd_mem),
-        .MEM_Rd         (),
+        .EX_Rd          (ex_muxinstri15i12_memandhazard),
+        .MEM_Rd         (mem_muxi15i12_wb),
         .WB_Rd          (),
         .ID_Rm          (instr_i3_i0),
         .ID_Rn          (instr_i19_i16),
@@ -405,42 +410,42 @@ ID_EX id_ex (
 
         .PC_Enable      (enable_pc),
         .IF_IF_Enable   (enable_ifid),
-        .forward_Rm      (forward_rm),
-        .forward_Rn      (forward_rn),
-        .forward_Rd      (forward_rd),
-        .forward_Rg      (forward_rg),
+        .forward_Rm     (forward_rm),
+        .forward_Rn     (forward_rn),
+        .forward_Rd     (forward_rd),
+        .forward_Rg     (forward_rg),
         .NOP_EX         (nop)
     );
 
-    // EX_MEM ex_mem (
-    //     .clk                    (),
-    //     .reset                  (),
-    //     .ID_LOAD                (),
-    //     .ID_MEM_WRITE           (),
-    //     .ID_MEM_SIZE            (),
-    //     .ID_MEM_ENABLE          (),
-    //     .RF_ENABLE              (),
-    //     .MUX_PD                 (),
-    //     .DM_ADDRESS             (),
-    //     .MUX_INSTR_I15_I12      (),
+    EX_MEM ex_mem (
+        .clk                    (clk),
+        .reset                  (reset),
+        .ID_LOAD                (ex_load_mem),
+        .ID_MEM_WRITE           (ex_memwrite_mem),
+        .ID_MEM_SIZE            (ex_memsize_mem),
+        .ID_MEM_ENABLE          (ex_memenable_mem),
+        .RF_ENABLE              (ex_rfenable_mem),
+        .MUX_PD                 (ex_muxpd_mem),
+        .DM_ADDRESS             (alumux_dmaddress_mem),
+        .MUX_INSTR_I15_I12      (ex_muxinstri15i12_memandhazard),
 
-    //     .id_load                (),
-    //     .id_mem_size            (),
-    //     .id_mem_write           (),
-    //     .id_mem_enable          (),
-    //     .rf_enable              (),
-    //     .mux_pd                 (),
-    //     .dm_address             (),
-    //     .mux_instr_i15_i12      ()
-    // );
+        .id_load                (mem_load_wb),
+        .id_mem_size            (mem_size_dm),
+        .id_mem_write           (mem_write_dm),
+        .id_mem_enable          (mem_enable_dm),
+        .rf_enable              (mem_rfenable_wb),
+        .mux_pd                 (mem_pd_inputdm),
+        .dm_address             (mem_address_dmandmux),
+        .mux_instr_i15_i12      (mem_muxi15i12_wb)
+    );
 
-    Data_Memory_RAM dmram(
-        .data_out       (),
-        .address        (),
-        .data_in        (),
-        .size           (),
-        .rw             (),
-        .enable         (),
+    Data_Memory_RAM ram_inst(
+        .data_out       (dm_output_muxdm),
+        .address        (mem_address_dmandmux[7:0]),
+        .data_in        (mem_pd_inputdm),
+        .size           (mem_size_dm),
+        .rw             (mem_write_dm),
+        .enable         (mem_enable_dm)
 
     );
 
