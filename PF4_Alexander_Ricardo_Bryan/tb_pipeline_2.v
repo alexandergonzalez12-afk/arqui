@@ -402,10 +402,10 @@ ID_EX id_ex (
     HazardUnit hazardunit (
         .EX_RF_enable   (ex_rfenable_mem),
         .MEM_RF_enable  (mem_rfenable_wb),          
-        .WB_RF_enable   (),
-        .EX_Rd          (ex_muxinstri15i12_memandhazard),
-        .MEM_Rd         (mem_muxi15i12_wb),
-        .WB_Rd          (),
+        .WB_RF_enable   (wb_registerle_rf),
+        .EX_Rd          (alu_out_muxaluandidmuxes[15:12]),
+        .MEM_Rd         (muxdatamemory_wb[15:12]),
+        .WB_Rd          (wb_registerrw_rf[15:12]),
         .ID_Rm          (instr_i3_i0),
         .ID_Rn          (instr_i19_i16),
         .ID_Rd          (instr_i15_i12),
@@ -639,10 +639,10 @@ ID_EX id_ex (
         $display("LE: %b | PW: %b", wb_registerpw_rf, wb_registerle_rf);
         $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
         $display("EX/MEM");
-        $display("mem_pd_inputdm: %b | mem_address_dmandmux: %b | mem_muxi15i12_wb: %b", mem_pd_inputdm, mem_address_dmandmux, mem_muxi15i12_wb);
+        $display("id_load: %b | id_mem_size: %b | id_mem_write: %b | id_mem_enable: %b | rf_enable: %b | mux_pd: %b | dm_address: %b | mux_instr_i15_i12:  %b", mem_load_wb, mem_size_dm, mem_write_dm, mem_enable_dm, mem_rfenable_wb, mem_pd_inputdm, mem_address_dmandmux, mem_muxi15i12_wb);
         $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
         $display("MEM/WB");
-        $display("dm_output_muxdm: %b | mem_address_dmandmux: %b | mem_pd_inputdm: %b | mem_size_dm: %b | mem_write_dm: %b | mem_enable_dm: %b ",dm_output_muxdm, mem_address_dmandmux, mem_pd_inputdm, mem_size_dm, mem_write_dm, mem_enable_dm);
+        $display("RF_ENABLE: %b | MUX_DATAMEMORY: %b | MUX_INSTR_I15_I12: %b | rf_enable: %b | mux_instr_i15_i12: %b | mux_datamemory: %b",  mem_rfenable_wb, muxdatamemory_wb, mem_muxi15i12_wb, wb_registerle_rf, wb_registerrw_rf, wb_registerpw_rf);
         $display("-=-=-=-=-=-=--=-=-=-=--=-=-=-=-=-=-=-=--=-=-=-=--=-=--=-==-=-=-=-=-=-=--==-==-=-==-=-==-=-==-=-");
         $display("Register File memmory -=-=-=-=-=-=-==-=-=");
         $display("Selectv O : %d", tprf.O);
