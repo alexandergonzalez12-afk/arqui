@@ -617,14 +617,16 @@ ID_EX id_ex (
         #32 S = 1;
         #80 $finish; // Stop simulation at time 40
     end
-
+    // TODO: ALU has incomplete instructions, implement missing opcode instructions
     // Display outputs for each clock cycle
     always @(posedge clk) begin
         $display("PC: %d | Instruction Type: %s", pc, get_keyword(instruction[24:21]));
         $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
         $display("IF/ID");
         $display("Instruction           %b", if_instruction);
-        $display("Register File:    RA: %b | RB: %b | RD: %b | PA: %b | PB: %b | PD %d", instr_i3_i0, instr_i19_i16,  instr_i15_i12, rf_registerpa_mux, rf_registerpb_mux, rf_registerpd_mux);
+        $display("Register File:    RA: %b | RB: %d | RD: %b | RW: %d | PA: %b | PB: %b | PD %d", instr_i3_i0, instr_i19_i16,  instr_i15_i12, wb_registerrw_rf, rf_registerpa_mux, rf_registerpb_mux, rf_registerpd_mux);
+        $display("=====================================================================================================================================================================");
+        $display("ALU\nA: %b | B: %b | alu_op: %b | C_IN: %b | result: %b | Z: %b | N: %b | C: %b | V: %b", ex_muxpa_alu, shifter_n_alu, ex_aluop_alu, psr_cin_alu, alu_out_muxaluandidmuxes, alu_z_chandler, alu_n_chandler, alu_c_chandler, alu_v_chandler);
         $display("PC states:        PC: %b |nPC: %bPC | Fetch: %b", pc, npc, fetch_npc_pc);
         $display("Control Unit:     ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | STORE_CC: %b | ID_BL: %b | ID_B: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | RF_E: %b | ID_AM: %b", cu_idaluop_mux, cu_idload_mux, cu_idmemwrite_mux, cu_storecc_mux, cu_idbl_mux, cu_idb_mux, cu_idmemsize_mux, cu_idmeme_mux, cu_rfe_rfmux, cu_idam_mux);
         $display("Control Unit Mux: ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | STORE_CC: %b | ID_BL: %b | ID_B: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | RF_E: %b | ID_AM: %b", mux_aluop_id, mux_idload_id, mux_memwrite_id, mux_storecc_id, mux_bl_chandler, mux_b_chandler, mux_memsize_id, mux_meme_id, mux_rfe_id, mux_idam_id);
