@@ -329,7 +329,7 @@ always @(*) begin
         4'b0010: {C, result} = A - B;             // A - B
         4'b0110: {C, result} = A - B - C_IN;       // A - B - CIN (with carry)
         4'b0011: {C, result} = B - A;             // B - A
-        4'b0111: {C, result} = B - A - C_IN;       // B - A - CIN
+        4'b0101: {C, result} = B - A - C_IN;       // B - A - CIN
         4'b0100: {C, result} = A + B;             // A + B
         4'b1100: result = A | B;                  // Bitwise OR
         4'b0001: result = A ^ B;                  // Bitwise XOR
