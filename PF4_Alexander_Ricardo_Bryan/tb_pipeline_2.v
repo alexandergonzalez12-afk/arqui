@@ -190,7 +190,7 @@ module tb_pipeline;
     // hazard Unit
     // ====================================
 
-    wire [31:0] nop;
+    wire nop;
     wire [1:0] forward_rm;
     wire [1:0] forward_rn;
     wire [1:0] forward_rd;
@@ -416,7 +416,7 @@ ID_EX id_ex (
         .IF_IF_Enable   (enable_ifid),
         .forward_Rm     (forward_rm),
         .forward_Rn     (forward_rn),
-        .forward_Rd     (forward_rd),
+        //.forward_Rd     (forward_rd),
         .forward_Rg     (forward_rg),
         .NOP_EX         (nop)
     );
@@ -613,59 +613,61 @@ ID_EX id_ex (
         reset = 1;
         //enable_pc = 1;
         //enable_ifid = 1;
-        S = 0;
-
+        //S = 0;
         // Start simulation
         #3 reset = 0;
-        #32 S = 1;
-        #32 $finish; // Stop simulation at time 40
+        //#32 S = 1;
     end
-    // TODO: ALU has incomplete instructions, implement missing opcode instructions
+
+    initial begin
+        $monitor("CLK: %b | Reset: %b | PC: %d | r1: %d | r2: %d | r3: %d | r5: %d | r6: %d", clk, reset, pc, tprf.R1, tprf.R2, tprf.R3, tprf.R5, tprf.R6);
+        #60 $finish; // Stop simulation at time 52
+    end
     // Display outputs for each clock cycle
-    always @(posedge clk) begin
-        $display("PC: %d | Instruction Type: %s", pc, get_keyword(instruction[24:21]));
-        $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
-        $display("IF/ID");
-        $display("Instruction           %b", if_instruction);
-        $display("Register File:    RA: %b | RB: %b | RD: %b | RW: %b | PA: %b | PB: %b | PD %b", instr_i3_i0, instr_i19_i16,  instr_i15_i12, wb_registerrw_rf, rf_registerpa_mux, rf_registerpb_mux, rf_registerpd_mux);
-        $display("=====================================================================================================================================================================");
-        $display("ALU\nA: %b | B: %b | alu_op: %b | C_IN: %b | result: %b | Z: %b | N: %b | C: %b | V: %b", ex_muxpa_alu, shifter_n_alu, ex_aluop_alu, psr_cin_alu, alu_out_muxaluandidmuxes, alu_z_chandler, alu_n_chandler, alu_c_chandler, alu_v_chandler);
-        $display("PC states:        PC: %b |nPC: %bPC | Fetch: %b", pc, npc, fetch_npc_pc);
-        $display("Control Unit:     ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | STORE_CC: %b | ID_BL: %b | ID_B: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | RF_E: %b | ID_AM: %b", cu_idaluop_mux, cu_idload_mux, cu_idmemwrite_mux, cu_storecc_mux, cu_idbl_mux, cu_idb_mux, cu_idmemsize_mux, cu_idmeme_mux, cu_rfe_rfmux, cu_idam_mux);
-        $display("Control Unit Mux: ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | STORE_CC: %b | ID_BL: %b | ID_B: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | RF_E: %b | ID_AM: %b", mux_aluop_id, mux_idload_id, mux_memwrite_id, mux_storecc_id, mux_bl_chandler, mux_b_chandler, mux_memsize_id, mux_meme_id, mux_rfe_id, mux_idam_id);
-        $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
-        $display("ID/EX");
-        $display("ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | ID_AM: %b | STORE_CC: %b | RF_E: %b | BL_Out: %b | Next PC: %b | MUX_PA: %b | MUX_PB: %b | MUX_PD: %b | MUX_15-12: %b | INSTR_11-0: %b", ex_aluop_alu, ex_load_mem, ex_memwrite_mem, ex_memsize_mem, ex_memenable_mem, ex_am_shifter, ex_storecc_psr, ex_rfenable_mem, ex_blout_muxalu, ex_nextpc_muxalu, ex_muxpa_alu, ex_muxpb_shifter, ex_muxpd_mem, ex_muxinstri15i12_memandhazard, ex_instri11i0_shifter);
-        $display("LE: %b | PW: %b", wb_registerpw_rf, wb_registerle_rf);
-        $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
-        $display("EX/MEM");
-        $display("id_load: %b | id_mem_size: %b | id_mem_write: %b | id_mem_enable: %b | rf_enable: %b | mux_pd: %b | dm_address: %b | mux_instr_i15_i12:  %b", mem_load_wb, mem_size_dm, mem_write_dm, mem_enable_dm, mem_rfenable_wb, mem_pd_inputdm, mem_address_dmandmux, mem_muxi15i12_wb);
-        $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
-        $display("MEM/WB");
-        $display("RF_ENABLE: %b | MUX_DATAMEMORY: %b | MUX_INSTR_I15_I12: %b | rf_enable: %b | mux_instr_i15_i12: %b | mux_datamemory: %b",  mem_rfenable_wb, muxdatamemory_wb, mem_muxi15i12_wb, wb_registerle_rf, wb_registerrw_rf, wb_registerpw_rf);
-        $display("-=-=-=-=-=-=--=-=-=-=--=-=-=-=-=-=-=-=--=-=-=-=--=-=--=-==-=-=-=-=-=-=--==-==-=-==-=-==-=-==-=-");
-        $display("Register File memmory -=-=-=-=-=-=-==-=-=");
-        $display("Selectv O : %d", tprf.O);
-        $display("R0: %d | A0", tprf.R0);
-        $display("R1: %d | A1", tprf.R1);
-        $display("R2: %d | A2", tprf.R2);
-        $display("R3: %d | A3", tprf.R3);
-        $display("R4: %d | A4", tprf.R4);
-        $display("R5: %d | A5", tprf.R5);
-        $display("R6: %d | A6", tprf.R6);
-        $display("R7: %d | A7", tprf.R7);
-        $display("R8: %d | A8", tprf.R8);
-        $display("R9: %d | A9", tprf.R9);
-        $display("R10: %d | A10", tprf.R10);
-        $display("R11: %d | A11", tprf.R11);
-        $display("R12: %d | A12", tprf.R12);
-        $display("R13: %d | A13", tprf.R13);
-        $display("R14: %d | A14", tprf.R14);
-        $display("R15: %d | A15", tprf.R15);
+    //always @(posedge clk) begin
+        // $display("PC: %d | Instruction Type: %s", pc, get_keyword(instruction[24:21]));
+        // $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
+        // $display("IF/ID");
+        // $display("Instruction           %b", if_instruction);
+        // $display("Register File:    RA: %b | RB: %b | RD: %b | RW: %b | PA: %b | PB: %b | PD %b", instr_i3_i0, instr_i19_i16,  instr_i15_i12, wb_registerrw_rf, rf_registerpa_mux, rf_registerpb_mux, rf_registerpd_mux);
+        // $display("=====================================================================================================================================================================");
+        // $display("ALU\nA: %b | B: %b | alu_op: %b | C_IN: %b | result: %b | Z: %b | N: %b | C: %b | V: %b", ex_muxpa_alu, shifter_n_alu, ex_aluop_alu, psr_cin_alu, alu_out_muxaluandidmuxes, alu_z_chandler, alu_n_chandler, alu_c_chandler, alu_v_chandler);
+        // $display("PC states:        PC: %b |nPC: %bPC | Fetch: %b", pc, npc, fetch_npc_pc);
+        // $display("Control Unit:     ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | STORE_CC: %b | ID_BL: %b | ID_B: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | RF_E: %b | ID_AM: %b", cu_idaluop_mux, cu_idload_mux, cu_idmemwrite_mux, cu_storecc_mux, cu_idbl_mux, cu_idb_mux, cu_idmemsize_mux, cu_idmeme_mux, cu_rfe_rfmux, cu_idam_mux);
+        // $display("Control Unit Mux: ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | STORE_CC: %b | ID_BL: %b | ID_B: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | RF_E: %b | ID_AM: %b", mux_aluop_id, mux_idload_id, mux_memwrite_id, mux_storecc_id, mux_bl_chandler, mux_b_chandler, mux_memsize_id, mux_meme_id, mux_rfe_id, mux_idam_id);
+        // $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
+        // $display("ID/EX");
+        // $display("ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | ID_AM: %b | STORE_CC: %b | RF_E: %b | BL_Out: %b | Next PC: %b | MUX_PA: %b | MUX_PB: %b | MUX_PD: %b | MUX_15-12: %b | INSTR_11-0: %b", ex_aluop_alu, ex_load_mem, ex_memwrite_mem, ex_memsize_mem, ex_memenable_mem, ex_am_shifter, ex_storecc_psr, ex_rfenable_mem, ex_blout_muxalu, ex_nextpc_muxalu, ex_muxpa_alu, ex_muxpb_shifter, ex_muxpd_mem, ex_muxinstri15i12_memandhazard, ex_instri11i0_shifter);
+        // $display("LE: %b | PW: %b", wb_registerpw_rf, wb_registerle_rf);
+        // $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
+        // $display("EX/MEM");
+        // $display("id_load: %b | id_mem_size: %b | id_mem_write: %b | id_mem_enable: %b | rf_enable: %b | mux_pd: %b | dm_address: %b | mux_instr_i15_i12:  %b", mem_load_wb, mem_size_dm, mem_write_dm, mem_enable_dm, mem_rfenable_wb, mem_pd_inputdm, mem_address_dmandmux, mem_muxi15i12_wb);
+        // $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
+        // $display("MEM/WB");
+        // $display("RF_ENABLE: %b | MUX_DATAMEMORY: %b | MUX_INSTR_I15_I12: %b | rf_enable: %b | mux_instr_i15_i12: %b | mux_datamemory: %b",  mem_rfenable_wb, muxdatamemory_wb, mem_muxi15i12_wb, wb_registerle_rf, wb_registerrw_rf, wb_registerpw_rf);
+        // $display("-=-=-=-=-=-=--=-=-=-=--=-=-=-=-=-=-=-=--=-=-=-=--=-=--=-==-=-=-=-=-=-=--==-==-=-==-=-==-=-==-=-");
+        // $display("Register File memmory -=-=-=-=-=-=-==-=-=");
+        // $display("Selectv O : %d", tprf.O);
+        // $display("R0: %d | A0", tprf.R0);
+        // $display("R1: %d | A1", tprf.R1);
+        // $display("R2: %d | A2", tprf.R2);
+        // $display("R3: %d | A3", tprf.R3);
+        // $display("R4: %d | A4", tprf.R4);
+        // $display("R5: %d | A5", tprf.R5);
+        // $display("R6: %d | A6", tprf.R6);
+        // $display("R7: %d | A7", tprf.R7);
+        // $display("R8: %d | A8", tprf.R8);
+        // $display("R9: %d | A9", tprf.R9);
+        // $display("R10: %d | A10", tprf.R10);
+        // $display("R11: %d | A11", tprf.R11);
+        // $display("R12: %d | A12", tprf.R12);
+        // $display("R13: %d | A13", tprf.R13);
+        // $display("R14: %d | A14", tprf.R14);
+        // $display("R15: %d | A15", tprf.R15);
 
 
-        $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
-        $display("");
+        // $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
+        
 
-    end
+    //end
 endmodule

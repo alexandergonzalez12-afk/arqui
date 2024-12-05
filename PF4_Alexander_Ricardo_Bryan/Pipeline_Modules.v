@@ -603,72 +603,69 @@ end
 endmodule
 
 module HazardUnit(
-    input EX_RF_enable, MEM_RF_enable, WB_RF_enable,    // Register File Enable signals
-    input [3:0] EX_Rd, MEM_Rd, WB_Rd,                   // Destination registers in each stage
-    input [3:0] ID_Rm, ID_Rn, ID_Rd,                    // Source registers in the ID stage
-    input EX_Load,                                      // Load instruction signal in EX stage
-    input ID_Store,                                     // Store instruction signal in ID stage
-    output reg PC_Enable, IF_IF_Enable,                 // Control signals for stalling
-    output reg [1:0] forward_Rm, forward_Rn, forward_Rd, forward_Rg,
-    output reg [31:0] NOP_EX                            // NOP signal for EX stage
+  input wire [3:0] ID_Rn,
+  input wire [3:0] ID_Rm,
+  input wire [3:0] ID_Rd,
+  input wire [3:0] EX_Rd,
+  input wire [3:0] MEM_Rd,
+  input wire [3:0] WB_Rd,
+  input wire EX_Load,
+  input wire EX_RF_enable,
+  input wire MEM_RF_enable,
+  input wire WB_RF_enable,
+  input wire ID_Store,
+  output reg [1:0] forward_Rn,
+  output reg [1:0] forward_Rm,
+  output reg [1:0] forward_Rg,
+  output reg IF_IF_Enable,
+  output reg PC_Enable,
+  output reg NOP_EX
 );
 
-    // Default values to prevent latches
-    always @(*) begin
-        PC_Enable = 1'b1;
-        IF_IF_Enable = 1'b1;
-        NOP_EX = 32'b0;
-        forward_Rm = 2'b00;
-        forward_Rn = 2'b00;
-        forward_Rd = 2'b00;
-        forward_Rg = 2'b00;
 
-        // Forwarding logic
-        // Forwarding for Rm
-        if (EX_RF_enable && (ID_Rm == EX_Rd))
-            forward_Rm = 2'b01; // Forward from EX stage
-        else if (MEM_RF_enable && (ID_Rm == MEM_Rd))
-            forward_Rm = 2'b10; // Forward from MEM stage
-        else if (WB_RF_enable && (ID_Rm == WB_Rd))
-            forward_Rm = 2'b11; // Forward from WB stage
-
-        // Forwarding for Rn
-        if (EX_RF_enable && (ID_Rn == EX_Rd))
-            forward_Rn = 2'b01; // Forward from EX stage
-        else if (MEM_RF_enable && (ID_Rn == MEM_Rd))
-            forward_Rn = 2'b10; // Forward from MEM stage
-        else if (WB_RF_enable && (ID_Rn == WB_Rd))
-            forward_Rn = 2'b11; // Forward from WB stage
-
-
-            // Forwarding for Rg
-        if (EX_RF_enable && (ID_Rd == EX_Rd))
-            forward_Rg = 2'b01; // Forward from EX stage
-        else if (MEM_RF_enable && (ID_Rd == MEM_Rd))
-            forward_Rg = 2'b10; // Forward from MEM stage
-        else if (WB_RF_enable && (ID_Rd == WB_Rd))
-            forward_Rg = 2'b11; // Forward from WB stage
-
-
-        // Forwarding for Rd (only if it's a store instruction)
-        if (ID_Store) begin
-            if (EX_RF_enable && (ID_Rd == EX_Rd))
-                forward_Rd = 2'b01; // Forward from EX stage
-            else if (MEM_RF_enable && (ID_Rd == MEM_Rd))
-                forward_Rd = 2'b10; // Forward from MEM stage
-            else if (WB_RF_enable && (ID_Rd == WB_Rd))
-                forward_Rd = 2'b11; // Forward from WB stage
-        end
-
-        // Load hazard detection and stalling
-        if (EX_Load) begin
-            if ((ID_Rm == EX_Rd) || (ID_Rn == EX_Rd) || (ID_Rd == EX_Rd)) begin
-                PC_Enable = 1'b0;        // Stall PC update
-                IF_IF_Enable = 1'b0;    // Stall IF/ID pipeline register
-                NOP_EX = 32'b0;         // Insert NOP in EX stage
-            end
-        end
+  always @(*) begin 
+    forward_Rn <= 2'b00;
+    forward_Rm <= 2'b00;
+    forward_Rg <= 2'b00;
+    IF_IF_Enable <= 1;
+    PC_Enable <= 1;
+    NOP_EX <= 0;
+    // && ((ID_Rn == EX_Rd) || (ID_Rm == 			EX_Rd))
+  	if(EX_Load && ((ID_Rn == EX_Rd) || (ID_Rm == EX_Rd) || (ID_Rd == EX_Rd))) begin
+        IF_IF_Enable <= 0;
+        PC_Enable <= 0;
+        NOP_EX <= 1;
     end
+    else 
+    if (EX_RF_enable & (ID_Rn == EX_Rd)) begin
+            forward_Rn <= 2'b11;
+    end
+    else if (MEM_RF_enable & (ID_Rn == MEM_Rd))begin
+            forward_Rn <= 2'b01;
+    end
+    else if (WB_RF_enable & (ID_Rn == WB_Rd))begin
+            forward_Rn <= 2'b10;
+    end
+    else if (EX_RF_enable & (ID_Rm == EX_Rd))begin
+            forward_Rm <= 2'b11;
+    end
+    else if (MEM_RF_enable & (ID_Rm == MEM_Rd))begin
+            forward_Rm <= 2'b01;
+    end
+    else if (WB_RF_enable & (ID_Rm == WB_Rd))begin
+            forward_Rm <= 2'b10;
+    end
+    else if (EX_RF_enable & (ID_Rd == EX_Rd))begin         
+            forward_Rg <= 2'b11;
+    end
+    else if (MEM_RF_enable & (ID_Rd == MEM_Rd))begin
+            forward_Rg <= 2'b01;
+    end
+    else if (WB_RF_enable & (ID_Rd == WB_Rd))begin    
+            forward_Rg <= 2'b10;
+    end
+
+  end
 endmodule
 
 
