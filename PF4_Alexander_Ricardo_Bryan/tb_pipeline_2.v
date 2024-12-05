@@ -632,6 +632,11 @@ ID_EX id_ex (
         $display("ID/EX");
         $display("ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | ID_AM: %b | STORE_CC: %b | RF_E: %b | BL_Out: %b | Next PC: %b | MUX_PA: %b | MUX_PB: %b | MUX_PD: %b | MUX_15-12: %b | INSTR_11-0: %b", ex_aluop_alu, ex_load_mem, ex_memwrite_mem, ex_memsize_mem, ex_memenable_mem, ex_am_shifter, ex_storecc_psr, ex_rfenable_mem, ex_blout_muxalu, ex_nextpc_muxalu, ex_muxpa_alu, ex_muxpb_shifter, ex_muxpd_mem, ex_muxinstri15i12_memandhazard, ex_instri11i0_shifter);
         $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
+        $display("EX/MEM");
+        $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
+        $display("MEM/WB");
+        $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
         $display("");
+
     end
 endmodule
