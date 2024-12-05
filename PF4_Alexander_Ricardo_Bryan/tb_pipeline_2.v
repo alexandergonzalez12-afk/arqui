@@ -107,6 +107,9 @@ module tb_pipeline;
     // register file 
     // ====================================
 
+    reg [3:0] Ra,Rb,Rd;
+
+
     wire [3:0] wb_registerrw_rf;
     wire wb_registerle_rf;
     wire [31:0] wb_registerpw_rf;
@@ -496,9 +499,9 @@ ID_EX id_ex (
     );
 
     Three_port_register_file tprf (
-        .RA   (instr_i3_i0),
-        .RB   (instr_i19_i16),
-        .RD   (instr_i15_i12),
+        .RA   (Ra),
+        .RB   (Rb),
+        .RD   (Rd),
         .RW   (wb_registerrw_rf),
         .PC   (pc),
         .Clk  (clk),
@@ -511,7 +514,7 @@ ID_EX id_ex (
 
     // Instantiate the ControlUnit module
     ControlUnit uut_control (
-        .instruction        (instruction),  // instruction
+        .instruction        (if_instruction),  // instruction
         .ALU_OP             (cu_idaluop_mux), //out
         .ID_LOAD            (cu_idload_mux),
         .ID_MEM_WRITE       (cu_idmemwrite_mux),
@@ -615,7 +618,7 @@ ID_EX id_ex (
         // Start simulation
         #3 reset = 0;
         #32 S = 1;
-        #80 $finish; // Stop simulation at time 40
+        #32 $finish; // Stop simulation at time 40
     end
 
     // Display outputs for each clock cycle
@@ -634,7 +637,7 @@ ID_EX id_ex (
         $display("LE: %b | PW: %b", wb_registerpw_rf, wb_registerle_rf);
         $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
         $display("EX/MEM");
-        $display("mem_pd_inputdm: %b | mem_address_dmandmux: %b | mem_muxi15i12_wb", mem_pd_inputdm, mem_address_dmandmux, mem_muxi15i12_wb);
+        $display("mem_pd_inputdm: %b | mem_address_dmandmux: %b | mem_muxi15i12_wb: %b", mem_pd_inputdm, mem_address_dmandmux, mem_muxi15i12_wb);
         $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
         $display("MEM/WB");
         $display("dm_output_muxdm: %b | mem_address_dmandmux: %b | mem_pd_inputdm: %b | mem_size_dm: %b | mem_write_dm: %b | mem_enable_dm: %b ",dm_output_muxdm, mem_address_dmandmux, mem_pd_inputdm, mem_size_dm, mem_write_dm, mem_enable_dm);
