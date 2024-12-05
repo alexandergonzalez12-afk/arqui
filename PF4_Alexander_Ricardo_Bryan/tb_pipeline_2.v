@@ -515,16 +515,16 @@ ID_EX id_ex (
     // Instantiate the ControlUnit module
     ControlUnit uut_control (
         .instruction        (if_instruction),  // instruction
-        .ALU_OP             (cu_idaluop_mux), //out
-        .ID_LOAD            (cu_idload_mux),
-        .ID_MEM_WRITE       (cu_idmemwrite_mux),
-        .STORE_CC           (cu_storecc_mux),
-        .ID_MEM_SIZE        (cu_idmemsize_mux),
-        .ID_MEM_E           (cu_idmeme_mux),
-        .RF_E               (cu_rfe_rfmux),
-        .ID_AM              (cu_idam_mux),
-        .ID_B               (cu_idb_mux),
-        .ID_BL              (cu_idbl_mux)
+        .ID_ALU_op          (cu_idaluop_mux), //out
+        .ID_load_instr      (cu_idload_mux),
+        .ID_DM_rfw          (cu_idmemwrite_mux),
+        .ID_DP_instr        (cu_storecc_mux),
+        .ID_DM_size         (cu_idmemsize_mux),
+        .ID_DM_enable       (cu_idmeme_mux),
+        .ID_RF_enable       (cu_rfe_rfmux),
+        .ID_SHIFT_am        (cu_idam_mux),
+        .ID_B_instr         (cu_idb_mux),
+        .ID_BL_instr        (cu_idbl_mux)
     );
 
     // Instantiate the Multiplexer

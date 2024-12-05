@@ -676,45 +676,251 @@ endmodule
 //------------------------PHASE 3 MODULES -----------------------------
 module ControlUnit(
   input [31:0] instruction,
-  output reg [3:0] ALU_OP,
-  output reg ID_LOAD,
-  output reg ID_MEM_WRITE,
-  output reg [1:0] ID_AM,
-  output reg STORE_CC,
-  output reg ID_B,
-  output reg ID_BL,
-  output reg ID_MEM_SIZE,
-  output reg ID_MEM_E,
-  output reg RF_E
+  output reg [1:0] ID_SHIFT_am,
+  output reg [3:0] ID_ALU_op,
+  output reg ID_load_instr,
+  output reg ID_RF_enable,
+  output reg ID_DM_size,
+  output reg ID_DM_rfw,
+  output reg ID_DM_enable,
+  output reg ID_DP_instr,
+  output reg ID_B_instr,
+  output reg ID_BL_instr
 );
-
-always @(*) begin
-    // Reset control signals by default or for NOP instructions
-    ALU_OP = 4'b0000;
-    ID_LOAD = 0;
-    ID_MEM_WRITE = 0;
-    ID_AM = 2'b00;
-    STORE_CC = 0;
-    ID_B = 0;
-    ID_BL = 0;
-    ID_MEM_SIZE = 0;
-    ID_MEM_E = 0;
-    RF_E = 0;
-
-    if (instruction != 32'b00000000000000000000000000000000) begin
-        // Assign control signals based on instruction
-        ALU_OP = instruction[24:21];
-        ID_LOAD = instruction[20];
-        ID_MEM_WRITE = instruction[21];
-        ID_AM = instruction[26:25];
-        STORE_CC = instruction[20];
-        ID_B = instruction[24];
-        ID_BL = instruction[27];
-        ID_MEM_SIZE = instruction[22];
-        ID_MEM_E = instruction[23];
-        RF_E = instruction[19];
-    end
-end    
+  always @(*) begin
+    if (instruction == 32'b0) begin
+          ID_SHIFT_am = 2'b00;
+          ID_ALU_op = 4'b0000;
+          ID_load_instr = 0;
+          ID_RF_enable = 0;
+          ID_DM_size = 0;
+          ID_DM_rfw = 0;
+          ID_DM_enable = 0;
+          ID_DP_instr = 0;
+          ID_B_instr = 0;
+          ID_BL_instr = 0;
+      end else if (instruction != 32'b0) begin
+          // Decodificación de la instrucción cuando reset no está activo y la instrucción no es cero
+          case (instruction[27:25])
+              3'b000: begin // Data Processing Immediate or Register Shift
+                ID_BL_instr = 0;
+                ID_B_instr = 0;
+                ID_SHIFT_am = 2'b11;
+                case(instruction[4])
+                    1'b0: begin
+                      case (instruction[24:21]) 
+                              4'b0000: begin
+                                ID_ALU_op = 4'b0110;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b0001: begin
+                                ID_ALU_op = 4'b1000;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b0010: begin
+                                ID_ALU_op = 4'b0010;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b0011: begin
+                                ID_ALU_op = 4'b0100;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b0100: begin
+                                ID_ALU_op = 4'b0000;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b0101: begin
+                                ID_ALU_op = 4'b0001;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b0110: begin
+                                ID_ALU_op = 4'b0011;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b0111: begin
+                                ID_ALU_op = 4'b0101;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b1000: begin
+                                ID_ALU_op = 4'b0110;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 0;
+                              end
+                              4'b1001: begin
+                                ID_ALU_op = 4'b1000;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 0;
+                              end
+                              4'b1010: begin
+                                ID_ALU_op = 4'b0010;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 0;
+                              end
+                              4'b1011: begin
+                                ID_ALU_op = 4'b0000;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 0;
+                              end
+                              4'b1100: begin
+                                ID_ALU_op = 4'b0111;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b1101: begin
+                                ID_ALU_op = 4'b1010;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b1110: begin
+                                ID_ALU_op = 4'b1100;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b1111: begin
+                                ID_ALU_op = 4'b1011;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                          endcase
+                      end
+                   1'b1: begin
+                   end
+                 endcase
+              end
+                     
+                 
+              
+              3'b001: begin // Data Processing Immediate
+                ID_BL_instr = 0;
+                ID_B_instr = 0;
+                ID_SHIFT_am = 2'b00;
+                  case (instruction[24:21])
+                    	4'b0000: begin
+                                ID_ALU_op = 4'b0110;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b0001: begin
+                                ID_ALU_op = 4'b1000;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b0010: begin
+                                ID_ALU_op = 4'b0010;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b0011: begin
+                                ID_ALU_op = 4'b0100;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b0100: begin
+                                ID_ALU_op = 4'b0000;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b0101: begin
+                                ID_ALU_op = 4'b0001;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b0110: begin
+                                ID_ALU_op = 4'b0011;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b0111: begin
+                                ID_ALU_op = 4'b0101;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b1000: begin
+                                ID_ALU_op = 4'b0110;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 0;
+                              end
+                              4'b1001: begin
+                                ID_ALU_op = 4'b1000;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 0;
+                              end
+                              4'b1010: begin
+                                ID_ALU_op = 4'b0010;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 0;
+                              end
+                              4'b1011: begin
+                                ID_ALU_op = 4'b0000;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 0;
+                              end
+                              4'b1100: begin
+                                ID_ALU_op = 4'b0111;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b1101: begin//mov
+                                ID_ALU_op = 4'b1010;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b1110: begin
+                                ID_ALU_op = 4'b1100;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                              4'b1111: begin
+                                ID_ALU_op = 4'b1011;
+                                ID_DP_instr = instruction[20];
+                                ID_RF_enable = 1;
+                              end
+                  endcase
+              end
+              3'b010: begin // Load/Store Immediate Offset
+                  ID_load_instr = 1;
+                  ID_DM_enable = 1;
+                  ID_DP_instr = 0;
+                  ID_DM_rfw = (!instruction[20] == 1);
+                  ID_DM_size = (!instruction[22] == 1);
+                  ID_SHIFT_am = 2'b10;
+              end
+              3'b011: begin // Load/Store Conditional
+                  if (instruction[4] == 0) begin
+                      ID_load_instr = 1;
+                      ID_DM_enable = 1;
+                    	ID_DM_rfw = (!instruction[20] == 1);
+                    	ID_DM_size = (!instruction[22] == 1);
+                    	ID_DP_instr = 0;
+                    	ID_SHIFT_am = 2'b11;
+                  end
+              end
+              3'b101: begin // Branch
+                  if (instruction[24] == 1'b1)
+                    begin
+                      ID_DP_instr = 0;
+                      ID_BL_instr = 1;                  
+                	    ID_B_instr = 0;
+                      ID_ALU_op = 4'b1111;
+                    end
+                  else begin
+                  	  ID_DP_instr = 0;
+                      ID_B_instr = 1;
+                	    ID_BL_instr = 0;
+                    	ID_ALU_op = 4'b1111;
+                  end
+              end
+          endcase
+      end 
+  end
 endmodule
 
 module Multiplexer (
