@@ -324,13 +324,13 @@ always @(*) begin
     V = 0;
 
     case (OP)
-        4'b0000: {C, Out} = A & B;             // A & B
+        4'b0000: Out = A & B;             // A & B
         4'b0101: {C, Out} = A + B + CIN;       // A + B + CIN (with carry)
         4'b0010: {C, Out} = A - B;             // A - B
         4'b0110: {C, Out} = A - B - CIN;       // A - B - CIN (with carry)
         4'b0011: {C, Out} = B - A;             // B - A
         4'b0101: {C, Out} = B - A - CIN;       // B - A - CIN
-        4'b0100: Out = A + B;                  // Bitwise AND
+        4'b0100: {C, Out} = A + B;             // A + B
         4'b1100: Out = A | B;                  // Bitwise OR
         4'b0001: Out = A ^ B;                  // Bitwise XOR
         4'b1001: Out = A;                      // Pass A
