@@ -212,9 +212,10 @@ module tb_pipeline;
     // RF DATA MEMORY
     // ====================================
 
+    wire [31:0] muxdatamemory_wb;
 
     // ====================================
-    // WRITE BACK
+    // Finished wiring
     // ====================================
 
     // Helper function to get the keyword based on opcode
@@ -292,27 +293,27 @@ module tb_pipeline;
 
     MUX_PA mux_pa (
         .pa             (rf_registerpa_mux),
-        .jump_EX_pa     (),
-        .jump_MEM_pa    (),
-        .jump_WB_pa     (),
+        .jump_EX_pa     (alu_out_muxaluandidmuxes),
+        .jump_MEM_pa    (muxdatamemory_wb),
+        .jump_WB_pa     (wb_registerpw_rf),
         .S_PA           (forward_rn),
         .rf_pa          (mux_pa_id)
     );
 
     MUX_PB mux_pb (
         .pb             (rf_registerpb_mux),
-        .jump_EX_pb     (),
-        .jump_MEM_pb    (),
-        .jump_WB_pb     (),
+        .jump_EX_pb     (alu_out_muxaluandidmuxes),
+        .jump_MEM_pb    (muxdatamemory_wb),
+        .jump_WB_pb     (wb_registerpw_rf),
         .S_PB           (forward_rm),
         .rf_pb          (mux_pb_id)
     );
 
     MUX_PD mux_pd (
         .pd             (rf_registerpd_mux),
-        .jump_EX_pd     (),
-        .jump_MEM_pd    (),
-        .jump_WB_pd     (),
+        .jump_EX_pd     (alu_out_muxaluandidmuxes),
+        .jump_MEM_pd    (muxdatamemory_wb),
+        .jump_WB_pd     (wb_registerpw_rf),
         .S_PD           (forward_rg),
         .rf_pd          (mux_pd_id)
     );    
@@ -332,9 +333,9 @@ ID_EX id_ex (
     
     .BL_OUT                 (chandler_blout_idmux),
     .NEXT_PC                (if_npc_fetch),
-    .MUX_PA                 (mux_pa_id), // salida de los muxes de la etapa id/ex (inputs)
-    .MUX_PB                 (mux_pb_id), // salida de los muxes de la etapa id/ex (inputs)
-    .MUX_PD                 (mux_pd_id), // salida de los muxes de la etapa id/ex (inputs)
+    .MUX_PA                 (mux_pa_id), 
+    .MUX_PB                 (mux_pb_id), 
+    .MUX_PD                 (mux_pd_id), 
     .MUX_INSTR_I15_I12      (idmux_out_ex),
     .INSTR_I11_I0           (instr_i11_i0),
 
@@ -447,6 +448,24 @@ ID_EX id_ex (
         .rw             (mem_write_dm),
         .enable         (mem_enable_dm)
 
+    );
+
+    MUX_DataMemory mux_datamemory(
+        .Addr       (mem_address_dmandmux),
+        .DataOut    (dm_output_muxdm),
+        .Sel        (mem_load_wb),
+        .MuxOut     (muxdatamemory_wb)     
+    );
+
+    MEM_WB mem_wb(
+        .clk                (clk),
+        .reset              (reset),
+        .RF_ENABLE          (mem_rfenable_wb),
+        .MUX_DATAMEMORY     (muxdatamemory_wb),
+        .MUX_INSTR_I15_I12  (mem_muxi15i12_wb),
+        .rf_enable          (wb_registerle_rf),
+        .mux_instr_i15_i12  (wb_registerrw_rf),
+        .mux_datamemory     (wb_registerpw_rf)
     );
 
     PSR psr (
@@ -601,7 +620,7 @@ ID_EX id_ex (
 
     // Display outputs for each clock cycle
     always @(posedge clk) begin
-        $display("PC: %0d | Opcode: %s", pc, get_keyword(instruction[24:21]));
+        $display("PC: %0d", pc);
         $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
         $display("IF/ID");
         $display("Instruction           %b", if_instruction);
@@ -613,6 +632,11 @@ ID_EX id_ex (
         $display("ID/EX");
         $display("ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | ID_AM: %b | STORE_CC: %b | RF_E: %b | BL_Out: %b | Next PC: %b | MUX_PA: %b | MUX_PB: %b | MUX_PD: %b | MUX_15-12: %b | INSTR_11-0: %b", ex_aluop_alu, ex_load_mem, ex_memwrite_mem, ex_memsize_mem, ex_memenable_mem, ex_am_shifter, ex_storecc_psr, ex_rfenable_mem, ex_blout_muxalu, ex_nextpc_muxalu, ex_muxpa_alu, ex_muxpb_shifter, ex_muxpd_mem, ex_muxinstri15i12_memandhazard, ex_instri11i0_shifter);
         $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
+        $display("EX/MEM");
+        $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
+        $display("MEM/WB");
+        $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
         $display("");
+
     end
 endmodule
