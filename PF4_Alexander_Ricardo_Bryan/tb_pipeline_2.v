@@ -627,7 +627,7 @@ ID_EX id_ex (
         $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
         $display("IF/ID");
         $display("Instruction           %b", if_instruction);
-        $display("Register File:    RA: %b | RB: %d | RD: %b | RW: %d | PA: %b | PB: %b | PD %d", instr_i3_i0, instr_i19_i16,  instr_i15_i12, wb_registerrw_rf, rf_registerpa_mux, rf_registerpb_mux, rf_registerpd_mux);
+        $display("Register File:    RA: %b | RB: %b | RD: %b | RW: %b | PA: %b | PB: %b | PD %b", instr_i3_i0, instr_i19_i16,  instr_i15_i12, wb_registerrw_rf, rf_registerpa_mux, rf_registerpb_mux, rf_registerpd_mux);
         $display("=====================================================================================================================================================================");
         $display("ALU\nA: %b | B: %b | alu_op: %b | C_IN: %b | result: %b | Z: %b | N: %b | C: %b | V: %b", ex_muxpa_alu, shifter_n_alu, ex_aluop_alu, psr_cin_alu, alu_out_muxaluandidmuxes, alu_z_chandler, alu_n_chandler, alu_c_chandler, alu_v_chandler);
         $display("PC states:        PC: %b |nPC: %bPC | Fetch: %b", pc, npc, fetch_npc_pc);
