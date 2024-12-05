@@ -2,7 +2,10 @@ PC:          0 | Instruction Type:     MOV
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           00000000000000000000000000000000
-Register File:    RA: 0000 | RB: 0000 | RD: 0000 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: 0000 | RB:  0 | RD: 0000 | RW:  0 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: 00000000000000000000000000000000 | B: 00000000000000000000000000000000 | alu_op: 0000 | C_IN: z | result: 00000000000000000000000000000000 | Z: 1 | N: 0 | C: x | V: 0
 PC states:        PC: 00000000000000000000000000000000 |nPC: 00000000000000000000000000000100PC | Fetch: 00000000000000000000000000000100
 Control Unit:     ALU_OP: 1101 | ID_LOAD: 0 | ID_MEM_WRITE: 1 | STORE_CC: 0 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 0 | ID_MEM_E: 1 | RF_E: 0 | ID_AM: 01
 Control Unit Mux: ALU_OP: 1101 | ID_LOAD: 0 | ID_MEM_WRITE: 1 | STORE_CC: 0 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 0 | ID_MEM_E: 1 | RF_E: 0 | ID_AM: 01
@@ -41,7 +44,10 @@ PC:          0 | Instruction Type:     MOV
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           00000000000000000000000000000000
-Register File:    RA: 0000 | RB: 0000 | RD: 0000 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: 0000 | RB:  0 | RD: 0000 | RW:  0 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: 00000000000000000000000000000000 | B: 00000000000000000000000000000000 | alu_op: 0000 | C_IN: z | result: 00000000000000000000000000000000 | Z: 1 | N: 0 | C: x | V: 0
 PC states:        PC: 00000000000000000000000000000000 |nPC: 00000000000000000000000000000100PC | Fetch: 00000000000000000000000000000100
 Control Unit:     ALU_OP: 1101 | ID_LOAD: 0 | ID_MEM_WRITE: 1 | STORE_CC: 0 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 0 | ID_MEM_E: 1 | RF_E: 0 | ID_AM: 01
 Control Unit Mux: ALU_OP: 1101 | ID_LOAD: 0 | ID_MEM_WRITE: 1 | STORE_CC: 0 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 0 | ID_MEM_E: 1 | RF_E: 0 | ID_AM: 01
@@ -80,7 +86,10 @@ PC:          4 | Instruction Type:     ORR
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           11100011101000000101000000110100
-Register File:    RA: 0100 | RB: 0000 | RD: 0101 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: 0100 | RB:  0 | RD: 0101 | RW:  0 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | alu_op: 1101 | C_IN: z | result: 00000000000000000000000000000000 | Z: 1 | N: 0 | C: x | V: x
 PC states:        PC: 00000000000000000000000000000100 |nPC: 00000000000000000000000000001000PC | Fetch: 00000000000000000000000000001000
 Control Unit:     ALU_OP: 1100 | ID_LOAD: 1 | ID_MEM_WRITE: 0 | STORE_CC: 1 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 0 | ID_MEM_E: 1 | RF_E: 0 | ID_AM: 10
 Control Unit Mux: ALU_OP: 1100 | ID_LOAD: 1 | ID_MEM_WRITE: 0 | STORE_CC: 1 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 0 | ID_MEM_E: 1 | RF_E: 0 | ID_AM: 10
@@ -119,7 +128,10 @@ PC:          8 | Instruction Type:     BIC
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           11100101100101010001000000000000
-Register File:    RA: 0000 | RB: 0101 | RD: 0001 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: 0000 | RB:  5 | RD: 0001 | RW:  0 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: 00000000000000000000000000110100 | alu_op: 1100 | C_IN: z | result: 00000000000000000000000000000000 | Z: 1 | N: 0 | C: x | V: x
 PC states:        PC: 00000000000000000000000000001000 |nPC: 00000000000000000000000000001100PC | Fetch: 00000000000000000000000000001100
 Control Unit:     ALU_OP: 1110 | ID_LOAD: 1 | ID_MEM_WRITE: 0 | STORE_CC: 1 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 1 | ID_MEM_E: 1 | RF_E: 0 | ID_AM: 10
 Control Unit Mux: ALU_OP: 1110 | ID_LOAD: 1 | ID_MEM_WRITE: 0 | STORE_CC: 1 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 1 | ID_MEM_E: 1 | RF_E: 0 | ID_AM: 10
@@ -158,7 +170,10 @@ PC:         12 | Instruction Type:     BIC
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           11100101110101010010000000000100
-Register File:    RA: 0100 | RB: 0101 | RD: 0010 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: 0100 | RB:  5 | RD: 0010 | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: 00000000000000000000000000000000 | alu_op: 1110 | C_IN: z | result: 00000000000000000000000000000000 | Z: 1 | N: 0 | C: x | V: x
 PC states:        PC: 00000000000000000000000000001100 |nPC: 00000000000000000000000000010000PC | Fetch: 00000000000000000000000000010000
 Control Unit:     ALU_OP: 1110 | ID_LOAD: 1 | ID_MEM_WRITE: 0 | STORE_CC: 1 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 1 | ID_MEM_E: 1 | RF_E: 0 | ID_AM: 10
 Control Unit Mux: ALU_OP: 1110 | ID_LOAD: 1 | ID_MEM_WRITE: 0 | STORE_CC: 1 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 1 | ID_MEM_E: 1 | RF_E: 0 | ID_AM: 10
@@ -197,7 +212,10 @@ PC:         16 | Instruction Type:     MOV
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           11100101110101010011000000000101
-Register File:    RA: 0101 | RB: 0101 | RD: 0011 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: 0101 | RB:  5 | RD: 0011 | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: 00000000000000000000000000000100 | alu_op: 1110 | C_IN: z | result: 00000000000000000000000000000000 | Z: 1 | N: 0 | C: x | V: x
 PC states:        PC: 00000000000000000000000000010000 |nPC: 00000000000000000000000000010100PC | Fetch: 00000000000000000000000000010100
 Control Unit:     ALU_OP: 1101 | ID_LOAD: 1 | ID_MEM_WRITE: 1 | STORE_CC: 1 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 0 | ID_MEM_E: 1 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 1101 | ID_LOAD: 1 | ID_MEM_WRITE: 1 | STORE_CC: 1 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 0 | ID_MEM_E: 1 | RF_E: 0 | ID_AM: 00
@@ -236,7 +254,10 @@ PC:         20 | Instruction Type:     AND
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           11100001101100001010000000000001
-Register File:    RA: 0001 | RB: 0000 | RD: 1010 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: 0001 | RB:  0 | RD: 1010 | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: 00000000000000000000000000000101 | alu_op: 1101 | C_IN: z | result: 00000000000000000000000000000000 | Z: 1 | N: 0 | C: x | V: x
 PC states:        PC: 00000000000000000000000000010100 |nPC: 00000000000000000000000000011000PC | Fetch: 00000000000000000000000000011000
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 1 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 01
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 1 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 01
@@ -275,7 +296,10 @@ PC:         24 | Instruction Type:     SUB
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           01011010000000000000000000000100
-Register File:    RA: 0100 | RB: 0000 | RD: 0000 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: 0100 | RB:  0 | RD: 0000 | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | alu_op: 0000 | C_IN: z | result: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | Z: x | N: x | C: x | V: x
 PC states:        PC: 00000000000000000000000000011000 |nPC: 00000000000000000000000000011100PC | Fetch: 00000000000000000000000000011100
 Control Unit:     ALU_OP: 0010 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 1 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 0010 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 1 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
@@ -314,7 +338,10 @@ PC:         28 | Instruction Type:     NOP
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           11100000010000110110000000000010
-Register File:    RA: 0010 | RB: 0011 | RD: 0110 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: 0010 | RB:  3 | RD: 0110 | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: 00000000000000000000000000000100 | alu_op: 0010 | C_IN: z | result: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | Z: x | N: x | C: x | V: x
 PC states:        PC: 00000000000000000000000000011100 |nPC: 00000000000000000000000000100000PC | Fetch: 00000000000000000000000000100000
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
@@ -353,7 +380,10 @@ PC:         32 | Instruction Type:     NOP
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           00000000000000000000000000000000
-Register File:    RA: 0000 | RB: 0000 | RD: 0000 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: 0000 | RB:  0 | RD: 0000 | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: 00000000000000000000000000000010 | alu_op: 0000 | C_IN: z | result: 000000000000000000000000000000x0 | Z: x | N: 0 | C: x | V: x
 PC states:        PC: 00000000000000000000000000100000 |nPC: 00000000000000000000000000100100PC | Fetch: 00000000000000000000000000100100
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
@@ -392,7 +422,10 @@ PC:         36 | Instruction Type:     AND
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           00000000000000000000000000000000
-Register File:    RA: 0000 | RB: 0000 | RD: 0000 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: 0000 | RB:  0 | RD: 0000 | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: 00000000000000000000000000000000 | alu_op: 0000 | C_IN: z | result: 00000000000000000000000000000000 | Z: 1 | N: 0 | C: x | V: x
 PC states:        PC: 00000000000000000000000000100100 |nPC: 00000000000000000000000000101000PC | Fetch: 00000000000000000000000000101000
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 1 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 01
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 1 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 01
@@ -431,7 +464,10 @@ PC:         40 | Instruction Type:     ADD
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           11101010000000000000000000000100
-Register File:    RA: 0100 | RB: 0000 | RD: 0000 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: 0100 | RB:  0 | RD: 0000 | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | alu_op: 0000 | C_IN: z | result: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | Z: x | N: x | C: x | V: x
 PC states:        PC: 00000000000000000000000000101000 |nPC: 00000000000000000000000000101100PC | Fetch: 00000000000000000000000000101100
 Control Unit:     ALU_OP: 0100 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 1 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 0100 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 1 | RF_E: 0 | ID_AM: 00
@@ -470,7 +506,10 @@ PC:         44 | Instruction Type:     BIC
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           11100000100000110110000000000010
-Register File:    RA: 0010 | RB: 0011 | RD: 0110 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: 0010 | RB:  3 | RD: 0110 | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: 00000000000000000000000000000100 | alu_op: 0100 | C_IN: z | result: 00000000000000000000000000000000 | Z: 1 | N: 0 | C: x | V: x
 PC states:        PC: 00000000000000000000000000101100 |nPC: 00000000000000000000000000110000PC | Fetch: 00000000000000000000000000110000
 Control Unit:     ALU_OP: 1110 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 1 | ID_MEM_E: 1 | RF_E: 0 | ID_AM: 10
 Control Unit Mux: ALU_OP: 1110 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 1 | ID_MEM_E: 1 | RF_E: 0 | ID_AM: 10
@@ -509,7 +548,10 @@ PC:         48 | Instruction Type:     RSC
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           11100101110001010110000000000110
-Register File:    RA: 0110 | RB: 0101 | RD: 0110 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: 0110 | RB:  5 | RD: 0110 | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: 00000000000000000000000000000010 | alu_op: 1110 | C_IN: z | result: 00000000000000000000000000000000 | Z: 1 | N: 0 | C: x | V: x
 PC states:        PC: 00000000000000000000000000110000 |nPC: 00000000000000000000000000110100PC | Fetch: 00000000000000000000000000110100
 Control Unit:     ALU_OP: 0111 | ID_LOAD: 1 | ID_MEM_WRITE: 1 | STORE_CC: 1 | ID_BL: 1 | ID_B: 0 | ID_MEM_SIZE: 1 | ID_MEM_E: 1 | RF_E: 1 | ID_AM: 01
 Control Unit Mux: ALU_OP: 0111 | ID_LOAD: 1 | ID_MEM_WRITE: 1 | STORE_CC: 1 | ID_BL: 1 | ID_B: 0 | ID_MEM_SIZE: 1 | ID_MEM_E: 1 | RF_E: 1 | ID_AM: 01
@@ -548,7 +590,10 @@ PC:         52 | Instruction Type:     AND
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           11101010111111111111111111111111
-Register File:    RA: 1111 | RB: 1111 | RD: 1111 | PA: 00000000000000000000000000110000 | PB: 00000000000000000000000000110000 | PD         48
+Register File:    RA: 1111 | RB: 15 | RD: 1111 | RW: 14 | PA: 00000000000000000000000000110000 | PB: 00000000000000000000000000110000 | PD         48
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | alu_op: 0111 | C_IN: z | result: 00000000000000000000000000000000 | Z: 1 | N: 0 | C: x | V: x
 PC states:        PC: 00000000000000000000000000110100 |nPC: 00000000000000000000000000111000PC | Fetch: 00000000000000000000000000111000
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 1 | ID_MEM_WRITE: 0 | STORE_CC: 1 | ID_BL: 1 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 10
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 1 | ID_MEM_WRITE: 0 | STORE_CC: 1 | ID_BL: 1 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 10
@@ -587,7 +632,10 @@ PC:         56 | Instruction Type:     TEQ
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           11111100000100110010000000000000
-Register File:    RA: 0000 | RB: 0011 | RD: 0010 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: 0000 | RB:  3 | RD: 0010 | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: 00000000000000000000000000110000 | B: 00000000000000000000111111111111 | alu_op: 0000 | C_IN: z | result: 00000000000000000000000000110000 | Z: 0 | N: 0 | C: x | V: 0
 PC states:        PC: 00000000000000000000000000111000 |nPC: 00000000000000000000000000111100PC | Fetch: 00000000000000000000000000111100
 Control Unit:     ALU_OP: 1001 | ID_LOAD: 0 | ID_MEM_WRITE: 1 | STORE_CC: 0 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 01
 Control Unit Mux: ALU_OP: 1001 | ID_LOAD: 0 | ID_MEM_WRITE: 1 | STORE_CC: 0 | ID_BL: 0 | ID_B: 1 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 01
@@ -626,7 +674,10 @@ PC:         60 | Instruction Type:     NOP
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           00010011001000000000000000000000
-Register File:    RA: 0000 | RB: 0000 | RD: 0000 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: 0000 | RB:  0 | RD: 0000 | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | alu_op: 1001 | C_IN: z | result: 00000000000000000000000000000000 | Z: 1 | N: 0 | C: x | V: x
 PC states:        PC: 00000000000000000000000000111100 |nPC: 00000000000000000000000001000000PC | Fetch: 00000000000000000000000001000000
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
@@ -665,7 +716,10 @@ PC:         64 | Instruction Type:     NOP
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           00000000xxxxxxxxxxxxxxxxxxxxxxxx
-Register File:    RA: xxxx | RB: xxxx | RD: xxxx | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: xxxx | RB:  x | RD: xxxx | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: 00000000000000000000000000000000 | alu_op: 0000 | C_IN: z | result: 00000000000000000000000000000000 | Z: 1 | N: 0 | C: x | V: x
 PC states:        PC: 00000000000000000000000001000000 |nPC: 00000000000000000000000001000100PC | Fetch: 00000000000000000000000001000100
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
@@ -704,7 +758,10 @@ PC:         68 | Instruction Type:     NOP
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-Register File:    RA: xxxx | RB: xxxx | RD: xxxx | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: xxxx | RB:  x | RD: xxxx | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | alu_op: 0000 | C_IN: z | result: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | Z: x | N: x | C: x | V: x
 PC states:        PC: 00000000000000000000000001000100 |nPC: 00000000000000000000000001001000PC | Fetch: 00000000000000000000000001001000
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
@@ -743,7 +800,10 @@ PC:         72 | Instruction Type:     NOP
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-Register File:    RA: xxxx | RB: xxxx | RD: xxxx | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: xxxx | RB:  x | RD: xxxx | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | alu_op: 0000 | C_IN: z | result: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | Z: x | N: x | C: x | V: x
 PC states:        PC: 00000000000000000000000001001000 |nPC: 00000000000000000000000001001100PC | Fetch: 00000000000000000000000001001100
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
@@ -782,7 +842,10 @@ PC:         76 | Instruction Type:     NOP
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-Register File:    RA: xxxx | RB: xxxx | RD: xxxx | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: xxxx | RB:  x | RD: xxxx | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | alu_op: 0000 | C_IN: z | result: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | Z: x | N: x | C: x | V: x
 PC states:        PC: 00000000000000000000000001001100 |nPC: 00000000000000000000000001010000PC | Fetch: 00000000000000000000000001010000
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
@@ -821,7 +884,10 @@ PC:         80 | Instruction Type:     NOP
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-Register File:    RA: xxxx | RB: xxxx | RD: xxxx | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: xxxx | RB:  x | RD: xxxx | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | alu_op: 0000 | C_IN: z | result: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | Z: x | N: x | C: x | V: x
 PC states:        PC: 00000000000000000000000001010000 |nPC: 00000000000000000000000001010100PC | Fetch: 00000000000000000000000001010100
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
@@ -860,7 +926,10 @@ PC:         84 | Instruction Type:     NOP
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-Register File:    RA: xxxx | RB: xxxx | RD: xxxx | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: xxxx | RB:  x | RD: xxxx | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | alu_op: 0000 | C_IN: z | result: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | Z: x | N: x | C: x | V: x
 PC states:        PC: 00000000000000000000000001010100 |nPC: 00000000000000000000000001011000PC | Fetch: 00000000000000000000000001011000
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
@@ -899,7 +968,10 @@ PC:         88 | Instruction Type:     NOP
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-Register File:    RA: xxxx | RB: xxxx | RD: xxxx | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: xxxx | RB:  x | RD: xxxx | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | alu_op: 0000 | C_IN: z | result: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | Z: x | N: x | C: x | V: x
 PC states:        PC: 00000000000000000000000001011000 |nPC: 00000000000000000000000001011100PC | Fetch: 00000000000000000000000001011100
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
@@ -938,7 +1010,10 @@ PC:         92 | Instruction Type:     NOP
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-Register File:    RA: xxxx | RB: xxxx | RD: xxxx | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: xxxx | RB:  x | RD: xxxx | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | alu_op: 0000 | C_IN: z | result: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | Z: x | N: x | C: x | V: x
 PC states:        PC: 00000000000000000000000001011100 |nPC: 00000000000000000000000001100000PC | Fetch: 00000000000000000000000001100000
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
@@ -977,7 +1052,10 @@ PC:         96 | Instruction Type:     NOP
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-Register File:    RA: xxxx | RB: xxxx | RD: xxxx | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: xxxx | RB:  x | RD: xxxx | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | alu_op: 0000 | C_IN: z | result: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | Z: x | N: x | C: x | V: x
 PC states:        PC: 00000000000000000000000001100000 |nPC: 00000000000000000000000001100100PC | Fetch: 00000000000000000000000001100100
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
@@ -1016,7 +1094,10 @@ PC:        100 | Instruction Type:     NOP
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-Register File:    RA: xxxx | RB: xxxx | RD: xxxx | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: xxxx | RB:  x | RD: xxxx | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | alu_op: 0000 | C_IN: z | result: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | Z: x | N: x | C: x | V: x
 PC states:        PC: 00000000000000000000000001100100 |nPC: 00000000000000000000000001101000PC | Fetch: 00000000000000000000000001101000
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
@@ -1055,7 +1136,10 @@ PC:        104 | Instruction Type:     NOP
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-Register File:    RA: xxxx | RB: xxxx | RD: xxxx | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: xxxx | RB:  x | RD: xxxx | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | alu_op: 0000 | C_IN: z | result: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | Z: x | N: x | C: x | V: x
 PC states:        PC: 00000000000000000000000001101000 |nPC: 00000000000000000000000001101100PC | Fetch: 00000000000000000000000001101100
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
@@ -1094,7 +1178,10 @@ PC:        108 | Instruction Type:     NOP
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 IF/ID
 Instruction           xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-Register File:    RA: xxxx | RB: xxxx | RD: xxxx | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+Register File:    RA: xxxx | RB:  x | RD: xxxx | RW: 14 | PA: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PB: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | PD          x
+=====================================================================================================================================================================
+ALU
+A: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | B: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | alu_op: 0000 | C_IN: z | result: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | Z: x | N: x | C: x | V: x
 PC states:        PC: 00000000000000000000000001101100 |nPC: 00000000000000000000000001110000PC | Fetch: 00000000000000000000000001110000
 Control Unit:     ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
 Control Unit Mux: ALU_OP: 0000 | ID_LOAD: 0 | ID_MEM_WRITE: 0 | STORE_CC: 0 | ID_BL: 0 | ID_B: 0 | ID_MEM_SIZE: 0 | ID_MEM_E: 0 | RF_E: 0 | ID_AM: 00
