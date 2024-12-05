@@ -620,7 +620,7 @@ ID_EX id_ex (
 
     // Display outputs for each clock cycle
     always @(posedge clk) begin
-        $display("PC: %0d | Opcode: %s", pc, get_keyword(instruction[24:21]));
+        $display("PC: %0d", pc);
         $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
         $display("IF/ID");
         $display("Instruction           %b", if_instruction);
