@@ -52,10 +52,10 @@ module tb_pipeline;
     wire [7:0] ID_mnemonic2;
     wire [1:0] sop_count;
 
-    wire [7:0] id_mnemonic0
-    wire [7:0] id_mnemonic1
-    wire [7:0] id_mnemonic2
-    wire [1:0] Sop_count;
+    wire [7:0] id_mnemonic0;
+    wire [7:0] id_mnemonic1;
+    wire [7:0] id_mnemonic2;
+    wire  Sop_count;
 
     // Outputs from Multiplexer
     wire [3:0] mux_alu_op;
@@ -160,12 +160,14 @@ module tb_pipeline;
     // ====================================
     wire chandler_blout_idmux;
     wire [3:0] idmux_out_ex;
+    wire [31:0] muxxpa;
 
 
     // ====================================
     // Condition handler
     // ====================================
     wire [3:0] CC;
+    wire [3:0] cc;
     wire [3:0] chandlermux_cc_chandler;
 
     // ====================================
@@ -178,7 +180,6 @@ module tb_pipeline;
     wire ex_memsize_mem;
     wire ex_memenable_mem;
     wire [1:0] ex_am_shifter;
-s;
     wire ex_rfenable_mem;
     wire ex_blout_muxalu;
     wire [31:0] ex_nextpc_muxalu;
@@ -236,6 +237,9 @@ s;
     // ====================================
     // Finished wiring
     // ====================================
+    wire wb_load;
+    integer loop_c, PROG_SIZE, file_size ;
+    reg [7:0] Address;
 
     // Helper function to get the keyword based on opcode
     function [7*8:1] get_keyword;
@@ -430,7 +434,6 @@ ID_EX id_ex (
         .IF_IF_Enable   (enable_ifid),
         .forward_Rm     (forward_rm),
         .forward_Rn     (forward_rn),
-        //.forward_Rd     (forward_rd),
         .forward_Rg     (forward_rg),
         .NOP_EX         (nop)
     );
@@ -443,6 +446,7 @@ ID_EX id_ex (
         .ID_MEM_SIZE            (ex_memsize_mem),
         .ID_MEM_ENABLE          (ex_memenable_mem),
         .RF_ENABLE              (ex_rfenable_mem),
+        .MUX_PA                 (ex_muxpa_alu),
         .MUX_PD                 (ex_muxpd_mem),
         .DM_ADDRESS             (alumux_dmaddress_mem),
         .MUX_INSTR_I15_I12      (ex_muxinstri15i12_memandhazard),
@@ -452,6 +456,7 @@ ID_EX id_ex (
         .id_mem_write           (mem_write_dm),
         .id_mem_enable          (mem_enable_dm),
         .rf_enable              (mem_rfenable_wb),
+        .mux_pa                 (muxxpa),
         .mux_pd                 (mem_pd_inputdm),
         .dm_address             (mem_address_dmandmux),
         .mux_instr_i15_i12      (mem_muxi15i12_wb)
@@ -478,31 +483,26 @@ ID_EX id_ex (
         .clk                (clk),
         .reset              (reset),
         .RF_ENABLE          (mem_rfenable_wb),
+        .ID_LOAD            (mem_load_wb),
         .MUX_DATAMEMORY     (muxdatamemory_wb),
         .MUX_INSTR_I15_I12  (mem_muxi15i12_wb),
         .rf_enable          (wb_registerle_rf),
+        .id_load            (wb_load),
         .mux_instr_i15_i12  (wb_registerrw_rf),
         .mux_datamemory     (wb_registerpw_rf)
     );
 
     PSR psr (
-        .STORE_CC           (s),
-        .Z_in               (alu_z_chandler),
-        .N_in               (alu_n_chandler),
-        .C_in               (alu_c_chandler),
-        .V_in               (alu_v_chandler),
-        .Z_out              (psr_z_muxcc),
-        .N_out              (psr_n_muxcc),
-        .C_out              (psr_c_muxcc),
-        .V_out              (psr_v_muxcc)
+        .clk                (clk),
+        .ConditionCode      (CC),
+        .PSR_ConditionCode  (cc),
+        .C_in               (psr_cin_alu)
     );
 
     MUX_CC mux_cc (
-        .Z                  (alu_z_chandler),
-        .N                  (alu_n_chandler),
-        .C                  (alu_c_chandler),
-        .V                  (alu_v_chandler),
-        .Flag_out           ({ psr_z_muxcc, psr_n_muxcc, psr_c_muxcc, psr_v_muxcc}),
+        .ConditionCode      (CC),
+        .Flag_out           (cc),
+        .SIG_s              (ex_s),
         .ConditionCodes     (chandlermux_cc_chandler)
     );
     
@@ -532,7 +532,7 @@ ID_EX id_ex (
         .ID_alu_op          (cu_idaluop_mux), //out
         .ID_load_instr      (cu_idload_mux),
         .ID_RW              (cu_idmemwrite_mux),
-        .ID_S_bit           (cu_storecc_mux),
+        .ID_S_bit           (cu_ids_mux),
         .ID_size            (cu_idmemsize_mux),
         .ID_enable_instr    (cu_idmeme_mux),
         .ID_RF_enable       (cu_rfe_rfmux),
@@ -542,7 +542,7 @@ ID_EX id_ex (
         .ID_mnemonic0       (id_mnemonic0),
         .ID_mnemonic1       (id_mnemonic1),
         .ID_mnemonic2       (id_mnemonic2),
-        .sop_count          (Sop_count)
+        .sop_count          (sop_count)
     );
 
     // Instantiate the Multiplexer
@@ -550,7 +550,7 @@ ID_EX id_ex (
         .ALU_OP         (cu_idaluop_mux),
         .ID_LOAD        (cu_idload_mux),
         .ID_MEM_WRITE   (cu_idmemwrite_mux),
-        .ID_S           (cu_storecc_mux),
+        .ID_S           (cu_ids_mux),
         .ID_BL          (cu_idbl_mux),
         .ID_B           (cu_idb_mux),
         .ID_MEM_SIZE    (cu_idmemsize_mux),
@@ -606,86 +606,99 @@ ID_EX id_ex (
         forever #2 clk = ~clk;
     end
 
-    // Preload instructions from the file into the instruction memory
-    initial begin
+     initial begin
         fi = $fopen("codigo_validacion.txt", "r");
         if (fi == 0) begin
-            $display("Error: File could not be opened.");
+            $display("Error: Cannot open file.");
             $finish;
         end
 
-        // Start loading instructions from the file
-        address = 8'd0;
+        PROG_SIZE = 0;
+
+        // Read file line by line to determine file size and load ROM
         while (!$feof(fi)) begin
-            code = $fscanf(fi, "%b", data);
-            rom_inst.Mem[address] = data; // Preload the ROM memory
-            ram_inst.Mem[address] = data; // Preload the RAM memory
-            address = address + 1;
+            if ($fscanf(fi, "%b", data) == 1) begin
+                rom_inst.mem[PROG_SIZE] = data;
+                PROG_SIZE = PROG_SIZE + 1;
+            end
         end
+        
+
+        $display("Program load %0d instructions.", PROG_SIZE);
+        $fclose(fi);
+    end
+     initial begin
+        fi = $fopen("codigo_validacion.txt", "r");
+        if (fi == 0) begin
+            $display("Error: Could not open input file.");
+            $finish;
+        end
+
+        Address = 8'b00000000;
+        while ($fscanf(fi, "%b", data) != -1) begin 
+            ram_inst.mem[Address] = data;  
+            Address = Address + 1;
+        end
+        
         $fclose(fi);
     end
 
-    // Test sequence with enforced stop time at 40
+        initial begin
+        clk = 0;       // Initialize clock
+        reset = 1;     
+        #3 reset = 0; 
+        for (i = 0; i < 256; i = i + 4) begin
+    // Check if at least one value in the current block is valid
+    
+    end
+    end
+    always #1 clk = ~clk; 
+   
+
+
+
+    // Monitor signal values throughout the simulation
     initial begin
-        // Initialize signals
-        reset = 1;
-        //enable_pc = 1;
-        //enable_ifid = 1;
-        //S = 0;
-        // Start simulation
-        #3 reset = 0;
-        //#32 S = 1;
+        $monitor("Time: %0d | PC: %d | r1: %d | r2: %d | r3: %d | r5: %d | r6: %d", $time, pc, tprf.R1, tprf.R2, tprf.R3, tprf.R5, tprf.R6);
     end
 
-    initial begin
-        $monitor("CLK: %b | Reset: %b | PC: %d | r1: %d | r2: %d | r3: %d | r5: %d | r6: %d", clk, reset, pc, tprf.R1, tprf.R2, tprf.R3, tprf.R5, tprf.R6);
-        #60 $finish; // Stop simulation at time 52
+    // // Counter logic
+    reg [31:0] pc_history [0:10];
+    integer pc_count;
+    integer cnt;
+    integer i;
+        initial begin
+            pc_count=0;
+            cnt=0;
+        end
+
+        integer file;
+
+    always @(posedge clk) begin
+        pc_history[pc_count] = pc;
+        pc_count = pc_count +1;
+        if(pc_count==11) pc_count =0;
+        for(i = 0;i <= 10; i= i+1) begin
+            if(pc==pc_history[i]) cnt = cnt+1;
+        end
+        if(cnt>=11) begin
+            $display("Infinite Loop Detected");
+           for (i = 0; i < 256; i = i + 4) begin
+        // Check if at least one value in the current block is valid
+        if ((ram_inst.mem[i] !== 8'bx) || (ram_inst.mem[i+1] !== 8'bx) || 
+            (ram_inst.mem[i+2] !== 8'bx) || (ram_inst.mem[i+3] !== 8'bx)) begin
+            $display("RAM[%0d:%0d] = %b %b %b %b", 
+                     i, i+3, 
+                     ram_inst.mem[i], ram_inst.mem[i+1], ram_inst.mem[i+2], ram_inst.mem[i+3]);
+
+        end
     end
-    // Display outputs for each clock cycle
-    //always @(posedge clk) begin
-        // $display("PC: %d | Instruction Type: %s", pc, get_keyword(instruction[24:21]));
-        // $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
-        // $display("IF/ID");
-        // $display("Instruction           %b", if_instruction);
-        // $display("Register File:    RA: %b | RB: %b | RD: %b | RW: %b | PA: %b | PB: %b | PD %b", instr_i3_i0, instr_i19_i16,  instr_i15_i12, wb_registerrw_rf, rf_registerpa_mux, rf_registerpb_mux, rf_registerpd_mux);
-        // $display("=====================================================================================================================================================================");
-        // $display("ALU\nA: %b | B: %b | alu_op: %b | C_IN: %b | result: %b | Z: %b | N: %b | C: %b | V: %b", ex_muxpa_alu, shifter_n_alu, ex_aluop_alu, psr_cin_alu, alu_out_muxaluandidmuxes, alu_z_chandler, alu_n_chandler, alu_c_chandler, alu_v_chandler);
-        // $display("PC states:        PC: %b |nPC: %bPC | Fetch: %b", pc, npc, fetch_npc_pc);
-        // $display("Control Unit:     ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | STORE_CC: %b | ID_BL: %b | ID_B: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | RF_E: %b | ID_AM: %b", cu_idaluop_mux, cu_idload_mux, cu_idmemwrite_mux, cu_storecc_mux, cu_idbl_mux, cu_idb_mux, cu_idmemsize_mux, cu_idmeme_mux, cu_rfe_rfmux, cu_idam_mux);
-        // $display("Control Unit Mux: ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | STORE_CC: %b | ID_BL: %b | ID_B: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | RF_E: %b | ID_AM: %b", mux_aluop_id, mux_idload_id, mux_memwrite_id, sig_s, mux_bl_chandler, mux_b_chandler, mux_memsize_id, mux_meme_id, mux_rfe_id, mux_idam_id);
-        // $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
-        // $display("ID/EX");
-        // $display("ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | ID_AM: %b | STORE_CC: %b | RF_E: %b | BL_Out: %b | Next PC: %b | MUX_PA: %b | MUX_PB: %b | MUX_PD: %b | MUX_15-12: %b | INSTR_11-0: %b", ex_aluop_alu, ex_load_mem, ex_memwrite_mem, ex_memsize_mem, ex_memenable_mem, ex_am_shis, ex_rfenable_mem, ex_blout_muxalu, ex_nextpc_muxalu, ex_muxpa_alu, ex_muxpb_shifter, ex_muxpd_mem, ex_muxinstri15i12_memandhazard, ex_instri11i0_shifter);
-        // $display("LE: %b | PW: %b", wb_registerpw_rf, wb_registerle_rf);
-        // $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
-        // $display("EX/MEM");
-        // $display("id_load: %b | id_mem_size: %b | id_mem_write: %b | id_mem_enable: %b | rf_enable: %b | mux_pd: %b | dm_address: %b | mux_instr_i15_i12:  %b", mem_load_wb, mem_size_dm, mem_write_dm, mem_enable_dm, mem_rfenable_wb, mem_pd_inputdm, mem_address_dmandmux, mem_muxi15i12_wb);
-        // $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
-        // $display("MEM/WB");
-        // $display("RF_ENABLE: %b | MUX_DATAMEMORY: %b | MUX_INSTR_I15_I12: %b | rf_enable: %b | mux_instr_i15_i12: %b | mux_datamemory: %b",  mem_rfenable_wb, muxdatamemory_wb, mem_muxi15i12_wb, wb_registerle_rf, wb_registerrw_rf, wb_registerpw_rf);
-        // $display("-=-=-=-=-=-=--=-=-=-=--=-=-=-=-=-=-=-=--=-=-=-=--=-=--=-==-=-=-=-=-=-=--==-==-=-==-=-==-=-==-=-");
-        // $display("Register File memmory -=-=-=-=-=-=-==-=-=");
-        // $display("Selectv O : %d", tprf.O);
-        // $display("R0: %d | A0", tprf.R0);
-        // $display("R1: %d | A1", tprf.R1);
-        // $display("R2: %d | A2", tprf.R2);
-        // $display("R3: %d | A3", tprf.R3);
-        // $display("R4: %d | A4", tprf.R4);
-        // $display("R5: %d | A5", tprf.R5);
-        // $display("R6: %d | A6", tprf.R6);
-        // $display("R7: %d | A7", tprf.R7);
-        // $display("R8: %d | A8", tprf.R8);
-        // $display("R9: %d | A9", tprf.R9);
-        // $display("R10: %d | A10", tprf.R10);
-        // $display("R11: %d | A11", tprf.R11);
-        // $display("R12: %d | A12", tprf.R12);
-        // $display("R13: %d | A13", tprf.R13);
-        // $display("R14: %d | A14", tprf.R14);
-        // $display("R15: %d | A15", tprf.R15);
 
 
-        // $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
-        
 
-    //end
+            $finish;
+        end else begin
+            cnt = 0;
+        end
+    end
 endmodule

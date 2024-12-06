@@ -41,7 +41,7 @@ module Register (
     
   always @ (posedge Clk or posedge reset) begin
     if (reset)
-      0 <= 32'b0;
+      O <= 32'b0;
     if (LE) 
       O <= PW;           // Load data if LE is 1
   end
@@ -181,14 +181,13 @@ end
 endmodule
 
 module MUX_CC (
-    input N,Z,C,V,
-    input [3:0] Flag_out,
-    input SIG_store_cc, //selector
+    input [3:0] Flag_out, ConditionCode,
+    input SIG_s, //selector
     output reg [3:0] ConditionCodes  // Changed to reg
 );
 always @(*) begin
-    case (SIG_store_cc)
-        1'b0: ConditionCodes = {N,Z,C,V}; // show this to professor, is this in order?
+    case (SIG_s)
+        1'b0: ConditionCodes = ConditionCode; // show this to professor, is this in order?
         1'b1: ConditionCodes = Flag_out;
     endcase
 end
@@ -430,9 +429,9 @@ module MUX_ALU (
 endmodule
 
 module PSR (    // needs fixing
- input clk,
- input ConditionCode,
- output reg PSR_ConditionCode, //Z, N, C, V
+ input      clk,
+ input      [3:0] ConditionCode,
+ output reg [3:0] PSR_ConditionCode, //Z, N, C, V
  output reg C_in
 );
 always @(posedge clk) begin
@@ -573,15 +572,15 @@ module HazardUnit(
              if(!ID_Load) begin // Store hazard
                 // sop_count == 3
                 if (sop_count == 2'b11) begin
-                    if (EX_RF_enable && ((ID_Rn == EX_Rd) || (ID_Rm == EX_Rd) || (ID_RD == EX_Rd))) forward_Rg = 2'b01;
-                    else if (MEM_RF_enable && ((ID_Rn == MEM_Rd) || (ID_Rm == MEM_Rd) || (ID_RD == MEM_Rd))) forward_Rg = 2'b10;
-                    else if (WB_RF_enable && ((ID_Rn == WB_Rd) || (ID_Rm == WB_Rd) || (ID_RD == WB_Rd))) forward_Rg = 2'b11;
+                    if (EX_RF_enable && ((ID_Rn == EX_Rd) || (ID_Rm == EX_Rd) || (ID_Rd == EX_Rd))) forward_Rg = 2'b01;
+                    else if (MEM_RF_enable && ((ID_Rn == MEM_Rd) || (ID_Rm == MEM_Rd) || (ID_Rd == MEM_Rd))) forward_Rg = 2'b10;
+                    else if (WB_RF_enable && ((ID_Rn == WB_Rd) || (ID_Rm == WB_Rd) || (ID_Rd == WB_Rd))) forward_Rg = 2'b11;
                 end
                 // sop_count == 2 (Rn and Rd only)
                 else if (sop_count == 2'b10) begin
-                    if (EX_RF_enable && ((ID_Rn == EX_Rd) || (ID_RD == EX_Rd))) forward_Rg = 2'b01;
-                    else if (MEM_RF_enable && ((ID_Rn == MEM_Rd) || (ID_RD == MEM_Rd))) forward_Rg = 2'b10;
-                    else if (WB_RF_enable && ((ID_Rn == WB_Rd) || (ID_RD == WB_Rd))) forward_Rg = 2'b11;
+                    if (EX_RF_enable && ((ID_Rn == EX_Rd) || (ID_Rd == EX_Rd))) forward_Rg = 2'b01;
+                    else if (MEM_RF_enable && ((ID_Rn == MEM_Rd) || (ID_Rd == MEM_Rd))) forward_Rg = 2'b10;
+                    else if (WB_RF_enable && ((ID_Rn == WB_Rd) || (ID_Rd == WB_Rd))) forward_Rg = 2'b11;
                 end
             end
         end
@@ -948,7 +947,7 @@ module ID_EX (
             id_mem_size <= ID_MEM_SIZE;
             id_mem_enable <= ID_MEM_ENABLE;
             id_am <= ID_AM;
-            store_cc <= ID_S;
+            id_s <= ID_S;
             rf_enable <= RF_ENABLE;
             bl_out <= BL_OUT;              //added connections
             next_pc <= NEXT_PC;
@@ -969,7 +968,7 @@ module EX_MEM(
     input               ID_MEM_SIZE,        //EX_SIZE
     input               ID_MEM_ENABLE,      //EX_Enable
     input               RF_ENABLE,          //RF_Enable
-    input [31:0]        MUX_PA              //EX_PA
+    input [31:0]        MUX_PA,              //EX_PA
     input [31:0]        MUX_PD,             //EX_PD
     input [31:0]        DM_ADDRESS,         //ALU out
     input [3:0]         MUX_INSTR_I15_I12,  //EX_RD
@@ -979,7 +978,7 @@ module EX_MEM(
     output reg          id_mem_write,
     output reg          id_mem_enable,
     output reg          rf_enable,
-    output reg [31:0]   mux_pa              //MEM_PA
+    output reg [31:0]   mux_pa,              //MEM_PA
     output reg [31:0]   mux_pd,             //MEM_PD
     output reg [31:0]   dm_address,         //ALU out
     output reg [3:0]    mux_instr_i15_i12   //MEM_RD
@@ -1017,7 +1016,7 @@ module MEM_WB (
     input [31:0] MUX_DATAMEMORY,              //mem mux out
     input [3:0] MUX_INSTR_I15_I12,            //mem RD
     output reg rf_enable,
-    output reg id_load; 
+    output reg id_load, 
     output reg [3:0] mux_instr_i15_i12,       //wb RD
     output reg [31:0] mux_datamemory          //wb muxout
 );
