@@ -711,9 +711,10 @@ ID_EX id_ex (
                     end
                 end
                 $finish;
-             end else begin
-                 pc_count = 0;
-             end
+             end 
+            //  else begin
+            //      pc_count = 0;
+            //  end
     end
 
 endmodule
