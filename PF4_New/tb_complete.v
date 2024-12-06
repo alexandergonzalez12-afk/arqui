@@ -664,7 +664,7 @@ ID_EX id_ex (
             $display("=====================================================================================================================================================================");
             $display("ALU\nA: %b | B: %b | alu_op: %b | C_IN: %b | result: %b | Z: %b | N: %b | C: %b | V: %b", ex_muxpa_alu, shifter_n_alu, ex_aluop_alu, psr_cin_alu, alu_out_muxaluandidmuxes, CC[2], CC[3], CC[1], CC[0]);
             $display("PC states:        PC: %b |nPC: %bPC | Fetch: %b", pc, npc, fetch_npc_pc);
-            $display("Control Unit:     ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | S_bit: %b | ID_BL: %b | ID_B: %b | ID_MEM_SIZE: %b | ID_enable instr: %b | RF_E: %b | ID_AM: %b | sop_count", cu_idaluop_mux, cu_idload_mux, cu_idmemwrite_mux, cu_ids_mux, cu_idbl_mux, cu_idb_mux, cu_idmemsize_mux, cu_idmeme_mux, cu_rfe_rfmux,  cu_idam_mux, sop_count);
+            $display("Control Unit:     ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | S_bit: %b | ID_BL: %b | ID_B: %b | ID_MEM_SIZE: %b | ID_enable instr: %b | RF_E: %b | ID_AM: %b | sop_count: %b", cu_idaluop_mux, cu_idload_mux, cu_idmemwrite_mux, cu_ids_mux, cu_idbl_mux, cu_idb_mux, cu_idmemsize_mux, cu_idmeme_mux, cu_rfe_rfmux,  cu_idam_mux, sop_count);
             $display("Control Unit Mux: ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | S_bit: %b | ID_BL: %b | ID_B: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | RF_E: %b | ID_AM: %b", mux_aluop_id, mux_idload_id, mux_memwrite_id, sig_s, mux_bl_chandler, mux_b_chandler, mux_memsize_id, mux_meme_id, mux_rfe_id, mux_idam_id);
             $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
             $display("ID/EX");
