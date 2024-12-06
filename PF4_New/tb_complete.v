@@ -618,7 +618,7 @@ ID_EX id_ex (
         // Read file line by line to determine file size and load ROM
         while (!$feof(fi)) begin
             if ($fscanf(fi, "%b", data) == 1) begin
-                rom_inst.mem[PROG_SIZE] = data;
+                rom_inst.Mem[PROG_SIZE] = data;
                 PROG_SIZE = PROG_SIZE + 1;
             end
         end
@@ -636,31 +636,52 @@ ID_EX id_ex (
 
         Address = 8'b00000000;
         while ($fscanf(fi, "%b", data) != -1) begin 
-            ram_inst.mem[Address] = data;  
+            ram_inst.Mem[Address] = data;  
             Address = Address + 1;
         end
         
         $fclose(fi);
     end
 
-        initial begin
+    initial begin
         clk = 0;       // Initialize clock
         reset = 1;     
         #3 reset = 0; 
-        for (i = 0; i < 256; i = i + 4) begin
-    // Check if at least one value in the current block is valid
-    
     end
-    end
-    always #1 clk = ~clk; 
+    always #2 clk = ~clk; 
    
 
 
 
     // Monitor signal values throughout the simulation
-    initial begin
-        $monitor("Time: %0d | PC: %d | r1: %d | r2: %d | r3: %d | r5: %d | r6: %d", $time, pc, tprf.R1, tprf.R2, tprf.R3, tprf.R5, tprf.R6);
-    end
+    //initial begin
+        always @(posedge clk) begin
+            $display("PC: %d | Instruction Type: %s %s %s", pc, id_mnemonic0, id_mnemonic1, id_mnemonic2);
+            $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
+            $display("IF/ID");
+            $display("Instruction           %b", if_instruction);
+            $display("Register File:    RA: %b | RB: %b | RD: %b | RW: %b | PA: %b | PB: %b | PD %b", instr_i3_i0, instr_i19_i16,  instr_i15_i12, wb_registerrw_rf, rf_registerpa_mux, rf_registerpb_mux, rf_registerpd_mux);
+            $display("=====================================================================================================================================================================");
+            $display("ALU\nA: %b | B: %b | alu_op: %b | C_IN: %b | result: %b | Z: %b | N: %b | C: %b | V: %b", ex_muxpa_alu, shifter_n_alu, ex_aluop_alu, psr_cin_alu, alu_out_muxaluandidmuxes, CC[2], CC[3], CC[1], CC[0]);
+            $display("PC states:        PC: %b |nPC: %bPC | Fetch: %b", pc, npc, fetch_npc_pc);
+            $display("Control Unit:     ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | S_bit: %b | ID_BL: %b | ID_B: %b | ID_MEM_SIZE: %b | ID_enable instr: %b | RF_E: %b | ID_AM: %b | sop_count", cu_idaluop_mux, cu_idload_mux, cu_idmemwrite_mux, cu_ids_mux, cu_idbl_mux, cu_idb_mux, cu_idmemsize_mux, cu_idmeme_mux, cu_rfe_rfmux,  cu_idam_mux, sop_count);
+            $display("Control Unit Mux: ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | S_bit: %b | ID_BL: %b | ID_B: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | RF_E: %b | ID_AM: %b", mux_aluop_id, mux_idload_id, mux_memwrite_id, sig_s, mux_bl_chandler, mux_b_chandler, mux_memsize_id, mux_meme_id, mux_rfe_id, mux_idam_id);
+            $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
+            $display("ID/EX");
+            $display("ALU_OP: %b | ID_LOAD: %b | ID_MEM_WRITE: %b | ID_MEM_SIZE: %b | ID_MEM_E: %b | ID_AM: %b | S_bit: %b | RF_E: %b | BL_Out: %b | Next PC: %b | MUX_PA: %b | MUX_PB: %b | MUX_PD: %b | MUX_15-12: %b | INSTR_11-0: %b", ex_aluop_alu, ex_load_mem, ex_memwrite_mem, ex_memsize_mem, ex_memenable_mem, ex_am_shifter, ex_s, ex_rfenable_mem, ex_blout_muxalu, ex_nextpc_muxalu, ex_muxpa_alu, ex_muxpb_shifter, ex_muxpd_mem, ex_muxinstri15i12_memandhazard, ex_instri11i0_shifter);
+            $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
+            $display("EX/MEM");
+            $display("id_load: %b | id_mem_size: %b | id_mem_write: %b | id_mem_enable: %b | rf_enable: %b | mux_pa: %b | mux_pd: %b | dm_address: %b | mux_instr_i15_i12:  %b", mem_load_wb, mem_size_dm, mem_write_dm, mem_enable_dm, mem_rfenable_wb, muxxpa, mem_pd_inputdm, mem_address_dmandmux, mem_muxi15i12_wb);
+            $display("------------------------------------------------------------------------------------------------------------------------------------------------------");
+            $display("MEM/WB");
+            $display("RF_ENABLE: %b | ID_LOAD: %b | MUX_DATAMEMORY: %b | MUX_INSTR_I15_I12: %b | rf_enable: %b | mux_instr_i15_i12: %b | mux_datamemory: %b",  mem_rfenable_wb, wb_load, muxdatamemory_wb, mem_muxi15i12_wb, wb_registerle_rf, wb_registerrw_rf, wb_registerpw_rf);
+            $display(" ");
+            //$monitor("Time: %0d | PC: %d | r1: %d | r2: %d | r3: %d | r5: %d | r6: %d", $time, pc, tprf.R1, tprf.R2, tprf.R3, tprf.R5, tprf.R6);
+
+        end
+        
+   // end
+
 
     // // Counter logic
     reg [31:0] pc_history [0:10];
@@ -681,24 +702,18 @@ ID_EX id_ex (
         for(i = 0;i <= 10; i= i+1) begin
             if(pc==pc_history[i]) cnt = cnt+1;
         end
-        if(cnt>=11) begin
-            $display("Infinite Loop Detected");
-           for (i = 0; i < 256; i = i + 4) begin
-        // Check if at least one value in the current block is valid
-        if ((ram_inst.mem[i] !== 8'bx) || (ram_inst.mem[i+1] !== 8'bx) || 
-            (ram_inst.mem[i+2] !== 8'bx) || (ram_inst.mem[i+3] !== 8'bx)) begin
-            $display("RAM[%0d:%0d] = %b %b %b %b", 
-                     i, i+3, 
-                     ram_inst.mem[i], ram_inst.mem[i+1], ram_inst.mem[i+2], ram_inst.mem[i+3]);
-
-        end
+            if(cnt>=11) begin
+                $display("Infinite Loop Detected");
+               for (i = 0; i < 256; i = i + 4) begin
+            // Check if at least one value in the current block is valid
+                    if ((ram_inst.Mem[i] !== 8'bx) || (ram_inst.Mem[i+1] !== 8'bx) || (ram_inst.Mem[i+2] !== 8'bx) || (ram_inst.Mem[i+3] !== 8'bx)) begin
+                        $display("RAM[%0d:%0d] = %b %b %b %b", i, i+3, ram_inst.Mem[i], ram_inst.Mem[i+1], ram_inst.Mem[i+2], ram_inst.Mem[i+3]);
+                    end
+                end
+                $finish;
+             end else begin
+                 pc_count = 0;
+             end
     end
 
-
-
-            $finish;
-        end else begin
-            cnt = 0;
-        end
-    end
 endmodule
