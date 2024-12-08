@@ -1,3 +1,6 @@
+`timescale 1ns / 1ps
+`include "Modules.v"
+
 module testbench();
     reg clk;
     reg reset;
