@@ -524,7 +524,7 @@ module HazardUnit(
   input WB_RF_enable,
   input ID_Load,
   input ID_Enable,
-  input sop_count,
+  input [2:0] sop_count,
   output reg [1:0] forward_Rn,
   output reg [1:0] forward_Rm,
   output reg [1:0] forward_Rg,
@@ -541,50 +541,98 @@ module HazardUnit(
     IF_IF_Enable <= 1;
     PC_Enable <= 1;
     NOP_EX <= 0;
-    if (sop_count > 2'b00) begin
-        // Data Forwarding for Source Operand 1 (Rn / ID_Rn)
-        if (sop_count >= 2'b01) begin
-            if (EX_RF_enable && (ID_Rn == EX_Rd)) forward_Rn = 2'b01;
-            else if (MEM_RF_enable && (ID_Rn == MEM_Rd)) forward_Rn = 2'b10;
-            else if (WB_RF_enable && (ID_Rn == WB_Rd)) forward_Rn = 2'b11;
-        end
-
-         // Data Forwarding for Source Operand 2 (Rm / ID_Rm)
-        if (sop_count >= 2'b10) begin
-            if (EX_RF_enable && (ID_Rm == EX_Rd)) forward_Rm = 2'b01;
-            else if (MEM_RF_enable && (ID_Rm == MEM_Rd)) forward_Rm = 2'b10;
-            else if (WB_RF_enable && (ID_Rm == WB_Rd)) forward_Rm = 2'b11;
-        end
-
-         // Data Forwarding for Source Operand 3 (e.g., ID_RD for some instructions)
-        if (sop_count == 2'b11) begin
-            if (EX_RF_enable && (ID_Rd == EX_Rd)) forward_Rg = 2'b01;
-            else if (MEM_RF_enable && (ID_Rd == MEM_Rd)) forward_Rg = 2'b10;
-            else if (WB_RF_enable && (ID_Rd == WB_Rd)) forward_Rg = 2'b11;
-        end
+    
+    if(EX_Load && ((ID_Rn == EX_Rd) || (ID_Rm == EX_Rd))) begin //Load/Store
+        IF_IF_Enable <= 0;
+        PC_Enable <= 0;
+        NOP_EX <= 1;
     end
-        if(EX_Load && ((ID_Rn == EX_Rd) || (ID_Rm == EX_Rd))) begin //load hazard
-                NOP_EX = 1;
-                IF_IF_Enable = 0;
-                PC_Enable = 0;
-        end
-        if(ID_Enable) begin
-             if(!ID_Load) begin // Store hazard
-                // sop_count == 3
-                if (sop_count == 2'b11) begin
-                    if (EX_RF_enable && ((ID_Rn == EX_Rd) || (ID_Rm == EX_Rd) || (ID_Rd == EX_Rd))) forward_Rg = 2'b01;
-                    else if (MEM_RF_enable && ((ID_Rn == MEM_Rd) || (ID_Rm == MEM_Rd) || (ID_Rd == MEM_Rd))) forward_Rg = 2'b10;
-                    else if (WB_RF_enable && ((ID_Rn == WB_Rd) || (ID_Rm == WB_Rd) || (ID_Rd == WB_Rd))) forward_Rg = 2'b11;
-                end
-                // sop_count == 2 (Rn and Rd only)
-                else if (sop_count == 2'b10) begin
-                    if (EX_RF_enable && ((ID_Rn == EX_Rd) || (ID_Rd == EX_Rd))) forward_Rg = 2'b01;
-                    else if (MEM_RF_enable && ((ID_Rn == MEM_Rd) || (ID_Rd == MEM_Rd))) forward_Rg = 2'b10;
-                    else if (WB_RF_enable && ((ID_Rn == WB_Rd) || (ID_Rd == WB_Rd))) forward_Rg = 2'b11;
-                end
+    else begin //Data Proccesing
+        case (sop_count)
+        3'b101: begin
+
+            //Forward to RA
+            if(EX_RF_enable && ((ID_Rn == EX_Rd))) begin
+                forward_Rg <= 2'b01;
+            end
+            else if (MEM_RF_enable && (ID_Rn == MEM_Rd)) begin
+                forward_Rg <= 2'b10;
+            end
+            else if (WB_RF_enable && (ID_Rn == WB_Rd)  )begin
+                forward_Rg <= 2'b11;
+            end
+            //Forward to RB
+            if(EX_RF_enable && (ID_Rm == EX_Rd)) begin
+                forward_Rg <= 2'b01;
+            end
+            else if (MEM_RF_enable && (ID_Rm == MEM_Rd)) begin
+                forward_Rg <= 2'b10;
+            end
+            else if (WB_RF_enable && (ID_Rm == WB_Rd)  )begin
+                forward_Rg <= 2'b11;
+            end
+            //Forward to RD
+            if(EX_RF_enable && (ID_Rd == EX_Rd)) begin
+                forward_Rg <= 2'b11;
+            end
+            else if (MEM_RF_enable && (ID_Rd == MEM_Rd)) begin
+                forward_Rg <= 2'b10;
+            end
+            else if (WB_RF_enable && (ID_Rd == WB_Rd)  )begin
+                forward_Rg <= 2'b11;
             end
         end
+         3'b001: begin 
+            if(EX_RF_enable && (ID_Rn == EX_Rd)) begin
+                forward_Rn <= 2'b01;
+            end
+            else if (MEM_RF_enable && (ID_Rn == MEM_Rd)) begin
+                forward_Rn <= 2'b10;
+            end
+            else if (WB_RF_enable && (ID_Rn == WB_Rd)  )begin
+                forward_Rn <= 2'b11;
+            end
+
+
+            end
+        3'b011: begin
+            if(EX_RF_enable && (ID_Rn == EX_Rd)) begin
+                forward_Rn <= 2'b01;
+            end
+            else if (MEM_RF_enable && (ID_Rn == MEM_Rd)) begin
+                forward_Rn <= 2'b10;
+            end
+            else if (WB_RF_enable && (ID_Rn == WB_Rd)  )begin
+                forward_Rn <= 2'b11;
+            end
+
+            if(EX_RF_enable && (ID_Rm == EX_Rd)) begin
+                forward_Rm <= 2'b01;
+            end
+            else if (MEM_RF_enable && (ID_Rm == MEM_Rd)) begin
+                forward_Rm <= 2'b10;
+            end
+            else if (WB_RF_enable && (ID_Rm == WB_Rd)  )begin
+                forward_Rm <= 2'b11;
+            end
+        end
+        3'b100: begin
+            if(EX_RF_enable && ((ID_Rn == EX_Rd) || (ID_Rd == EX_Rd)))begin
+                forward_Rg <= 2'b01;
+            end
+            else if (MEM_RF_enable && ((ID_Rn == MEM_Rd) || (ID_Rd == MEM_Rd)))begin
+                forward_Rg <= 2'b10;
+            end
+            else if (EX_RF_enable && ((ID_Rn == EX_Rd) || (ID_Rd == EX_Rd))) begin
+                forward_Rg <=2'b11 ;
+            end
+        end
+        endcase
     end
+    end
+  
+
+
 endmodule
 
 
@@ -593,20 +641,24 @@ endmodule
 module ControlUnit(
     output reg ID_S_bit, ID_load_instr, ID_RF_enable, ID_B_instr,
     ID_enable_instr, ID_size, ID_BL_instr, ID_RW,
-    output reg [1:0] ID_shift_AM, sop_count,
+    output reg [1:0] ID_shift_AM,
+    output reg [2:0] sop_count,
     output reg [3:0] ID_alu_op, 
     output reg [7:0] ID_mnemonic0, ID_mnemonic1, ID_mnemonic2,
     input [31:0] instruction
 );
 
 always @(instruction) begin
-/*
-signals for the number of source operands
-00 - 0 source operands
-01 - 1 source operand
-10 - 2 source operands
-11 - 3 source operands
-*/
+// use for the 5 types of cases (NUNCA HAY EL CASE DE RM && RD)
+// modificar el sop_count en el Control Unit a que cubra los 5 cases 
+// use sop_count y editarlo a que acepte 3 bits 
+// case 0: NO HAZARD!                   sop_count = 3b'000
+// case 1: Hazard on Rn                 sop_count = 3b'001
+// case 2: Hazard on Rm                 sop_count = 3b'010
+// case 3: Hazard on Rn, Rm             sop_count = 3b'011
+// case 4: hazard on Rn, Rd             sop_count = 3b'100
+// case 5: hazard on Rn, Rm, Rd         sop_count = 3b'101
+// evaluar primero que todo antes que el case !!!!!!!!!!!!!!!!!!!!
     if (instruction == 32'b00000000000000000000000000000000) begin
         ID_S_bit = 0;
         ID_load_instr = 0;
@@ -635,8 +687,7 @@ signals for the number of source operands
                     ID_BL_instr = 0;
                     ID_shift_AM = 2'b11;
                     
-                    /* THE ADDITION OF THE CODE ACCOUNTING FOR THE DIFFERENT OPERANDS. REMEMBER TO ADD THE OUTPUT OF THE SIGNAL CORRECTLY AND LINK IT TO THE HAZARD FORWARDING UNIT. MAKE A NEW INPUT IN THE HAZARD FORWARDING UNIT AS WELL. */
-                    sop_count = 2'b10; // 2 source operands
+                    sop_count = 3'b011; // 2 source operands
                     case (instruction[24:21])
                         4'b0000: begin ID_alu_op = 4'b0110; ID_mnemonic0 = "A"; ID_mnemonic1 = "N"; ID_mnemonic2 = "D"; end
                         4'b0001: begin ID_alu_op = 4'b1000; ID_mnemonic0 = "E"; ID_mnemonic1 = "O"; ID_mnemonic2 = "R"; end
@@ -668,9 +719,7 @@ signals for the number of source operands
                 ID_BL_instr = 0;
                 ID_shift_AM = 2'b00;
                 
-                /* ADDITION OF THE CODE ACCOUNTING FOR THE DIFFERENT OPERANDS. REMEMBER TO ADD THE OUTPUT OF THE SIGNAL CORRECTLY AND LINK IT TO THE HAZARD FORWARDING UNIT. MAKE A NEW INPUT IN THE HAZARD FORWARDING UNIT AS WELL. */
-                sop_count = 2'b01; // 1 source operand
-                // if this doesnt work, add another condition for the mov case for 0 operands (should work because the only mov instructions occur with 1 source operand)
+                sop_count = 3'b001; // 1 source operand
                 
                 case (instruction[24:21])
                     4'b0000: begin ID_alu_op = 4'b0110; ID_mnemonic0 = "A"; ID_mnemonic1 = "N"; ID_mnemonic2 = "D"; end
@@ -704,15 +753,13 @@ signals for the number of source operands
                 ID_BL_instr = 0;
                 ID_shift_AM = 2'b10;
                 if (instruction[20] == 0) begin ID_RW = 1; ID_mnemonic0 = "S"; ID_mnemonic1 = "T"; ID_mnemonic2 = "R"; ID_RF_enable = 0; 
-                /* ADDITION OF THE CODE ACCOUNTING FOR THE DIFFERENT OPERANDS. REMEMBER TO ADD THE OUTPUT OF THE SIGNAL CORRECTLY AND LINK IT TO THE HAZARD FORWARDING UNIT. MAKE A NEW INPUT IN THE HAZARD FORWARDING UNIT AS WELL. */
                 
-                sop_count = 2'b10; // 2 source operands
+                sop_count = 3'b100; // 2 source operands
                 
                 end
                 else begin ID_RW = 0; ID_mnemonic0 = "L"; ID_mnemonic1 = "D"; ID_mnemonic2 = "R"; ID_RF_enable = 1;
-                /* ADDITION OF THE CODE ACCOUNTING FOR THE DIFFERENT OPERANDS. REMEMBER TO ADD THE OUTPUT OF THE SIGNAL CORRECTLY AND LINK IT TO THE HAZARD FORWARDING UNIT. MAKE A NEW INPUT IN THE HAZARD FORWARDING UNIT AS WELL. */
                 
-                sop_count = 2'b01; // 1 source operand
+                sop_count = 3'b001; // 1 source operand
                 
                 end
                 ID_alu_op = (instruction[23] == 1) ? 4'b0000 : 4'b0010;
@@ -730,7 +777,7 @@ signals for the number of source operands
                     ID_BL_instr = 0;
                     if (instruction[20] == 0) begin ID_RW = 1; ID_RW = 1; ID_mnemonic0 = "S"; ID_mnemonic1 = "T"; ID_mnemonic2 = "R"; ID_RF_enable = 0;
                     /* ADDITION OF THE CODE ACCOUNTING FOR THE DIFFERENT OPERANDS. REMEMBER TO ADD THE OUTPUT OF THE SIGNAL CORRECTLY AND LINK IT TO THE HAZARD FORWARDING UNIT. MAKE A NEW INPUT IN THE HAZARD FORWARDING UNIT AS WELL. */
-                    sop_count = 2'b11; // 3 source operands
+                    sop_count = 3'b101; // 3 source operands
                     
                     end
                 else begin ID_RW = 0; ID_mnemonic0 = "L"; ID_mnemonic1 = "D"; ID_mnemonic2 = "R"; ID_RF_enable = 1; end
@@ -739,7 +786,7 @@ signals for the number of source operands
                     ID_shift_AM = 2'b11;
                     
                     /* ADDITION OF THE CODE ACCOUNTING FOR THE DIFFERENT OPERANDS. REMEMBER TO ADD THE OUTPUT OF THE SIGNAL CORRECTLY AND LINK IT TO THE HAZARD FORWARDING UNIT. MAKE A NEW INPUT IN THE HAZARD FORWARDING UNIT AS WELL. */
-                    sop_count = 2'b01;
+                    sop_count = 3'b100;
                             
                     if(instruction[23] == 1) begin
                         ID_alu_op = 4'b0000;
@@ -757,7 +804,7 @@ signals for the number of source operands
                 ID_size = 0;
                 ID_BL_instr = instruction[24];
                 /* ADDITION OF THE CODE ACCOUNTING FOR THE DIFFERENT OPERANDS. REMEMBER TO ADD THE OUTPUT OF THE SIGNAL CORRECTLY AND LINK IT TO THE HAZARD FORWARDING UNIT. MAKE A NEW INPUT IN THE HAZARD FORWARDING UNIT AS WELL. */
-                sop_count = 2'b00;
+                sop_count = 3'b000;
                 if (instruction[24] == 0) begin ID_mnemonic0 = "B"; ID_mnemonic1 = " "; ID_mnemonic2 = " "; end
                 else begin ID_mnemonic0 = "B"; ID_mnemonic1 = "L"; ID_mnemonic2 = " "; end
             end
