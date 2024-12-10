@@ -12,3 +12,7 @@ ARREGLAR HAZARD UNIT Y CONTROL UNIT
 // case 4: hazard on Rn, Rd             sop_count = 3b'100
 // case 5: hazard on Rn, Rm, Rd         sop_count = 3b'101
 // evaluar primero que todo antes que el case !!!!!!!!!!!!!!!!!!!!
+==================================================================================
+Things to fix to finish Hazard
+==================================================================================
+Check wires for EX_RD,MEM_RD and WB_RD for the Hazard Unit!!!!
