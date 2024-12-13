@@ -524,7 +524,7 @@ module HazardUnit(
   input WB_RF_enable,
   input ID_Load,
   input ID_Enable,
-  input sop_count,
+  input [1:0]sop_count,
   output reg [1:0] forward_Rn,
   output reg [1:0] forward_Rm,
   output reg [1:0] forward_Rg,
@@ -541,6 +541,9 @@ module HazardUnit(
     IF_IF_Enable <= 1;
     PC_Enable <= 1;
     NOP_EX <= 0;
+    $display("EX_RD", EX_Rd);
+    $display("MEM_RD", MEM_Rd);
+    $display("WB_RD", WB_Rd);
     if (sop_count > 2'b00) begin
         // Data Forwarding for Source Operand 1 (Rn / ID_Rn)
         if (sop_count >= 2'b01) begin

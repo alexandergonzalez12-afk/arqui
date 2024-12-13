@@ -50,12 +50,12 @@ module tb_pipeline;
     wire [7:0] ID_mnemonic0;
     wire [7:0] ID_mnemonic1;
     wire [7:0] ID_mnemonic2;
-    wire [2:0] sop_count;
+    wire [1:0] sop_count;
 
     wire [7:0] id_mnemonic0;
     wire [7:0] id_mnemonic1;
     wire [7:0] id_mnemonic2;
-    wire [2:0] Sop_count;
+    wire [1:0] Sop_count;
 
     // Outputs from Multiplexer
     wire [3:0] mux_alu_op;
@@ -419,7 +419,7 @@ ID_EX id_ex (
         .EX_RF_enable   (ex_rfenable_mem),
         .MEM_RF_enable  (mem_rfenable_wb),          
         .WB_RF_enable   (wb_registerle_rf),
-        .EX_Rd          (alu_out_muxaluandidmuxes[15:12]),
+        .EX_Rd          (alumux_dmaddress_mem[15:12]),
         .MEM_Rd         (muxdatamemory_wb[15:12]),
         .WB_Rd          (wb_registerrw_rf[15:12]),
         .ID_Rm          (instr_i3_i0),
