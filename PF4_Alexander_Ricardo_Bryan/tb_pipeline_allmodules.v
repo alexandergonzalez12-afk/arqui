@@ -411,9 +411,7 @@ module testbench();
 
     // Monitor signal values 
 initial begin
-    $monitor("Time: %0d | PC: %d | R1: %d | R2: %d | R3: %d | R5: %d",
-             $time, pc_out, 
-             RegisterFile.regi[1], RegisterFile.regi[2], RegisterFile.regi[3], RegisterFile.regi[5]/**, RegisterFile.reg_file[6]**/) ;
+    $monitor("Time: %0d | PC: %d | R1: %d | R2: %d | R3: %d | R5: %d", $time, pc_out, RegisterFile.regi[1], RegisterFile.regi[2], RegisterFile.regi[3], RegisterFile.regi[5]/**, RegisterFile.reg_file[6]**/) ;
 end
 // // Counter logic
 reg [31:0] pc_history [0:10];
