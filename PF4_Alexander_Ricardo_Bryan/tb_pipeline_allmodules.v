@@ -441,8 +441,8 @@ integer i;
             end
             $finish;
         end 
-        //else begin
-        //    cnt = 0;
-        //end
+        else begin
+            pc_count = 0;
+        end
     end
 endmodule
