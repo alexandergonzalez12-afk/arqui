@@ -402,19 +402,19 @@ module testbench();
         clk = 0;       
         reset = 1;     
         #3 reset = 0; 
-        for (i = 0; i < 256; i = i + 4) begin
-    end
+    //    for (i = 0; i < 256; i = i + 4) begin
+    //end
     end
     always #1 clk = ~clk; 
 
 
     // Monitor signal values 
 initial begin
-    $monitor("PC: %d | R1: %d | R2: %d | R3: %d | R5: %d", pc_out, RegisterFile.regi[1], RegisterFile.regi[2], RegisterFile.regi[3], RegisterFile.regi[5]/**, RegisterFile.reg_file[6]**/) ;
+    $monitor("PC: %d | R1: %d | R2: %d | R3: %d | R5: %d | R6: %d", pc_out, RegisterFile.regi[1], RegisterFile.regi[2], RegisterFile.regi[3], RegisterFile.regi[5] , RegisterFile.regi[6]) ;
 end
 
 
-// // Counter logic
+// Counter logic
 reg [31:0] pc_history [0:10];
 integer pc_count;
 integer cnt;
@@ -424,27 +424,25 @@ integer i;
         cnt=0;
     end
     integer file;
-always @(posedge clk) begin
-    pc_history[pc_count] = pc_out;
-    pc_count = pc_count +1;
-    if(pc_count==11) pc_count =0;
-    for(i = 0;i <= 10; i= i+1) begin
-        if(pc_out==pc_history[i]) cnt = cnt+1;
+    always @(posedge clk) begin
+        pc_history[pc_count] = pc_out;
+        pc_count = pc_count +1;
+        if(pc_count==10) pc_count =0;
+        for(i = 0;i <= 10; i= i+1) begin
+            if(pc_out==pc_history[i]) cnt = cnt+1;
+        end
+        if(cnt>=12) begin
+            $display("Infinite Loop Detected");
+            for (i = 0; i < 256; i = i + 4) begin
+                //Check if at least one value in the current block is valid
+                if ((Ram.mem[i] !== 8'bx) || (Ram.mem[i+1] !== 8'bx) || (Ram.mem[i+2] !== 8'bx) || (Ram.mem[i+3] !== 8'bx)) begin
+                    //$display("RAM[%0d:%0d] = %b %b %b %b", i, i+3, Ram.mem[i], Ram.mem[i+1], Ram.mem[i+2], Ram.mem[i+3]);                 
+                end
+            end
+            $finish;
+        end 
+        else begin
+            pc_count = 0;
+        end
     end
-    if(cnt>=11) begin
-        $display("Infinite Loop Detected");
-       for (i = 0; i < 256; i = i + 4) begin
-    // Check if at least one value in the current block is valid
-    if ((Ram.mem[i] !== 8'bx) || (Ram.mem[i+1] !== 8'bx) || 
-        (Ram.mem[i+2] !== 8'bx) || (Ram.mem[i+3] !== 8'bx)) begin
-        $display("RAM[%0d:%0d] = %b %b %b %b", 
-                 i, i+3, 
-                 Ram.mem[i], Ram.mem[i+1], Ram.mem[i+2], Ram.mem[i+3]);                 
-    end
-end
-        $finish;
-    end else begin
-        pc_count = 0;
-    end
-end
 endmodule
