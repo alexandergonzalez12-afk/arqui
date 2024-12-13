@@ -1,517 +1,476 @@
 `timescale 1ns / 1ps
 
-module tb_pipeline;
-
-    // Inputs
+module testbench();
     reg clk;
     reg reset;
-    reg enable_pc;
-    reg enable_ifid;
-    reg S; // Multiplexer select
+    wire [31:0] pc_out, NextPC;
+    wire IF_ID_enable;
+    wire[31:0] ID_PA, ID_PB, ID_PD;
+    wire [31:0] instruction, ID_instruction;
+    integer fi;
+    reg [7:0] Address, data;
+    wire [3:0] ID_RA, ID_RB, ID_RD;
+    wire [11:0] ID_shiftA;
+    wire [3:0] ID_ICC;
+    wire signed [23:0] imm_value;
+    wire signed [31:0] imm_valuex4;
+    wire ID_S_bit, ID_load_instr, ID_RF_enable, ID_B_instr,ID_enable_instr, ID_size, ID_BL_instr, ID_RW;
+    wire EX_RF_enable, MEM_RF_enable, WB_RF_enable;
+    wire [3:0] EX_RD, MEM_RD, WB_RD;
+    wire [31:0] TA,mux1;
+    wire [1:0] ID_shift_AM;
+    wire NOP;
+    wire [3:0] ID_alu_op;
+    wire [7:0] ID_mnemonic0, ID_mnemonic1, ID_mnemonic2;
+    wire [3:0] muxRDout;
+    reg [31:0] prev_pc;
+    integer loop_count;
+    integer MAX_PROGRAM_SIZE,file_size;
 
-    // Outputs
-    wire [31:0] pc;
-    wire [31:0] instruction;
+    wire CH_B_ID;
+    wire CH_BL_ID;
+    wire [31:0] muxPAout, muxPBout, muxPDout;
+    wire [1:0] AM;
+    wire [3:0] opcode;
+    wire S, load, RFenable, B, BL, size, ReadWrite, Enable;
+    wire EX_S_instr;
+    wire EX_load_instr;
+    wire EX_enable_instr;
+    wire EX_RW;
+    wire EX_size;
+    wire EX_BL_instr;
+    wire EX_B_instr;
+    wire [3:0] EX_alu_op;
+    wire [1:0] EX_shift_AM;
+    wire [31:0] EX_NextPC, ID_NextPC;
+    wire CH_EX_BL;
+    wire [31:0] EX_PA, EX_PB, EX_PD;
+    wire [11:0] EX_shiftA;
+    wire [3:0] PSR_CC;
+    wire Cin;
+    wire [3:0] ALU_CC;
+    wire [31:0] ALU_out;
+    wire [3:0] muxCCout;
+    wire [31:0] muxALUout;
+    wire [31:0] shifterOut;
+    wire PC_LE;
+    // Output wires for MEM stage
+    wire MEM_enable_instr;
+    wire MEM_size;
+    wire MEM_load_instr;
+    wire MEM_RW;
+    wire [31:0] MEM_PA,MEM_PD;
+    wire [31:0] MEM_ALU_out;
+    wire [31:0] dataOut, muxDataout;
+    wire WB_load_instr;
+    wire [31:0] WB_MUX_out;
+    wire [1:0] sop_count;
 
-    // Pipeline registers for each stage
-    // IF
-    reg [31:0] if_instruction;
-    reg ID_Load; // Signal LE for IF/ID
-    reg [31:0] Next_PC; // PC + 4
-    // ID
-    reg [3:0] id_ALU_OP;
-    reg [1:0] id_AM;
-    reg id_LOAD, id_RF_E;
-    reg [31:0] mux_pa;
-    reg [31:0] mux_pb;
-    reg [31:0] mux_pd;
-    reg [3:0] mux_I15_I12;
-    reg [11:0] instr_I11_I0;
-    // EX
-    reg [3:0] ex_ALU_OP;
-    reg [1:0] ex_AM;
-    reg ex_S, ex_LOAD;
-    reg [7:0] mux_alu;
-    // MEM
-    reg mem_LOAD, mem_RF_E, mem_SIZE, mem_RW;
-    reg [31:0] mux_datamemory;
-    // WB
-    reg wb_RF_E;
-
-    // register file 
-    reg [3:0] RA;
-    reg [3:0] RB;
-    reg [3:0] RD;
-    reg [31:0] PC;
-    reg [3:0] RW;    // double check this bits 
-    reg [31:0] PW;   // double check this bits 
-    reg [3:0] INSTR_I15_I12;
-
-    //inputs mux pa, pb, pd
-     // all mux pa,pb,pd jumps
-    reg [31:0] jump_EX_pa;
-    reg [31:0] jump_MEM_pa;
-    reg [31:0] jump_WB_pa;
-    reg [31:0] jump_EX_pb;
-    reg [31:0] jump_MEM_pb;
-    reg [31:0] jump_WB_pb;
-    reg [31:0] jump_EX_pd;
-    reg [31:0] jump_MEM_pd;
-    reg [31:0] jump_WB_pd;
-
-    //Condition Handler inputs 
-    reg [3:0] ConditionCode;
-    reg [1:0] N, Z, C, V;
-    reg [31:0] instruction;
-    reg [1:0] SIG_B;
-    reg [1:0] SIG_BL;
-    reg [1:0]  STORE_CC;
-    reg [3:0] c_field;
-    //mux for condition codes inputs
-    reg [3:0] ConditionCode;
-    reg [31:0] jump_MEM_instr;
-    reg SIG_store_cc;
-
-    //ALU inputs
-    reg {31:0} A;
-    reg {31:0} B;
-    reg [3:0] alu_op;
-    reg C_IN;
-
-    //MUX_ALU inputs
-    reg [31:0] alu_result;
-    reg [31:0] Next_PC;
-    reg BL_OUT;
-
-    // Shifter inputs
-    reg [31:0] Rm;            
-    reg [11:0] I;           
-    reg [1:0] AM;        
-
-    //MUX DATA MEMORY
-    reg [31:0] Addr;     
-    reg [31:0] DataOut;    
-    reg Sel;
-
-    //Data Memory
-    reg [31:0] dataMemoryIn;
-    reg [7:0] dataMemoryAddress;
-    reg dataMemory_mem_size, R/W, dataMemoryEnable; 
-
-    //Flag register inputs (PSR)
-    reg clk;
-    reg reset;
-    reg update;
-    reg store_cc;
-    reg N_in; 
-    reg Z_in;
-    reg C_in;
-    reg V_in;
+    wire [1:0] ID_MUX_PA, ID_MUX_PB, ID_MUX_PD;    
+    reg prev_pc1, prev_pc2;
     
-    // Pipeline outputs
-    // IF/ID
-    wire [23:0]instr_i23_i0;
-    wire [31:0] NEXT_PC;
-    wire [3:0] instr_i3_i0;
-    wire [3:0] instr_i19_i16;
-    wire [3:0] instr_i31_i28;
-    wire [11:0] instr_i11_i0;
-    wire [3:0] instr_i15_i12;
-    // ID/EX
-    // uses next pc from previous stage
-    wire [31:0] MUX_PA;
-    wire [31:0] MUX_PB;
-    wire [31:0] MUX_PD;
-    wire [3:0] MUX_I15_I12;
-    // EX/MEM
-    // uses the same i15_i12
-    // uses the same pd
-    wire [7:0] MUX_ALU;
-    // MEM/WB
-    // uses the same i15_i12
-    wire [31:0] MUX_DATAMEMORY;
-
-    // Control signals from ControlUnit
-    wire [3:0] ALU_OP;
-    wire ID_LOAD, ID_MEM_WRITE, STORE_CC, ID_B, ID_BL, ID_MEM_SIZE, ID_MEM_E, RF_E;
-    wire [1:0] ID_AM;
-
-    // Outputs from Multiplexer
-    wire [3:0] mux_alu_op;
-    wire mux_id_load, mux_id_mem_write, mux_store_cc, mux_id_b, mux_id_bl, mux_id_mem_size, mux_id_mem_e, mux_rf_e;
-    wire [1:0] mux_id_am;
-
-    // mux for condition codes
-    wire [3:0] ConditionCodes;
-
-    //ALU outputs
-    wire [31:0] ALU_result;
-    wire [31:0] Next_PC;
-    wire BL_OUT;
-    wire N, Z, C, V;
-
-    //MUX_ALU
-    wire [31:0] DM_address;
-
-    // shifter output
-    wire [31:0] N;
-
-    //DATA MEMORY
-    wire [31:0] Data_Memory_Out;    
-
-    //MUX DATA MEMORY Output
-    wire [31:0] MuxOut;
-
-    // output TA
-    wire [31:0] TA;
-    wire [31:0] instr_SE;
-
-    //Register File
-    wire [31:0] PA;
-    wire [31:0] PB;
-    wire [31:0] PD;
-    // all mux pa,pb,pd jumps
-    wire [31:0] jump_EX_pa;
-    wire [31:0] jump_MEM_pa;
-    wire [31:0] jump_WB_pa;
-    wire [31:0] jump_EX_pb;
-    wire [31:0] jump_MEM_pb;
-    wire [31:0] jump_WB_pb;
-    wire [31:0] jump_EX_pd;
-    wire [31:0] jump_MEM_pd;
-    wire [31:0] jump_WB_pd;
-
-    //Condition Handler Outputs
-    wire [1:0] Branch;
-    wire [1:0] BranchLink;
-    wire [1:0] Stall;
-    wire [1:0] NOP_EX;
-
-    // Flag register outputs
-    wire [1:0] N_out;
-    wire [1:0] Z_out;
-    wire [1:0] C_out;
-    wire [1:0] V_out;
-
-    // Registers for monitoring
-    reg [31:0] r1, r2, r3, r5;
-
-    integer fi, code;
-    reg [31:0] data;       // For loading instruction data
-    reg [7:0] address;     // Temporary address variable
-
-    // Helper function to get the keyword based on opcode
-    function [7*8:1] get_keyword;
-      input [3:0] opcode;
-      begin
-        if(instruction == 32'b0)
-          get_keyword = "NOP";
-        else
-          case (opcode)
-            4'b0000: get_keyword = "AND";
-            4'b0001: get_keyword = "EOR";
-            4'b0010: get_keyword = "SUB";
-            4'b0011: get_keyword = "RSB";
-            4'b0100: get_keyword = "ADD";
-            4'b0101: get_keyword = "ADC";
-            4'b0110: get_keyword = "SBC";
-            4'b0111: get_keyword = "RSC";
-            4'b1000: get_keyword = "TST";
-            4'b1001: get_keyword = "TEQ";
-            4'b1010: get_keyword = "CMP";
-            4'b1011: get_keyword = "CMN";
-            4'b1100: get_keyword = "ORR";
-            4'b1101: get_keyword = "MOV";
-            4'b1110: get_keyword = "BIC";
-            4'b1111: get_keyword = "MVN";
-            default: get_keyword = "NOP"; // Default to NOP if opcode is unknown
-          endcase
-      end
-    endfunction
-    // Instantiate the IF/ID stage 
-    IF_ID if_id (
-        .E(enable_ifid),
-        .reset(reset),
+    ProgramCounter pc (
+        .Qs(pc_out),
+        .Ds(reset ? 32'b0 : mux1),
+        .enable(PC_LE),
         .clk(clk),
-        .instr_in(if_instruction),
-        .next_pc(Next_PC),
-
-        .instr_out(if_instruction),
-        .instr_i23_i0(if_instruction),    
-        .Next_PC(next_pc),
-        .instr_i3_i0(if_instruction),
-        .instr_i19_i16(if_instruction),
-        .instr_i31_i28(if_instruction),
-        .instr_i11_i0(if_instruction),
-        .instr_i15_i12(if_instruction)
+        .reset(reset)
     );
-    // // Instantiate ID/EX stage
-    // EX_ID ex_id(
-    //  .clk(clk),
-    //  .reset(reset),
-    //  .ID_ALU_OP(),
-    //  .ID_LOAD(),
-    //  .ID_MEM_WRITE(),
-    //  .ID_MEM_SIZE(),
-    //  .ID_MEM_ENABLE(),
-    //  .ID_AM(),
-    //  .STORE_CC(),
-    //  .ID_BL(),
-    //  .ID_B(),
-    //  .RF_ENABLE(),
-    //  .BL_OUT(),                   
-    //  .NEXT_PC(),
-    //  .MUX_PA(),
-    //  .MUX_PB(),
-    //  .PD(),
-    //  .MUX_INSTR_I15_I12(),
-    //  .INSTR_I11_I0(),      
+    adder pc_adder (
+        .NextPC(NextPC),
+        .PC(pc_out)
+    );
 
-    //  .id_alu_op(),
-    //  .id_load(),
-    //  .id_mem_write(),
-    //  .id_mem_size(),
-    //  .id_mem_enable(),
-    //  .id_am(),
-    //  .store_cc(),
-    //  .id_bl(),
-    //  .id_b(),
-    //  .rf_enable(),
-    //  .bl_out(),             
-    //  .next_pc(),
-    //  .mux_pa(),
-    //  .mux_pb(),
-    //  .pd(),
-    //  .mux_instr_i15_i12(),
-    //  .instr_i11_i0() 
-    // );
+    rom256x8 rom (
+        .Address(pc_out[7:0]),
+        .Instruction(instruction)
+    );
+    IF_ID_PipelineReg if_id (
+        .Clk(clk),
+        .Reset(reset || CH_B_ID),
+        .IF_ID_enable(IF_ID_enable),
+        .IF_NextPC(NextPC),
+        .IF_instruction(instruction),
+        .ID_instruction(ID_instruction),
+        .imm_value(imm_value),
+        .ID_RA(ID_RA),
+        .ID_RB(ID_RB),
+        .ID_RD(ID_RD),
+        .ID_shiftA(ID_shiftA),
+        .ID_ICC(ID_ICC),
+        .ID_NextPC(ID_NextPC)
+    );
+    control_unit control (
+        .ID_S_bit(ID_S_bit),
+        .ID_load_instr(ID_load_instr),
+        .ID_RF_enable(ID_RF_enable),
+        .ID_B_instr(ID_B_instr),
+        .ID_enable_instr(ID_enable_instr),
+        .ID_size(ID_size),
+        .ID_BL_instr(ID_BL_instr),
+        .ID_RW(ID_RW),
+        .ID_shift_AM(ID_shift_AM),
+        .ID_alu_op(ID_alu_op),
+        .ID_mnemonic0(ID_mnemonic0),
+        .ID_mnemonic1(ID_mnemonic1),
+        .ID_mnemonic2(ID_mnemonic2),
+        .sop_count(sop_count),
+        .instruction(ID_instruction)
+    );
 
-    // Instantiate the PC module with PC increment of 4
-    PC uut_pc (
+    x4SE x4SE (
+        .imm_valuex4(imm_valuex4),
+        .imm_value(imm_value)
+    );
+
+    NextPC_Adder adder (
+        .NextPC(ID_NextPC),
+        .imm_valuex4(imm_valuex4),
+        .out(TA)
+    );
+
+    mux2x32 muxNextPC (
+        .out(mux1),
+        .portA(NextPC),
+        .portB(TA),
+        .select(CH_B_ID)
+    );
+
+    RegisterFile RegisterFile(
         .clk(clk),
         .reset(reset),
-        .E(enable_pc),
-        .next_pc(pc + 32'd4), // Increment PC by 4
-        .pc(pc)
+        .LE(WB_RF_enable),
+        .RW(WB_RD),
+        .PW(WB_MUX_out),
+        .RA(ID_RA),
+        .RB(ID_RB),
+        .RD(ID_RD),
+        .PC(pc_out),
+        .PA(ID_PA),
+        .PB(ID_PB),
+        .PD(ID_PD)
     );
 
-    // Instantiate the ControlUnit module
-    ControlUnit uut_control (
-        .instruction(instruction),
-        .ALU_OP(ALU_OP),
-        .ID_LOAD(ID_LOAD),
-        .ID_MEM_WRITE(ID_MEM_WRITE),
-        .ID_AM(ID_AM),
-        .STORE_CC(STORE_CC),
-        .ID_B(ID_B),
-        .ID_BL(ID_BL),
-        .ID_MEM_SIZE(ID_MEM_SIZE),
-        .ID_MEM_E(ID_MEM_E),
-        .RF_E(RF_E)
+    mux4x32 muxPA(
+        .out(muxPAout),
+        .portA(ID_PA),
+        .portB(muxALUout),
+        .portC(muxDataout),
+        .portD(WB_MUX_out),
+        .select(ID_MUX_PA)
     );
 
-    // Instantiate the Multiplexer
-    Multiplexer uut_mux (
-        .alu_op(mux_alu_op),
-        .id_load(mux_id_load),
-        .id_mem_write(mux_id_mem_write),
-        .store_cc(mux_store_cc),
-        .id_b(mux_id_b),
-        .id_bl(mux_id_bl),
-        .id_mem_size(mux_id_mem_size),
-        .id_mem_e(mux_id_mem_e),
-        .rf_e(mux_rf_e),
-        .id_am(mux_id_am),
+    mux4x32 muxPB(
+        .out(muxPBout),
+        .portA(ID_PB),
+        .portB(muxALUout),
+        .portC(muxDataout),
+        .portD(WB_MUX_out),
+        .select(ID_MUX_PB)
+    );
+    mux4x32 muxPD(
+        .out(muxPDout),
+        .portA(ID_PD),
+        .portB(muxALUout),
+        .portC(muxDataout),
+        .portD(WB_MUX_out),
+        .select(ID_MUX_PD)
+    );
+
+    mux2x4 muxRD(
+        .out(muxRDout),
+        .portA(ID_RD),
+        .portB(4'b1110),
+        .select(CH_BL_ID)
+    );
+
+    control_MUX cuMux(
+        .AM(AM),
+        .opcode(opcode),
         .S(S),
-        .ALU_OP(ALU_OP),
-        .ID_LOAD(ID_LOAD),
-        .ID_MEM_WRITE(ID_MEM_WRITE),
-        .STORE_CC(STORE_CC),
-        .ID_B(ID_B),
-        .ID_BL(ID_BL),
-        .ID_MEM_SIZE(ID_MEM_SIZE),
-        .ID_MEM_E(ID_MEM_E),
-        .RF_E(RF_E),
-        .ID_AM(ID_AM)
-    );
-
-    // Instantiate the instruction memory (ROM)
-    Instruction_Memory_ROM rom_inst (
-        .I(instruction),
-        .A(pc) // Connect the program counter to the memory address
-    );
-
-    // Instantiate the data memory MUX
-    MUX_DataMemory MUXdatamemory (
-        .Addr(Addr),
-        .DataOut(DataOut),
-        .Sel(Sel),
-        .MuxOut( Data_Memory_Out)
-    );
-
-    // Instantiate the data memory (RAM)
-    Data_Memory_RAM data_mem_inst (
-        .data_out(Data_Memory_Out),
-        .address(dataMemoryAddress),
-        .data_in(dataMemoryIn),
-        .size(dataMemory_mem_size),
-        .rw(R/W),
-        .enable(dataMemoryEnable)
-    );
-
-
-    // Instantiate the ConditionHandler
-    ConditionHandler uut_condition_handler (
-        .ConditionCode(ConditionCode),
-        .N(N),
-        .Z(Z),
-        .C(C),
-        .V(V),
-        .instruction(instruction[31:28]),
-        .SIG_B(SIG_B),
-        .SIG_BL(SIG_BL),
-        .STORE_CC(STORE_CC),
-        .c_field(c_field), 
-        .Branch(Branch),
-        .BranchLink(BranchLink),
-        .Stall(Stall),
-        .NOP_EX(NOP_EX)
-    );
-
-    // Instantiate the ALU module
-    ALU uut_alu (
-        .A(A),
+        .load(load),
+        .RFenable(RFenable),
         .B(B),
-        .ALU_OP(alu_op),
-        .C_IN(C_IN),
-        .ALU_result(ALU_result),
-        .N(N),
-        .Z(Z),
-        .C(C),
-        .V(V)
+        .BL(BL),
+        .size(size),
+        .ReadWrite(ReadWrite),
+        .Enable(Enable),
+        .ID_shift_AM(ID_shift_AM),
+        .ID_alu_op(ID_alu_op),
+        .ID_S_Bit(ID_S_bit),
+        .ID_load_instr(ID_load_instr),
+        .ID_RF_enable(ID_RF_enable),
+        .ID_B_intr(ID_B_instr), 
+        .ID_enable_instr(ID_enable_instr), 
+        .ID_RW(ID_RW), 
+        .ID_size(ID_size), 
+        .ID_BL_instr(ID_BL_instr), 
+        .select(NOP)
     );
 
-    // instantiate the flag register module
-    FlagRegister uut_flag_register (
-        .clk(clk),
-        .reset(reset),
-        .update(update),
-        .store_cc(store_cc),
-        .N_in(N_in),
-        .Z_in(Z_in),
-        .C_in(C_in),
-        .V_in(V_in),
-        .N_out(N_out),
-        .Z_out(Z_out),
-        .C_out(C_out),
-        .V_out(V_out)
+    ID_EX_PipelineReg id_ex (
+    .Clk(clk),                       // Connect `clk` signal to `Clk` input
+    .Reset(reset),                   // Connect `reset` signal to `Reset` input
+    .ID_S_instr(S),           // Connect `ID_S_Bit` to `ID_S_instr` input
+    .ID_alu_op(opcode),           // Connect `ID_alu_op` to `ID_alu_op` input
+    .ID_load_instr(load),   // Connect `ID_load_instr` to `ID_load_instr` input
+    .ID_RF_enable(RFenable),     // Connect `ID_RF_enable` to `ID_RF_enable` input
+    .ID_enable_instr(Enable), // Connect `ID_enable_instr` to `ID_enable_instr` input
+    .ID_size(size),                  // Connect `size` signal to `ID_size` input
+    .ID_RW(ID_RW),               // Connect `ReadWrite` to `ID_RW` input
+    .ID_BL_instr(BL),                // Connect `BL` signal to `ID_BL_instr` input
+    .ID_B_instr(B),                  // Connect `B` signal to `ID_B_instr` input
+    .ID_shift_AM(AM),                // Connect `AM` signal to `ID_shift_AM` input
+    .ID_PA(muxPAout),                // Connect `muxPAout` to `ID_PA` input
+    .ID_PB(muxPBout),                // Connect `muxPBout` to `ID_PB` input
+    .ID_PD(muxPDout),                // Connect `muxPDout` to `ID_PD` input
+    .ID_shiftA(ID_shiftA),           // Connect `ID_shiftA` signal to `ID_shiftA` input
+    .ID_RD(muxRDout),                // Connect `muxRDout` to `ID_RD` input
+    .ID_NextPC(NextPC),              // Connect `NextPC` signal to `ID_NextPC` input
+    .CH_ID_BL(CH_BL_ID), // Connect your signal to `CH_ID_BL` input
+    .EX_S_instr(EX_S_instr),         // Connect `EX_S_instr` output
+    .EX_load_instr(EX_load_instr),   // Connect `EX_load_instr` output
+    .EX_RF_enable(EX_RF_enable),     // Connect `EX_RF_enable` output
+    .EX_enable_instr(EX_enable_instr), // Connect `EX_enable_instr` output
+    .EX_RW(EX_RW),                   // Connect `EX_RW` output
+    .EX_size(EX_size),               // Connect `EX_size` output
+    .EX_BL_instr(EX_BL_instr),       // Connect `EX_BL_instr` output
+    .EX_B_instr(EX_B_instr),         // Connect `EX_B_instr` output
+    .EX_alu_op(EX_alu_op),           // Connect `EX_alu_op` output
+    .EX_shift_AM(EX_shift_AM),       // Connect `EX_shift_AM` output
+    .EX_NextPC(EX_NextPC),           // Connect `EX_NextPC` output
+    .CH_EX_BL(CH_EX_BL),             // Connect `CH_EX_BL` output
+    .EX_RD(EX_RD),                   // Connect `EX_RD` output
+    .EX_PA(EX_PA),                   // Connect `EX_PA` output
+    .EX_PB(EX_PB),                   // Connect `EX_PB` output
+    .EX_PD(EX_PD),                   // Connect `EX_PD` output
+    .EX_shiftA(EX_shiftA)              // Connect `EX_shiftA` output
     );
-    // Clock generation with 2 time units toggle
-    initial begin
-        clk = 0;
-        forever #2 clk = ~clk;
-    end
 
-    // Preload instructions from the file into the instruction memory
-    initial begin
+    PSR PSR(
+        .PSR_CC(PSR_CC),
+        .Cin(Cin),
+        .Alu_CC(ID_instruction[31:28]),
+        .clk(clk)
+    );
+
+    condition_handler CH(
+        .CC(ALU_CC),
+        .ID_ICC_3128(ID_ICC),
+        .ID_B_Instr(B),
+        .ID_BL_Instr(BL),
+        .Out_B(CH_B_ID),
+        .Out_BL(CH_BL_ID)
+    );
+
+    ALU ALU(
+        .Z(ALU_CC[2]),
+        .N(ALU_CC[3]),
+        .C(ALU_CC[1]),
+        .V(ALU_CC[0]),
+        .Out(ALU_out),
+        .A(EX_PA),
+        .B(shifterOut),
+        .Cin(Cin),
+        .opcode(EX_alu_op)
+
+    );
+
+    mux2x4 muxCC(
+        .out(muxCCout),
+        .portA(ALU_CC),
+        .portB(PSR_CC),
+        .select(EX_S_instr)
+    );
+
+    mux2x32 muxALU(
+        .out(muxALUout),
+        .portA(ALU_out),
+        .portB(EX_NextPC),
+        .select(CH_EX_BL)
+    );
+
+    shifter_sign_extender shifter(
+        .N(shifterOut),
+        .Rm(EX_PB),
+        .I(EX_shiftA),
+        .AM(EX_shift_AM)
+    );
+
+    HazardForwardingUnit HFU(
+        .ID_MUX_PA(ID_MUX_PA),
+        .ID_MUX_PB(ID_MUX_PB),
+        .ID_MUX_PD(ID_MUX_PD),
+        .NOP(NOP),
+        .IF_ID_LE(IF_ID_enable),
+        .PC_LE(PC_LE),
+        .EX_Rd(EX_RD),
+        .MEM_Rd(MEM_RD),
+        .ID_load_instr(ID_load_instr),
+        .ID_enable_instr(ID_enable_instr),
+        .WB_Rd(WB_RD),
+        .ID_RD(ID_RD),
+        .ID_RA(ID_RA),
+        .ID_RB(ID_RB),
+        .EX_RF_enable(EX_RF_enable),
+        .MEM_RF_enable(MEM_RF_enable),
+        .WB_RF_enable(WB_RF_enable),
+        .EX_load_instr(EX_load_instr),
+        .sop_count(sop_count)
+    );
+
+    EX_MEM_PipelineReg ex_mem (
+        .Clk(clk),                      // Clock signal
+        .Reset(reset),                  // Reset signal
+        .EX_enable_instr(EX_enable_instr),  // Input from EX stage
+        .EX_size(EX_size),              // Size input from EX stage
+        .EX_RF_enable(EX_RF_enable),    // Register File enable from EX stage
+        .EX_load_instr(EX_load_instr),  // Load instruction flag from EX stage
+        .EX_RW(EX_RW),                  // Read/Write control from EX stage
+        .EX_PA(EX_PA),            
+        .EX_PD(EX_PD),     // Address or data from EX stage
+        .EX_ALU_out(muxALUout),        // ALU output from EX stage
+        .EX_RD(EX_RD),
+        .MEM_enable_instr(MEM_enable_instr),  // MEM stage enable
+        .MEM_size(MEM_size),            // MEM stage size
+        .MEM_RF_enable(MEM_RF_enable),  // MEM stage Register File enable
+        .MEM_load_instr(MEM_load_instr), // MEM stage load instruction flag
+        .MEM_RW(MEM_RW),                // MEM stage Read/Write control
+        .MEM_PA(MEM_PA),                // MEM stage Address or data
+        .MEM_ALU_out(MEM_ALU_out),      // MEM stage ALU output
+        .MEM_RD(MEM_RD),   
+        .MEM_PD(MEM_PD)
+);
+
+    ram256x8 ram(
+        .DataOut(dataOut),
+        .Enable(MEM_enable_instr),
+        .ReadWrite(MEM_RW),
+        .Address(MEM_ALU_out[7:0]),
+        .DataIn(MEM_PD),
+        .Size(MEM_size)
+    );
+
+    mux2x32 muxData(
+      .out(muxDataout),
+      .portA(MEM_ALU_out),
+      .portB(dataOut),
+      .select(MEM_load_instr)  
+    );
+
+    MEM_WB_PipelineReg mem_wb (
+        .Clk(clk),
+        .Reset(reset),
+        .MEM_RF_enable(MEM_RF_enable),
+        .MEM_load_instr(MEM_load_instr),
+        .MEM_MUX_out(muxDataout),
+        .MEM_RD(MEM_RD),
+        .WB_RF_enable(WB_RF_enable),
+        .WB_MUX_out(WB_MUX_out),
+        .WB_RD(WB_RD)
+    );
+    // Replace ROM and RAM initialization logic with dynamic file size determination
+     initial begin
         fi = $fopen("codigo_validacion.txt", "r");
         if (fi == 0) begin
-            $display("Error: File could not be opened.");
+            $display("Error: Cannot open file.");
             $finish;
         end
 
-        // Start loading instructions from the file
-        // Preload data memory from the file
-        address = 8'd0;
+        MAX_PROGRAM_SIZE = 0;
+
+        // Read file line by line to determine file size and load ROM
         while (!$feof(fi)) begin
-            code = $fscanf(fi, "%b", data);
-            rom_inst.Mem[address] = data; // Preload the ROM memory
-             data_mem_inst.Mem[address] = data; // Preload the RAM memory
-            address = address + 1;
+            if ($fscanf(fi, "%b", data) == 1) begin
+                rom.mem[MAX_PROGRAM_SIZE] = data;
+                MAX_PROGRAM_SIZE = MAX_PROGRAM_SIZE + 1;
+            end
         end
+        
+
+        $display("Program loaded with %0d instructions.", MAX_PROGRAM_SIZE);
+        $fclose(fi);
+    end
+     initial begin
+        fi = $fopen("codigo_validacion.txt", "r");
+        if (fi == 0) begin
+            $display("Error: Could not open input file.");
+            $finish;
+        end
+
+        Address = 8'b00000000;
+        while ($fscanf(fi, "%b", data) != -1) begin 
+            ram.mem[Address] = data;  
+            Address = Address + 1;
+        end
+        
         $fclose(fi);
     end
 
-    // Preload data memory from the file
-    // initial begin
-    //     fi = $fopen("codigo_validacion.txt", "r");
-    //     if (fi == 0) begin
-    //         $display("Error: File could not be opened.");
-    //         $finish;
-    //     end
 
-    //     // Start loading data into the memory
-    //     address = 8'd0;
-    //     while (!$feof(fi)) begin
-    //         code = $fscanf(fi, "%b", data);
-           
-    //         address = address + 1;
-    //     end
-    //     $fclose(fi);
-    // end
-
-    // Test sequence with enforced stop time at 40
     initial begin
-        // Initialize signals
-        reset = 1;
-        enable_pc = 1;
-        enable_ifid = 1;
-        S = 0;
-
-        // Start simulation
-        #3 reset = 0;
-        #32 S = 1;
-        #20 $finish; // Stop simulation at time 40
+        clk = 0;       // Initialize clock
+        reset = 1;     
+        #3 reset = 0; 
+        for (i = 0; i < 256; i = i + 4) begin
+    // Check if at least one value in the current block is valid
+    
     end
-
-    always @(*) begin
-        PC <= pc;
-
     end
+    always #1 clk = ~clk; 
+   
 
-    // Pipeline stages update
-    always @(posedge clk) begin
-        // IF stage
-        if_instruction <= instruction;
 
-        // //Recently added
-        Next_PC <= pc;
 
-        // ID stage
-        id_ALU_OP <= ALU_OP;
-        id_AM <= ID_AM;
-        id_LOAD <= ID_LOAD;
-        id_RF_E <= RF_E;
+    // Monitor signal values throughout the simulation
+initial begin
+    $monitor("Time: %0d | PC: %d | R1: %d | R2: %d | R3: %d | R5: %d",
+             $time, pc_out, 
+             RegisterFile.reg_file[1], RegisterFile.reg_file[2], RegisterFile.reg_file[3], 
+             RegisterFile.reg_file[5]) ;
+end
 
-        //Recently added
-        RA <= instr_i3_i0;
-        RB <= instr_i19_i16;
-        RD <= instr_i15_i12;
-
-        // EX stage
-        ex_ALU_OP <= mux_alu_op;
-        ex_AM <= mux_id_am;
-        ex_S <= S;
-        ex_LOAD <= mux_id_load;
-
-        // MEM stage
-        mem_LOAD <= mux_id_load;
-        mem_RF_E <= mux_rf_e;
-        mem_SIZE <= mux_id_mem_size;
-        mem_RW <= mux_id_mem_write;
-
-        // WB stage
-        wb_RF_E <= mux_rf_e;
-    end
-
-    // Monitor outputs for each clock cycle
+// // Counter logic
+reg [31:0] pc_history [0:10];
+integer pc_count;
+integer cnt;
+integer i;
     initial begin
-        $monitor("PC: %0d | Address: %0d | r1: %0d | r2: %0d | r3: %0d | r5: %0d", pc, address, r1, r2, r3, r5);
+        pc_count=0;
+        cnt=0;
     end
 
-    // Display control signals and instruction in ID stage when required
-    always @(posedge clk) begin
-        $display("Control Signals in ID Stage: ALU_OP: %b | AM: %b | Load: %b | RF_E: %b", id_ALU_OP, id_AM, id_LOAD, id_RF_E);
-        $display("Instruction in ID Stage: %b", if_instruction);
+    integer file;
+
+always @(posedge clk) begin
+    pc_history[pc_count] = pc_out;
+    pc_count = pc_count +1;
+    if(pc_count==11) pc_count =0;
+    for(i = 0;i <= 10; i= i+1) begin
+        if(pc_out==pc_history[i]) cnt = cnt+1;
     end
+    if(cnt>=11) begin
+        $display("Infinite Loop Detected");
+       for (i = 0; i < 256; i = i + 4) begin
+    // Check if at least one value in the current block is valid
+    if ((ram.mem[i] !== 8'bx) || (ram.mem[i+1] !== 8'bx) || 
+        (ram.mem[i+2] !== 8'bx) || (ram.mem[i+3] !== 8'bx)) begin
+        $display("RAM[%0d:%0d] = %b %b %b %b", 
+                 i, i+3, 
+                 ram.mem[i], ram.mem[i+1], ram.mem[i+2], ram.mem[i+3]);
+                 
+    end
+end
+
+
+
+        $finish;
+    end else begin
+        pc_count = 0;
+    end
+end
+
+
+
+
 endmodule
