@@ -26,7 +26,6 @@ module testbench();
     reg [31:0] prev_pc;
     integer loop_count;
     integer PROGRAM_SIZE,file_size;
-
     wire CH_B_ID;
     wire CH_BL_ID;
     wire [31:0] muxPAout, muxPBout, muxPDout;
@@ -68,8 +67,8 @@ module testbench();
     reg prev_pc1, prev_pc2;
     
     P_C pc (
-        .Qs(pc_out),
-        .Ds(reset ? 32'b0 : mux1),
+        .pc(pc_out),
+        .npc(reset ? 32'b0 : mux1),
         .enable(PC_LE),
         .clk(clk),
         .reset(reset)
@@ -411,8 +410,10 @@ module testbench();
 
     // Monitor signal values 
 initial begin
-    $monitor("Time: %0d | PC: %d | R1: %d | R2: %d | R3: %d | R5: %d", $time, pc_out, RegisterFile.regi[1], RegisterFile.regi[2], RegisterFile.regi[3], RegisterFile.regi[5]/**, RegisterFile.reg_file[6]**/) ;
+    $monitor("PC: %d | R1: %d | R2: %d | R3: %d | R5: %d", pc_out, RegisterFile.regi[1], RegisterFile.regi[2], RegisterFile.regi[3], RegisterFile.regi[5]/**, RegisterFile.reg_file[6]**/) ;
 end
+
+
 // // Counter logic
 reg [31:0] pc_history [0:10];
 integer pc_count;

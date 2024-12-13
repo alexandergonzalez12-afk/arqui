@@ -491,13 +491,13 @@ end
 endmodule
 
 module P_C (
-    output reg [31:0] Qs, input [31:0] Ds, input enable, clk, reset
+    output reg [31:0] pc, input [31:0] npc, input enable, clk, reset
 );
     always @(posedge clk) begin
         if(reset) begin
-            Qs = 32'h00000000;
+            pc = 32'h00000000;
         end else if(enable) begin
-            Qs = Ds;
+            pc = npc;
         end
     end
 endmodule
