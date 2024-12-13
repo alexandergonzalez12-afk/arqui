@@ -25,7 +25,7 @@ module testbench();
     wire [3:0] muxRDout;
     reg [31:0] prev_pc;
     integer loop_count;
-    integer MAX_PROGRAM_SIZE,file_size;
+    integer PROGRAM_SIZE,file_size;
 
     wire CH_B_ID;
     wire CH_BL_ID;
@@ -54,7 +54,6 @@ module testbench();
     wire [31:0] muxALUout;
     wire [31:0] shifterOut;
     wire PC_LE;
-    // Output wires for MEM stage
     wire MEM_enable_instr;
     wire MEM_size;
     wire MEM_load_instr;
@@ -65,11 +64,10 @@ module testbench();
     wire WB_load_instr;
     wire [31:0] WB_MUX_out;
     wire [1:0] sop_count;
-
     wire [1:0] ID_MUX_PA, ID_MUX_PB, ID_MUX_PD;    
     reg prev_pc1, prev_pc2;
     
-    ProgramCounter pc (
+    P_C pc (
         .Qs(pc_out),
         .Ds(reset ? 32'b0 : mux1),
         .enable(PC_LE),
@@ -81,11 +79,11 @@ module testbench();
         .PC(pc_out)
     );
 
-    rom256x8 rom (
+    rom Rom (
         .Address(pc_out[7:0]),
         .Instruction(instruction)
     );
-    IF_ID_PipelineReg if_id (
+    IF_ID if_id (
         .Clk(clk),
         .Reset(reset || CH_B_ID),
         .IF_ID_enable(IF_ID_enable),
@@ -100,7 +98,7 @@ module testbench();
         .ID_ICC(ID_ICC),
         .ID_NextPC(ID_NextPC)
     );
-    control_unit control (
+    ControlUnit control (
         .ID_S_bit(ID_S_bit),
         .ID_load_instr(ID_load_instr),
         .ID_RF_enable(ID_RF_enable),
@@ -118,18 +116,18 @@ module testbench();
         .instruction(ID_instruction)
     );
 
-    x4SE x4SE (
+    x4_SE x4SE (
         .imm_valuex4(imm_valuex4),
         .imm_value(imm_value)
     );
 
-    NextPC_Adder adder (
+    NextPCadder adder (
         .NextPC(ID_NextPC),
         .imm_valuex4(imm_valuex4),
         .out(TA)
     );
 
-    mux2x32 muxNextPC (
+    mux2IN32OUT muxNextPC (
         .out(mux1),
         .portA(NextPC),
         .portB(TA),
@@ -151,7 +149,7 @@ module testbench();
         .PD(ID_PD)
     );
 
-    mux4x32 muxPA(
+    mux4IN32OUT muxPA(
         .out(muxPAout),
         .portA(ID_PA),
         .portB(muxALUout),
@@ -160,7 +158,7 @@ module testbench();
         .select(ID_MUX_PA)
     );
 
-    mux4x32 muxPB(
+    mux4IN32OUT muxPB(
         .out(muxPBout),
         .portA(ID_PB),
         .portB(muxALUout),
@@ -168,7 +166,7 @@ module testbench();
         .portD(WB_MUX_out),
         .select(ID_MUX_PB)
     );
-    mux4x32 muxPD(
+    mux4IN32OUT muxPD(
         .out(muxPDout),
         .portA(ID_PD),
         .portB(muxALUout),
@@ -177,14 +175,14 @@ module testbench();
         .select(ID_MUX_PD)
     );
 
-    mux2x4 muxRD(
+    mux2IN4OUT muxRD(
         .out(muxRDout),
         .portA(ID_RD),
         .portB(4'b1110),
         .select(CH_BL_ID)
     );
 
-    control_MUX cuMux(
+    Multiplexer cuMux(
         .AM(AM),
         .opcode(opcode),
         .S(S),
@@ -208,43 +206,43 @@ module testbench();
         .select(NOP)
     );
 
-    ID_EX_PipelineReg id_ex (
-    .Clk(clk),                       // Connect `clk` signal to `Clk` input
-    .Reset(reset),                   // Connect `reset` signal to `Reset` input
-    .ID_S_instr(S),           // Connect `ID_S_Bit` to `ID_S_instr` input
-    .ID_alu_op(opcode),           // Connect `ID_alu_op` to `ID_alu_op` input
-    .ID_load_instr(load),   // Connect `ID_load_instr` to `ID_load_instr` input
-    .ID_RF_enable(RFenable),     // Connect `ID_RF_enable` to `ID_RF_enable` input
-    .ID_enable_instr(Enable), // Connect `ID_enable_instr` to `ID_enable_instr` input
-    .ID_size(size),                  // Connect `size` signal to `ID_size` input
-    .ID_RW(ID_RW),               // Connect `ReadWrite` to `ID_RW` input
-    .ID_BL_instr(BL),                // Connect `BL` signal to `ID_BL_instr` input
-    .ID_B_instr(B),                  // Connect `B` signal to `ID_B_instr` input
-    .ID_shift_AM(AM),                // Connect `AM` signal to `ID_shift_AM` input
-    .ID_PA(muxPAout),                // Connect `muxPAout` to `ID_PA` input
-    .ID_PB(muxPBout),                // Connect `muxPBout` to `ID_PB` input
-    .ID_PD(muxPDout),                // Connect `muxPDout` to `ID_PD` input
-    .ID_shiftA(ID_shiftA),           // Connect `ID_shiftA` signal to `ID_shiftA` input
-    .ID_RD(muxRDout),                // Connect `muxRDout` to `ID_RD` input
-    .ID_NextPC(NextPC),              // Connect `NextPC` signal to `ID_NextPC` input
-    .CH_ID_BL(CH_BL_ID), // Connect your signal to `CH_ID_BL` input
-    .EX_S_instr(EX_S_instr),         // Connect `EX_S_instr` output
-    .EX_load_instr(EX_load_instr),   // Connect `EX_load_instr` output
-    .EX_RF_enable(EX_RF_enable),     // Connect `EX_RF_enable` output
-    .EX_enable_instr(EX_enable_instr), // Connect `EX_enable_instr` output
-    .EX_RW(EX_RW),                   // Connect `EX_RW` output
-    .EX_size(EX_size),               // Connect `EX_size` output
-    .EX_BL_instr(EX_BL_instr),       // Connect `EX_BL_instr` output
-    .EX_B_instr(EX_B_instr),         // Connect `EX_B_instr` output
-    .EX_alu_op(EX_alu_op),           // Connect `EX_alu_op` output
-    .EX_shift_AM(EX_shift_AM),       // Connect `EX_shift_AM` output
-    .EX_NextPC(EX_NextPC),           // Connect `EX_NextPC` output
-    .CH_EX_BL(CH_EX_BL),             // Connect `CH_EX_BL` output
-    .EX_RD(EX_RD),                   // Connect `EX_RD` output
-    .EX_PA(EX_PA),                   // Connect `EX_PA` output
-    .EX_PB(EX_PB),                   // Connect `EX_PB` output
-    .EX_PD(EX_PD),                   // Connect `EX_PD` output
-    .EX_shiftA(EX_shiftA)              // Connect `EX_shiftA` output
+    ID_EX id_ex (
+    .Clk(clk),                               
+    .Reset(reset),                          
+    .ID_S_instr(S),                         
+    .ID_alu_op(opcode),                     
+    .ID_load_instr(load),                   
+    .ID_RF_enable(RFenable),                
+    .ID_enable_instr(Enable),               
+    .ID_size(size),                          
+    .ID_RW(ID_RW),                          
+    .ID_BL_instr(BL),                        
+    .ID_B_instr(B),                          
+    .ID_shift_AM(AM),                        
+    .ID_PA(muxPAout),                       
+    .ID_PB(muxPBout),                       
+    .ID_PD(muxPDout),                       
+    .ID_shiftA(ID_shiftA),                   
+    .ID_RD(muxRDout),                       
+    .ID_NextPC(NextPC),                      
+    .CH_ID_BL(CH_BL_ID),                    
+    .EX_S_instr(EX_S_instr),                
+    .EX_load_instr(EX_load_instr),          
+    .EX_RF_enable(EX_RF_enable),            
+    .EX_enable_instr(EX_enable_instr),      
+    .EX_RW(EX_RW),                          
+    .EX_size(EX_size),                      
+    .EX_BL_instr(EX_BL_instr),              
+    .EX_B_instr(EX_B_instr),                
+    .EX_alu_op(EX_alu_op),                  
+    .EX_shift_AM(EX_shift_AM),              
+    .EX_NextPC(EX_NextPC),                  
+    .CH_EX_BL(CH_EX_BL),                    
+    .EX_RD(EX_RD),                          
+    .EX_PA(EX_PA),                          
+    .EX_PB(EX_PB),                          
+    .EX_PD(EX_PD),                          
+    .EX_shiftA(EX_shiftA)                    
     );
 
     PSR PSR(
@@ -254,7 +252,7 @@ module testbench();
         .clk(clk)
     );
 
-    condition_handler CH(
+    ConditionHandler CH(
         .CC(ALU_CC),
         .ID_ICC_3128(ID_ICC),
         .ID_B_Instr(B),
@@ -276,28 +274,28 @@ module testbench();
 
     );
 
-    mux2x4 muxCC(
+    mux2IN4OUT muxCC(
         .out(muxCCout),
         .portA(ALU_CC),
         .portB(PSR_CC),
         .select(EX_S_instr)
     );
 
-    mux2x32 muxALU(
+    mux2IN32OUT muxALU(
         .out(muxALUout),
         .portA(ALU_out),
         .portB(EX_NextPC),
         .select(CH_EX_BL)
     );
 
-    shifter_sign_extender shifter(
+    shifter Shifter(
         .N(shifterOut),
         .Rm(EX_PB),
         .I(EX_shiftA),
         .AM(EX_shift_AM)
     );
 
-    HazardForwardingUnit HFU(
+    HazardUnit HFU(
         .ID_MUX_PA(ID_MUX_PA),
         .ID_MUX_PB(ID_MUX_PB),
         .ID_MUX_PD(ID_MUX_PD),
@@ -319,30 +317,30 @@ module testbench();
         .sop_count(sop_count)
     );
 
-    EX_MEM_PipelineReg ex_mem (
-        .Clk(clk),                      // Clock signal
-        .Reset(reset),                  // Reset signal
-        .EX_enable_instr(EX_enable_instr),  // Input from EX stage
-        .EX_size(EX_size),              // Size input from EX stage
-        .EX_RF_enable(EX_RF_enable),    // Register File enable from EX stage
-        .EX_load_instr(EX_load_instr),  // Load instruction flag from EX stage
-        .EX_RW(EX_RW),                  // Read/Write control from EX stage
+    EX_MEM ex_mem (
+        .Clk(clk),                      
+        .Reset(reset),                  
+        .EX_enable_instr(EX_enable_instr),  
+        .EX_size(EX_size),              
+        .EX_RF_enable(EX_RF_enable),    
+        .EX_load_instr(EX_load_instr),  
+        .EX_RW(EX_RW),                  
         .EX_PA(EX_PA),            
-        .EX_PD(EX_PD),     // Address or data from EX stage
-        .EX_ALU_out(muxALUout),        // ALU output from EX stage
+        .EX_PD(EX_PD),     
+        .EX_ALU_out(muxALUout),        
         .EX_RD(EX_RD),
-        .MEM_enable_instr(MEM_enable_instr),  // MEM stage enable
-        .MEM_size(MEM_size),            // MEM stage size
-        .MEM_RF_enable(MEM_RF_enable),  // MEM stage Register File enable
-        .MEM_load_instr(MEM_load_instr), // MEM stage load instruction flag
-        .MEM_RW(MEM_RW),                // MEM stage Read/Write control
-        .MEM_PA(MEM_PA),                // MEM stage Address or data
-        .MEM_ALU_out(MEM_ALU_out),      // MEM stage ALU output
+        .MEM_enable_instr(MEM_enable_instr),  
+        .MEM_size(MEM_size),            
+        .MEM_RF_enable(MEM_RF_enable),  
+        .MEM_load_instr(MEM_load_instr), 
+        .MEM_RW(MEM_RW),                
+        .MEM_PA(MEM_PA),                
+        .MEM_ALU_out(MEM_ALU_out),      
         .MEM_RD(MEM_RD),   
         .MEM_PD(MEM_PD)
 );
 
-    ram256x8 ram(
+    ram Ram(
         .DataOut(dataOut),
         .Enable(MEM_enable_instr),
         .ReadWrite(MEM_RW),
@@ -351,14 +349,14 @@ module testbench();
         .Size(MEM_size)
     );
 
-    mux2x32 muxData(
+    mux2IN32OUT muxData(
       .out(muxDataout),
       .portA(MEM_ALU_out),
       .portB(dataOut),
       .select(MEM_load_instr)  
     );
 
-    MEM_WB_PipelineReg mem_wb (
+    MEM_WB mem_wb (
         .Clk(clk),
         .Reset(reset),
         .MEM_RF_enable(MEM_RF_enable),
@@ -369,26 +367,23 @@ module testbench();
         .WB_MUX_out(WB_MUX_out),
         .WB_RD(WB_RD)
     );
-    // Replace ROM and RAM initialization logic with dynamic file size determination
+
+    
      initial begin
         fi = $fopen("codigo_validacion.txt", "r");
         if (fi == 0) begin
             $display("Error: Cannot open file.");
             $finish;
         end
-
-        MAX_PROGRAM_SIZE = 0;
-
+        PROGRAM_SIZE = 0;
         // Read file line by line to determine file size and load ROM
         while (!$feof(fi)) begin
             if ($fscanf(fi, "%b", data) == 1) begin
-                rom.mem[MAX_PROGRAM_SIZE] = data;
-                MAX_PROGRAM_SIZE = MAX_PROGRAM_SIZE + 1;
+                Rom.mem[PROGRAM_SIZE] = data;
+                PROGRAM_SIZE = PROGRAM_SIZE + 1;
             end
         end
-        
-
-        $display("Program loaded with %0d instructions.", MAX_PROGRAM_SIZE);
+        $display("Program loaded %0d instructions.", PROGRAM_SIZE);
         $fclose(fi);
     end
      initial begin
@@ -397,39 +392,29 @@ module testbench();
             $display("Error: Could not open input file.");
             $finish;
         end
-
         Address = 8'b00000000;
         while ($fscanf(fi, "%b", data) != -1) begin 
-            ram.mem[Address] = data;  
+            Ram.mem[Address] = data;  
             Address = Address + 1;
         end
-        
         $fclose(fi);
     end
-
-
     initial begin
-        clk = 0;       // Initialize clock
+        clk = 0;       
         reset = 1;     
         #3 reset = 0; 
         for (i = 0; i < 256; i = i + 4) begin
-    // Check if at least one value in the current block is valid
-    
     end
     end
     always #1 clk = ~clk; 
-   
 
 
-
-    // Monitor signal values throughout the simulation
+    // Monitor signal values 
 initial begin
     $monitor("Time: %0d | PC: %d | R1: %d | R2: %d | R3: %d | R5: %d",
              $time, pc_out, 
-             RegisterFile.reg_file[1], RegisterFile.reg_file[2], RegisterFile.reg_file[3], 
-             RegisterFile.reg_file[5]) ;
+             RegisterFile.regi[1], RegisterFile.regi[2], RegisterFile.regi[3], RegisterFile.regi[5]/**, RegisterFile.reg_file[6]**/) ;
 end
-
 // // Counter logic
 reg [31:0] pc_history [0:10];
 integer pc_count;
@@ -439,9 +424,7 @@ integer i;
         pc_count=0;
         cnt=0;
     end
-
     integer file;
-
 always @(posedge clk) begin
     pc_history[pc_count] = pc_out;
     pc_count = pc_count +1;
@@ -453,24 +436,16 @@ always @(posedge clk) begin
         $display("Infinite Loop Detected");
        for (i = 0; i < 256; i = i + 4) begin
     // Check if at least one value in the current block is valid
-    if ((ram.mem[i] !== 8'bx) || (ram.mem[i+1] !== 8'bx) || 
-        (ram.mem[i+2] !== 8'bx) || (ram.mem[i+3] !== 8'bx)) begin
+    if ((Ram.mem[i] !== 8'bx) || (Ram.mem[i+1] !== 8'bx) || 
+        (Ram.mem[i+2] !== 8'bx) || (Ram.mem[i+3] !== 8'bx)) begin
         $display("RAM[%0d:%0d] = %b %b %b %b", 
                  i, i+3, 
-                 ram.mem[i], ram.mem[i+1], ram.mem[i+2], ram.mem[i+3]);
-                 
+                 Ram.mem[i], Ram.mem[i+1], Ram.mem[i+2], Ram.mem[i+3]);                 
     end
 end
-
-
-
         $finish;
     end else begin
         pc_count = 0;
     end
 end
-
-
-
-
 endmodule
