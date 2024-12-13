@@ -316,7 +316,7 @@ module tb_pipeline;
 
     MUX_PA mux_pa (
         .pa             (rf_registerpa_mux),
-        .jump_EX_pa     (alu_out_muxaluandidmuxes),
+        .jump_EX_pa     (alumux_dmaddress_mem),
         .jump_MEM_pa    (muxdatamemory_wb),
         .jump_WB_pa     (wb_registerpw_rf),
         .S_PA           (forward_rn),
@@ -325,7 +325,7 @@ module tb_pipeline;
 
     MUX_PB mux_pb (
         .pb             (rf_registerpb_mux),
-        .jump_EX_pb     (alu_out_muxaluandidmuxes),
+        .jump_EX_pb     (alumux_dmaddress_mem),
         .jump_MEM_pb    (muxdatamemory_wb),
         .jump_WB_pb     (wb_registerpw_rf),
         .S_PB           (forward_rm),
@@ -334,7 +334,7 @@ module tb_pipeline;
 
     MUX_PD mux_pd (
         .pd             (rf_registerpd_mux),
-        .jump_EX_pd     (alu_out_muxaluandidmuxes),
+        .jump_EX_pd     (alumux_dmaddress_mem),
         .jump_MEM_pd    (muxdatamemory_wb),
         .jump_WB_pd     (wb_registerpw_rf),
         .S_PD           (forward_rg),
@@ -419,9 +419,9 @@ ID_EX id_ex (
         .EX_RF_enable   (ex_rfenable_mem),
         .MEM_RF_enable  (mem_rfenable_wb),          
         .WB_RF_enable   (wb_registerle_rf),
-        .EX_Rd          (alumux_dmaddress_mem[15:12]),
-        .MEM_Rd         (muxdatamemory_wb[15:12]),
-        .WB_Rd          (wb_registerrw_rf[15:12]),
+        .EX_Rd          (ex_muxinstri15i12_memandhazard),
+        .MEM_Rd         (mem_muxi15i12_wb),
+        .WB_Rd          (wb_registerrw_rf),
         .ID_Rm          (instr_i3_i0),
         .ID_Rn          (instr_i19_i16),
         .ID_Rd          (instr_i15_i12),

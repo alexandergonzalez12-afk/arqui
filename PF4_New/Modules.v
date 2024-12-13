@@ -173,8 +173,8 @@ module MUX_I15_I12 (
 );
 always @(*) begin
     case (BL_out)
-        1'b0: result = 4'b1110;
-        1'b1: result = inst_I15_I12;
+        1'b1: result = 4'b1110;
+        1'b0: result = inst_I15_I12;
     endcase
 end
 
@@ -428,15 +428,15 @@ module MUX_ALU (
     end
 endmodule
 
-module PSR (    // needs fixing
+module PSR (
  input      clk,
  input      [3:0] ConditionCode,
  output reg [3:0] PSR_ConditionCode, //Z, N, C, V
  output reg C_in
 );
 always @(posedge clk) begin
-  C_in = ConditionCode[1];
-  PSR_ConditionCode = ConditionCode;
+  C_in <= ConditionCode[1];
+  PSR_ConditionCode <= ConditionCode;
 end
 endmodule
 
@@ -541,15 +541,17 @@ module HazardUnit(
     IF_IF_Enable <= 1;
     PC_Enable <= 1;
     NOP_EX <= 0;
-    $display("EX_RD", EX_Rd);
-    $display("MEM_RD", MEM_Rd);
-    $display("WB_RD", WB_Rd);
+    // $display("EX_RD %b", EX_Rd);
+    // $display("MEM_RD %b", MEM_Rd);
+    // $display("WB_RD %b", WB_Rd);
+    // $display("ID_Rn %b", ID_Rn);
     if (sop_count > 2'b00) begin
         // Data Forwarding for Source Operand 1 (Rn / ID_Rn)
         if (sop_count >= 2'b01) begin
             if (EX_RF_enable && (ID_Rn == EX_Rd)) forward_Rn = 2'b01;
             else if (MEM_RF_enable && (ID_Rn == MEM_Rd)) forward_Rn = 2'b10;
             else if (WB_RF_enable && (ID_Rn == WB_Rd)) forward_Rn = 2'b11;
+            // $display("forward_Rn %b", forward_Rn);
         end
 
          // Data Forwarding for Source Operand 2 (Rm / ID_Rm)
@@ -557,6 +559,7 @@ module HazardUnit(
             if (EX_RF_enable && (ID_Rm == EX_Rd)) forward_Rm = 2'b01;
             else if (MEM_RF_enable && (ID_Rm == MEM_Rd)) forward_Rm = 2'b10;
             else if (WB_RF_enable && (ID_Rm == WB_Rd)) forward_Rm = 2'b11;
+            // $display("forward_Rm %b", forward_Rm );
         end
 
          // Data Forwarding for Source Operand 3 (e.g., ID_RD for some instructions)
@@ -564,6 +567,7 @@ module HazardUnit(
             if (EX_RF_enable && (ID_Rd == EX_Rd)) forward_Rg = 2'b01;
             else if (MEM_RF_enable && (ID_Rd == MEM_Rd)) forward_Rg = 2'b10;
             else if (WB_RF_enable && (ID_Rd == WB_Rd)) forward_Rg = 2'b11;
+            // $display("forward_Rg %b", forward_Rg);
         end
     end
         if(EX_Load && ((ID_Rn == EX_Rd) || (ID_Rm == EX_Rd))) begin //load hazard
