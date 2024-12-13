@@ -402,8 +402,8 @@ module testbench();
         clk = 0;       
         reset = 1;     
         #3 reset = 0; 
-    //    for (i = 0; i < 256; i = i + 4) begin
-    //end
+        for (i = 0; i < 256; i = i + 4) begin
+    end
     end
     always #1 clk = ~clk; 
 
@@ -427,9 +427,9 @@ integer i;
     always @(posedge clk) begin
         pc_history[pc_count] = pc_out;
         pc_count = pc_count +1;
-        if(pc_count==10) pc_count =0;
-        for(i = 0;i <= 10; i= i+1) begin
-            if(pc_out==pc_history[i]) cnt = cnt+1;
+        if(pc_count == 10) pc_count = 0;
+        for(i = 0; i <= 10; i = i + 1) begin
+            if(pc_out == pc_history[i]) cnt = cnt+1;
         end
         if(cnt>=12) begin
             $display("Infinite Loop Detected");
@@ -441,8 +441,8 @@ integer i;
             end
             $finish;
         end 
-        else begin
-            pc_count = 0;
-        end
+        //else begin
+        //    cnt = 0;
+        //end
     end
 endmodule
