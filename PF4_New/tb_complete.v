@@ -523,7 +523,8 @@ ID_EX id_ex (
         .LE   (wb_registerle_rf),
         .PA   (rf_registerpa_mux),
         .PB   (rf_registerpb_mux),
-        .PD   (rf_registerpd_mux)
+        .PD   (rf_registerpd_mux),
+        .reset (reset)
     );
 
     // Instantiate the ControlUnit module
