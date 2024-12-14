@@ -482,12 +482,28 @@ always @(*) begin
 end
 endmodule
 
+// module x4_SE (
+//     output reg signed [31:0] imm_valuex4,
+//     input signed [23:0] imm_value
+// );
+// always @(*) begin
+//     imm_valuex4 = $signed({{6{imm_value[23]}},$signed(imm_value << 2)});
+// end
+// endmodule
+
 module x4_SE (
     output reg signed [31:0] imm_valuex4,
     input signed [23:0] imm_value
 );
 always @(*) begin
-    imm_valuex4 = $signed({{6{imm_value[23]}},$signed(imm_value << 2)});
+    // Inspect the MSB of imm_value for sign extension
+    if (imm_value[23] == 1'b0) begin
+        // Positive value: Extend with zeros
+        imm_valuex4 = {8'b0, imm_value} << 2;
+    end else begin
+        // Negative value: Extend with ones
+        imm_valuex4 = {8'b11111111, imm_value} << 2;
+    end
 end
 endmodule
 

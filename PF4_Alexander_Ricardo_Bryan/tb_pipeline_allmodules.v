@@ -86,7 +86,7 @@ module testbench();
         .Clk(clk),
         .Reset(reset || CH_B_ID),
         .IF_ID_enable(IF_ID_enable),
-        .IF_NextPC(NextPC),
+        .IF_NextPC(ID_NextPC),
         .IF_instruction(instruction),
         .ID_instruction(ID_instruction),
         .imm_value(imm_value),
@@ -402,48 +402,53 @@ module testbench();
         clk = 0;       
         reset = 1;     
         #3 reset = 0; 
-        for (i = 0; i < 256; i = i + 4) begin
     end
-    end
-    always #1 clk = ~clk; 
+    initial begin
+     forever #2 clk = ~clk; 
+     end
+    
 
 
     // Monitor signal values 
 initial begin
     $monitor("PC: %d | R1: %d | R2: %d | R3: %d | R5: %d | R6: %d", pc_out, RegisterFile.regi[1], RegisterFile.regi[2], RegisterFile.regi[3], RegisterFile.regi[5] , RegisterFile.regi[6]) ;
+    $monitor("PC: %d | Immidate_value_Extended %b | TA_adder_out %b | Input PC %b  ", pc_out, imm_valuex4, TA, mux1);
     
 end
 
+initial begin 
+    #100 $finish;
+end
 
-// Counter logic
-reg [31:0] pc_history [0:10];
-integer pc_count;
-integer cnt;
-integer i;
-    initial begin
-        pc_count=0;
-        cnt=0;
-    end
-    integer file;
-    always @(posedge clk) begin
-        pc_history[pc_count] = pc_out;
-        pc_count = pc_count +1;
-        if(pc_count == 13) pc_count = 0;
-        for(i = 0; i <= 12; i = i + 1) begin
-            if(pc_out == pc_history[i]) cnt = cnt+1;
-        end
-        if(cnt>=13) begin
-            $display("Infinite Loop Detected");
-            for (i = 0; i < 256; i = i + 4) begin
-                //Check if at least one value in the current block is valid
-                if ((Ram.mem[i] !== 8'bx) || (Ram.mem[i+1] !== 8'bx) || (Ram.mem[i+2] !== 8'bx) || (Ram.mem[i+3] !== 8'bx)) begin
-                    //$display("RAM[%0d:%0d] = %b %b %b %b", i, i+3, Ram.mem[i], Ram.mem[i+1], Ram.mem[i+2], Ram.mem[i+3]);                 
-                end
-            end
-            $finish;
-        end 
-        else begin
-            pc_count = 0;
-        end
-    end
+// // Counter logic
+// reg [31:0] pc_history [0:10];
+// integer pc_count;
+// integer cnt;
+// integer i;
+//     initial begin
+//         pc_count=0;
+//         cnt=0;
+//     end
+//     integer file;
+//     always @(posedge clk) begin
+//         pc_history[pc_count] = pc_out;
+//         pc_count = pc_count +1;
+//         if(pc_count == 13) pc_count = 0;
+//         for(i = 0; i <= 12; i = i + 1) begin
+//             if(pc_out == pc_history[i]) cnt = cnt+1;
+//         end
+//         if(cnt>=13) begin
+//             $display("Infinite Loop Detected");
+//             for (i = 0; i < 256; i = i + 4) begin
+//                 //Check if at least one value in the current block is valid
+//                 if ((Ram.mem[i] !== 8'bx) || (Ram.mem[i+1] !== 8'bx) || (Ram.mem[i+2] !== 8'bx) || (Ram.mem[i+3] !== 8'bx)) begin
+//                     //$display("RAM[%0d:%0d] = %b %b %b %b", i, i+3, Ram.mem[i], Ram.mem[i+1], Ram.mem[i+2], Ram.mem[i+3]);                 
+//                 end
+//             end
+//             $finish;
+//         end 
+//         else begin
+//             pc_count = 0;
+//         end
+    // end
 endmodule
