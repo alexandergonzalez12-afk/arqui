@@ -411,6 +411,7 @@ module testbench();
     // Monitor signal values 
 initial begin
     $monitor("PC: %d | R1: %d | R2: %d | R3: %d | R5: %d | R6: %d", pc_out, RegisterFile.regi[1], RegisterFile.regi[2], RegisterFile.regi[3], RegisterFile.regi[5] , RegisterFile.regi[6]) ;
+    
 end
 
 
@@ -427,11 +428,11 @@ integer i;
     always @(posedge clk) begin
         pc_history[pc_count] = pc_out;
         pc_count = pc_count +1;
-        if(pc_count == 10) pc_count = 0;
-        for(i = 0; i <= 10; i = i + 1) begin
+        if(pc_count == 13) pc_count = 0;
+        for(i = 0; i <= 12; i = i + 1) begin
             if(pc_out == pc_history[i]) cnt = cnt+1;
         end
-        if(cnt>=12) begin
+        if(cnt>=13) begin
             $display("Infinite Loop Detected");
             for (i = 0; i < 256; i = i + 4) begin
                 //Check if at least one value in the current block is valid

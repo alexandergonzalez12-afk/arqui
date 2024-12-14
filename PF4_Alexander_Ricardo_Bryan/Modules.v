@@ -141,11 +141,12 @@ module ConditionHandler (
                 4'b1011: Out_B = (N!=V);                    // Branch if less than
                 4'b1100: Out_B = ((Z==0)&&(N==V));          // Branch if greater than
                 4'b1101: Out_B = ((Z==1)||(N!=V));          // Branch if less than or equal
-                4'b1110: Out_B = 1;
-            endcase
+                4'b1110: Out_B = 0;                         // Branch Never
+                4'b1111: Out_B = 1;                         // Always branch
+            endcase   
             if (ID_BL_Instr) begin
-            Out_BL = 1; 
-        end
+                Out_BL = 1; 
+            end
         end
     end
 
